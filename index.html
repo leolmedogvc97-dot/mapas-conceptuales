@@ -5,10 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Plataforma de Mapas Mentales</title>
   <link rel="stylesheet" href="styles.css">
+  <!-- Librerías para exportar a PNG y PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
 
+  <!-- Barra de Herramientas Superior -->
   <header class="toolbar">
     <div class="brand">
       <span class="logo">🧠</span>
@@ -31,11 +34,19 @@
 
       <button id="btn-export-json" class="btn outline">💾 Guardar (JSON)</button>
       <button id="btn-import-json" class="btn outline">📂 Cargar (JSON)</button>
-      <button id="btn-export-png" class="btn success">🖼️ Exportar PNG</button>
+      
+      <div class="separator"></div>
+
+      <!-- Nuevos botones de exportación -->
+      <button id="btn-export-png" class="btn success">🖼️ PNG</button>
+      <button id="btn-export-pdf" class="btn danger-pdf" style="background:#dc2626; color:white;">📄 PDF</button>
+      <button id="btn-export-word" class="btn word-btn" style="background:#1d4ed8; color:white;">📝 Word (.docx)</button>
+      
       <input type="file" id="file-input" accept=".json" style="display: none;">
     </div>
   </header>
 
+  <!-- Lienzo principal de trabajo -->
   <main class="canvas-container" id="canvas-container">
     <svg id="svg-canvas" class="svg-layer"></svg>
     <div id="nodes-container" class="nodes-layer"></div>
