@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MindMap Studio</title>
+  <!-- Librería para exportar a Imagen PNG/JPG -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --bg-color: #f8fafc;
@@ -59,14 +61,14 @@
     .actions {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      gap: 0.4rem;
     }
 
     .separator {
       width: 1px;
       height: 24px;
       background-color: var(--grid-color);
-      margin: 0 0.5rem;
+      margin: 0 0.3rem;
     }
 
     .btn {
@@ -116,6 +118,14 @@
       overflow: auto;
       width: 100%;
       height: calc(100vh - 60px);
+    }
+
+    .export-area {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5000px;
+      height: 4000px;
     }
 
     .svg-layer {
@@ -193,19 +203,22 @@
       <div class="separator"></div>
 
       <button type="button" id="btn-import-text" class="btn outline" style="background-color: #fef08a; font-weight: bold; border-color: #eab308;">
-        📥 Pegar Texto / JSON
+        📥 Pegar JSON
       </button>
 
       <div class="separator"></div>
 
-      <button type="button" id="btn-export-json" class="btn outline">💾 Guardar (JSON)</button>
       <button type="button" id="btn-import-json" class="btn outline">📁 Cargar (JSON)</button>
+      <button type="button" id="btn-export-json" class="btn outline">💾 Guardar (JSON)</button>
+      <button type="button" id="btn-export-image" class="btn outline">🖼️ Exportar PNG</button>
     </div>
   </div>
 
   <div class="canvas-container" id="canvas-container">
-    <svg class="svg-layer" id="svg-canvas"></svg>
-    <div class="nodes-layer" id="nodes-container"></div>
+    <div class="export-area" id="export-area">
+      <svg class="svg-layer" id="svg-canvas"></svg>
+      <div class="nodes-layer" id="nodes-container"></div>
+    </div>
   </div>
 
   <script>
@@ -235,7 +248,7 @@
       
       const canvasContainer = document.getElementById("canvas-container");
       if (canvasContainer) {
-        canvasContainer.scrollLeft = 1000;
+        canvasContainer.scrollLeft = 1400;
         canvasContainer.scrollTop = 0;
       }
     });
@@ -370,6 +383,7 @@
     }
 
     function setupEventListeners() {
+      // Agregar Nodo Hijo
       document.getElementById("btn-add-child")?.addEventListener("click", () => {
         const res = findNodeAndParent(selectedNodeId);
         if (!res) return;
@@ -380,6 +394,7 @@
         render();
       });
 
+      // Agregar Nodo Hermano
       document.getElementById("btn-add-sibling")?.addEventListener("click", () => {
         const res = findNodeAndParent(selectedNodeId);
         if (!res || !res.parent) return;
@@ -390,6 +405,7 @@
         render();
       });
 
+      // Eliminar Nodo
       document.getElementById("btn-delete")?.addEventListener("click", () => {
         if (selectedNodeId === "root") return;
         const res = findNodeAndParent(selectedNodeId);
@@ -401,6 +417,7 @@
         }
       });
 
+      // Pegar JSON manualmente
       document.getElementById("btn-import-text")?.addEventListener("click", () => {
         const rawInput = prompt("Pega aquí el JSON del mapa conceptual:");
         if (!rawInput) return;
@@ -415,6 +432,7 @@
         }
       });
 
+      // Cambiar color
       if (colorPicker) {
         colorPicker.addEventListener("input", (e) => {
           const res = findNodeAndParent(selectedNodeId);
@@ -425,15 +443,18 @@
         });
       }
 
+      // EXPORTAR JSON (Guardar)
       document.getElementById("btn-export-json")?.addEventListener("click", () => {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mindMapData, null, 2));
-        const a = document.createElement("a");
-        a.href = dataStr;
-        a.download = "mapa_mental.json";
-        a.click();
+        const downloadAnchor = document.createElement("a");
+        downloadAnchor.setAttribute("href", dataStr);
+        downloadAnchor.setAttribute("download", "mapa_conceptual.json");
+        document.body.appendChild(downloadAnchor);
+        downloadAnchor.click();
+        downloadAnchor.remove();
       });
 
-      // Botón Cargar JSON corregido
+      // CARGAR JSON
       document.getElementById("btn-import-json")?.addEventListener("click", (e) => {
         e.preventDefault();
         const fileInput = document.createElement("input");
@@ -459,6 +480,27 @@
         });
 
         fileInput.click();
+      });
+
+      // EXPORTAR IMAGEN PNG
+      document.getElementById("btn-export-image")?.addEventListener("click", () => {
+        const exportArea = document.getElementById("export-area");
+        if (typeof html2canvas !== "undefined") {
+          html2canvas(exportArea, {
+            backgroundColor: "#f8fafc",
+            width: 4000,
+            height: 3000
+          }).then(canvas => {
+            const link = document.createElement("a");
+            link.download = "mapa_conceptual.png";
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+          }).catch(err => {
+            alert("Error al generar la imagen del mapa.");
+          });
+        } else {
+          alert("La librería de exportación de imagen se está cargando, reintenta en un momento.");
+        }
       });
     }
 
