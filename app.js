@@ -1,14 +1,122 @@
-let mindMapData = {
+// Mapa conceptual predeterminado: Sistema Jurídico
+const legalMapPreset = {
   id: "root",
-  text: "Idea Principal",
-  x: 500,
-  y: 350,
-  color: "#3b82f6",
+  text: "SISTEMA JURÍDICO",
+  x: 1200,
+  y: 80,
+  color: "#1e3a8a",
   children: [
-    { id: "child_1", text: "Subtema A", x: 750, y: 280, color: "#10b981", children: [] },
-    { id: "child_2", text: "Subtema B", x: 750, y: 420, color: "#8b5cf6", children: [] }
+    {
+      id: "node_dc",
+      text: "DERECHO COMPARADO",
+      x: 350,
+      y: 240,
+      color: "#2563eb",
+      children: [
+        { id: "node_macro", text: "MACRO-COMPARACIÓN\n(Sistemas y familias)", x: 200, y: 380, color: "#3b82f6", children: [] },
+        { id: "node_micro", text: "MICRO-COMPARACIÓN\n(Instituciones concretas)", x: 480, y: 380, color: "#3b82f6", children: [] }
+      ]
+    },
+    {
+      id: "node_rj",
+      text: "RECEPCIÓN JURÍDICA",
+      x: 1200,
+      y: 240,
+      color: "#059669",
+      children: [
+        { id: "node_tec", text: "TÉCNICA\n(Voluntaria)", x: 1050, y: 380, color: "#10b981", children: [] },
+        { id: "node_pol", text: "POLÍTICA\n(Impuesta)", x: 1350, y: 380, color: "#10b981", children: [] }
+      ]
+    },
+    {
+      id: "node_fj",
+      text: "FAMILIAS JURÍDICAS",
+      x: 2150,
+      y: 240,
+      color: "#7c3aed",
+      children: [
+        {
+          id: "node_crit",
+          text: "CRITERIOS DE CLASIFICACIÓN\n- Historia\n- Fuentes / Jerarquía\n- Estructura\n- Ideología / Religión",
+          x: 1850,
+          y: 380,
+          color: "#8b5cf6",
+          children: []
+        },
+        {
+          id: "node_clas",
+          text: "CLASIFICACIÓN DE FAMILIAS",
+          x: 2450,
+          y: 380,
+          color: "#8b5cf6",
+          children: [
+            {
+              id: "node_civil",
+              text: "CIVIL LAW / ROMANO-GERMÁNICO",
+              x: 1550,
+              y: 560,
+              color: "#d97706",
+              children: [
+                { id: "node_c1", text: "Subclasificaciones:\n• Eur.-Continentales (Francia, Alemania)\n• Latinoamericanos (México, Brasil)\n• Latinoafricanos (Senegal, Togo)", x: 1550, y: 700, color: "#f59e0b", children: [] },
+                { id: "node_c2", text: "Características:\n• Derecho escrito y codificado\n• Jurisprudencia secundaria\n• Formal y Preventivo", x: 1550, y: 860, color: "#f59e0b", children: [] },
+                { id: "node_c3", text: "SISTEMA FEDATARIO:\nNOTARIO LATINO\n• Lic. en Derecho y profesional\n• Fe pública estatal\n• Preventor de litigios", x: 1550, y: 1020, color: "#b45309", children: [] }
+              ]
+            },
+            {
+              id: "node_common",
+              text: "COMMON LAW / ANGLOSAJÓN",
+              x: 2000,
+              y: 560,
+              color: "#d97706",
+              children: [
+                { id: "node_cm1", text: "Subclasificaciones:\n• Inglés (Inglaterra, Australia)\n• Norteamericano (EE. UU.)\n• Angloafricanos (Nigeria, Uganda)", x: 2000, y: 700, color: "#f59e0b", children: [] },
+                { id: "node_cm2", text: "Características:\n• Derecho no escrito / oral\n• Costumbre como fuente\n• Precedente (Stare decisis)\n• Jurado contencioso", x: 2000, y: 860, color: "#f59e0b", children: [] },
+                { id: "node_cm3", text: "SISTEMA FEDATARIO:\nNOTARY PUBLIC\n• Sin estudios jurídicos\n• Certifica firmas/identidad\n• Sin prueba plena", x: 2000, y: 1020, color: "#b45309", children: [] }
+              ]
+            },
+            {
+              id: "node_islam",
+              text: "ISLÁMICO",
+              x: 2450,
+              y: 560,
+              color: "#d97706",
+              children: [
+                { id: "node_is1", text: "Fundamento:\n• Basado en la Sharía y la religión", x: 2450, y: 700, color: "#f59e0b", children: [] },
+                { id: "node_is2", text: "Subclasificaciones:\n• Radicales (Irán, A. Saudita)\n• Moderados (Egipto, Marruecos)", x: 2450, y: 820, color: "#f59e0b", children: [] }
+              ]
+            },
+            {
+              id: "node_soc",
+              text: "SOCIALISTA",
+              x: 2850,
+              y: 560,
+              color: "#d97706",
+              children: [
+                { id: "node_sc1", text: "Estado actual:\n• Transición económica de mercado", x: 2850, y: 700, color: "#f59e0b", children: [] },
+                { id: "node_sc2", text: "Subclasificaciones:\n• Sistema Chino (c/ mercado)\n• En transición (Cuba, Vietnam)", x: 2850, y: 820, color: "#f59e0b", children: [] },
+                { id: "node_sc3", text: "Características:\n• Subordinación legal al Estado\n• Transición a economía mixta", x: 2850, y: 960, color: "#f59e0b", children: [] }
+              ]
+            },
+            {
+              id: "node_mix",
+              text: "SISTEMAS MIXTOS",
+              x: 3250,
+              y: 560,
+              color: "#d97706",
+              children: [
+                { id: "node_mx1", text: "Subclasificaciones:\n• Escandinavos (Dinamarca, Noruega)\n• Híbridos (Filipinas, Singapur)", x: 3250, y: 700, color: "#f59e0b", children: [] },
+                { id: "node_mx2", text: "Características:\n• Combinación heterogénea de tradiciones jurídicas", x: 3250, y: 840, color: "#f59e0b", children: [] }
+              ]
+            }
+          ]
+        }
+      ]
+    }
   ]
 };
+
+// Asignar el mapa jurídico como inicial
+let mindMapData = JSON.parse(JSON.stringify(legalMapPreset));
 
 let selectedNodeId = "root";
 let draggingNodeId = null;
@@ -21,6 +129,11 @@ const colorPicker = document.getElementById("node-color");
 document.addEventListener("DOMContentLoaded", () => {
   render();
   setupEventListeners();
+  
+  // Centrar el scroll automáticamente en el nodo principal al iniciar
+  const canvasContainer = document.getElementById("canvas-container");
+  canvasContainer.scrollLeft = 800;
+  canvasContainer.scrollTop = 0;
 });
 
 function render() {
@@ -35,6 +148,7 @@ function renderNodeRecursive(node, parentNode = null) {
   nodeEl.style.left = `${node.x}px`;
   nodeEl.style.top = `${node.y}px`;
   nodeEl.style.backgroundColor = node.color || "#3b82f6";
+  nodeEl.style.whiteSpace = "pre-wrap"; // Permite saltos de línea dentro del nodo
   nodeEl.dataset.id = node.id;
 
   const textEl = document.createElement("span");
@@ -57,13 +171,13 @@ function renderNodeRecursive(node, parentNode = null) {
 }
 
 function drawConnector(parent, child) {
-  const pX = parent.x + 60;
-  const pY = parent.y + 20;
-  const cX = child.x + 60;
-  const cY = child.y + 20;
+  const pX = parent.x + 80;
+  const pY = parent.y + 25;
+  const cX = child.x + 80;
+  const cY = child.y + 25;
 
-  const controlX = (pX + cX) / 2;
-  const pathData = `M ${pX} ${pY} C ${controlX} ${pY}, ${controlX} ${cY}, ${cX} ${cY}`;
+  const controlY = (pY + cY) / 2;
+  const pathData = `M ${pX} ${pY} C ${pX} ${controlY}, ${cX} ${controlY}, ${cX} ${cY}`;
 
   const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
   path.setAttribute("d", pathData);
@@ -93,9 +207,9 @@ function addChildNode() {
   const newId = "node_" + Date.now();
   const newNode = {
     id: newId,
-    text: "Nuevo Subtema",
-    x: parent.x + 220,
-    y: parent.y + (parent.children.length * 60) - 30,
+    text: "Nuevo Concepto",
+    x: parent.x,
+    y: parent.y + 120,
     color: parent.color,
     children: []
   };
@@ -113,9 +227,9 @@ function addSiblingNode() {
   const newId = "node_" + Date.now();
   const newNode = {
     id: newId,
-    text: "Nuevo Hermano",
-    x: result.node.x,
-    y: result.node.y + 70,
+    text: "Nuevo Concepto",
+    x: result.node.x + 220,
+    y: result.node.y,
     color: parent.color,
     children: []
   };
@@ -155,12 +269,6 @@ function enableInlineEdit(textEl, node) {
   };
 
   textEl.addEventListener("blur", saveText, { once: true });
-  textEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      saveText();
-    }
-  });
 }
 
 function startDrag(e, node) {
@@ -193,7 +301,7 @@ function stopDrag() {
 }
 
 function buildWordList(node) {
-  let html = `<li><b>${node.text}</b>`;
+  let html = `<li><b>${node.text.replace(/\n/g, '<br>')}</b>`;
   if (node.children && node.children.length > 0) {
     html += "<ul>";
     node.children.forEach(child => {
@@ -229,6 +337,12 @@ function setupEventListeners() {
   document.getElementById("btn-add-child").addEventListener("click", addChildNode);
   document.getElementById("btn-add-sibling").addEventListener("click", addSiblingNode);
   document.getElementById("btn-delete").addEventListener("click", deleteNode);
+  
+  document.getElementById("btn-load-legal").addEventListener("click", () => {
+    mindMapData = JSON.parse(JSON.stringify(legalMapPreset));
+    selectedNodeId = "root";
+    render();
+  });
 
   colorPicker.addEventListener("input", (e) => {
     const result = findNodeAndParent(selectedNodeId);
