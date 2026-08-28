@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MindMap Studio</title>
-  <!-- Librerías para PNG y PDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
@@ -95,7 +94,6 @@
     .btn.secondary { background: #64748b; color: white; border-color: transparent; }
     .btn.danger { background: #fee2e2; color: var(--danger); border-color: transparent; }
 
-    /* Menú Desplegable */
     .dropdown {
       position: relative;
       display: inline-block;
@@ -249,7 +247,6 @@
       
       <div class="separator"></div>
 
-      <!-- DESPLEGABLE DE EXPORTACIÓN -->
       <div class="dropdown">
         <button class="btn primary" style="background-color: #059669;">📤 Exportar ▼</button>
         <div class="dropdown-content">
@@ -425,20 +422,19 @@
       textEl.addEventListener("blur", saveText, { once: true });
     }
 
-    // Calcula el área exacta que ocupan los nodos con un margen de seguridad
-    function getBoundingBoxOfNodes(padding = 50) {
-      const nodeElements = document.querySelectorAll(".nodes-layer .node");
-      if (!nodeElements || nodeElements.length === 0) {
-        return { x: 0, y: 0, width: 2000, height: 1500 };
-      }
+    // Generador de renderizado enfocado para exportación de alta precisión
+    async function renderCleanCanvas() {
+      // 1. Obtener limites exactos de todos los elementos
+      const nodeElements = Array.from(document.querySelectorAll(".nodes-layer .node"));
+      if (nodeElements.length === 0) return null;
 
       let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
 
       nodeElements.forEach(el => {
-        const left = parseFloat(el.style.left) || 0;
-        const top = parseFloat(el.style.top) || 0;
-        const width = el.offsetWidth || 200;
-        const height = el.offsetHeight || 100;
+        const left = el.offsetLeft;
+        const top = el.offsetTop;
+        const width = el.offsetWidth;
+        const height = el.offsetHeight;
 
         if (left < minX) minX = left;
         if (top < minY) minY = top;
@@ -446,21 +442,93 @@
         if (top + height > maxY) maxY = top + height;
       });
 
-      minX = Math.max(0, minX - padding);
-      minY = Math.max(0, minY - padding);
-      maxX = maxX + padding;
-      maxY = maxY + padding;
+      const padding = 60;
+      minX -= padding;
+      minY -= padding;
+      maxX += padding;
+      maxY += padding;
 
-      return {
-        x: minX,
-        y: minY,
-        width: maxX - minX,
-        height: maxY - minY
-      };
+      const exportWidth = maxX - minX;
+      const exportHeight = maxY - minY;
+
+      // 2. Crear contenedor temporal fuera de pantalla
+      const tempWrapper = document.createElement("div");
+      tempWrapper.style.position = "absolute";
+      tempWrapper.style.left = "-9999px";
+      tempWrapper.style.top = "-9999px";
+      tempWrapper.style.width = `${exportWidth}px`;
+      tempWrapper.style.height = `${exportHeight}px`;
+      tempWrapper.style.backgroundColor = "#f8fafc";
+      tempWrapper.style.overflow = "hidden";
+
+      const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      tempSvg.setAttribute("width", exportWidth);
+      tempSvg.setAttribute("height", exportHeight);
+      tempSvg.style.position = "absolute";
+      tempSvg.style.top = "0";
+      tempSvg.style.left = "0";
+
+      tempWrapper.appendChild(tempSvg);
+
+      // 3. Clonar y reubicar nodos
+      nodeElements.forEach(el => {
+        const clone = el.cloneNode(true);
+        clone.classList.remove("selected");
+        const currentLeft = parseFloat(el.style.left);
+        const currentTop = parseFloat(el.style.top);
+        clone.style.left = `${currentLeft - minX}px`;
+        clone.style.top = `${currentTop - minY}px`;
+        tempWrapper.appendChild(clone);
+      });
+
+      document.body.appendChild(tempWrapper);
+
+      // 4. Redescubrir conectores ajustados
+      function drawTempConnectors(node, parentNode = null) {
+        if (parentNode) {
+          const pEl = tempWrapper.querySelector(`[data-id="${parentNode.id}"]`);
+          const cEl = tempWrapper.querySelector(`[data-id="${node.id}"]`);
+
+          if (pEl && cEl) {
+            const pX = pEl.offsetLeft + pEl.offsetWidth / 2;
+            const pY = pEl.offsetTop + pEl.offsetHeight;
+            const cX = cEl.offsetLeft + cEl.offsetWidth / 2;
+            const cY = cEl.offsetTop;
+
+            const controlY = (pY + cY) / 2;
+            const pathData = `M ${pX} ${pY} C ${pX} ${controlY}, ${cX} ${controlY}, ${cX} ${cY}`;
+
+            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            path.setAttribute("d", pathData);
+            path.setAttribute("stroke", node.color || "#cbd5e1");
+            path.setAttribute("stroke-width", "3");
+            path.setAttribute("fill", "none");
+
+            tempSvg.appendChild(path);
+          }
+        }
+
+        if (node.children) {
+          node.children.forEach(child => drawTempConnectors(child, node));
+        }
+      }
+
+      drawTempConnectors(mindMapData);
+
+      // 5. Renderizar canvas
+      const canvas = await html2canvas(tempWrapper, {
+        width: exportWidth,
+        height: exportHeight,
+        scale: 2,
+        backgroundColor: "#f8fafc"
+      });
+
+      document.body.removeChild(tempWrapper);
+
+      return { canvas, width: exportWidth, height: exportHeight };
     }
 
     function setupEventListeners() {
-      // Agregar Hijo
       document.getElementById("btn-add-child")?.addEventListener("click", () => {
         const res = findNodeAndParent(selectedNodeId);
         if (!res) return;
@@ -471,7 +539,6 @@
         render();
       });
 
-      // Agregar Hermano
       document.getElementById("btn-add-sibling")?.addEventListener("click", () => {
         const res = findNodeAndParent(selectedNodeId);
         if (!res || !res.parent) return;
@@ -482,7 +549,6 @@
         render();
       });
 
-      // Eliminar
       document.getElementById("btn-delete")?.addEventListener("click", () => {
         if (selectedNodeId === "root") return;
         const res = findNodeAndParent(selectedNodeId);
@@ -494,7 +560,6 @@
         }
       });
 
-      // Pegar JSON
       document.getElementById("btn-import-text")?.addEventListener("click", () => {
         const rawInput = prompt("Pega aquí el JSON del mapa conceptual:");
         if (!rawInput) return;
@@ -509,7 +574,6 @@
         }
       });
 
-      // Color
       if (colorPicker) {
         colorPicker.addEventListener("input", (e) => {
           const res = findNodeAndParent(selectedNodeId);
@@ -520,7 +584,6 @@
         });
       }
 
-      // EXPORTAR JSON
       document.getElementById("btn-export-json")?.addEventListener("click", () => {
         const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mindMapData, null, 2));
         const a = document.createElement("a");
@@ -529,7 +592,6 @@
         a.click();
       });
 
-      // CARGAR JSON
       document.getElementById("btn-import-json")?.addEventListener("click", (e) => {
         e.preventDefault();
         const fileInput = document.createElement("input");
@@ -557,59 +619,36 @@
         fileInput.click();
       });
 
-      // EXPORTAR PNG (Ajustado al contenido)
-      document.getElementById("btn-export-image")?.addEventListener("click", () => {
-        const exportArea = document.getElementById("export-area");
-        const bbox = getBoundingBoxOfNodes(60);
-
-        if (typeof html2canvas !== "undefined") {
-          html2canvas(exportArea, {
-            backgroundColor: "#f8fafc",
-            x: bbox.x,
-            y: bbox.y,
-            width: bbox.width,
-            height: bbox.height,
-            scale: 2
-          }).then(canvas => {
-            const a = document.createElement("a");
-            a.download = "mapa_conceptual.png";
-            a.href = canvas.toDataURL("image/png");
-            a.click();
-          });
-        }
+      // EXPORTAR PNG RECOR TADO EXACTO
+      document.getElementById("btn-export-image")?.addEventListener("click", async () => {
+        const result = await renderCleanCanvas();
+        if (!result) return;
+        const a = document.createElement("a");
+        a.download = "mapa_conceptual.png";
+        a.href = result.canvas.toDataURL("image/png");
+        a.click();
       });
 
-      // EXPORTAR PDF (Ajustado perfectamente sin espacios gigantes)
-      document.getElementById("btn-export-pdf")?.addEventListener("click", () => {
-        const exportArea = document.getElementById("export-area");
-        const bbox = getBoundingBoxOfNodes(60);
+      // EXPORTAR PDF RECORTADO EXACTO
+      document.getElementById("btn-export-pdf")?.addEventListener("click", async () => {
+        const result = await renderCleanCanvas();
+        if (!result || !window.jspdf) return;
 
-        if (typeof html2canvas !== "undefined" && window.jspdf) {
-          html2canvas(exportArea, {
-            backgroundColor: "#f8fafc",
-            x: bbox.x,
-            y: bbox.y,
-            width: bbox.width,
-            height: bbox.height,
-            scale: 2
-          }).then(canvas => {
-            const imgData = canvas.toDataURL("image/png");
-            const { jsPDF } = window.jspdf;
-            
-            const isLandscape = bbox.width >= bbox.height;
-            const pdf = new jsPDF({
-              orientation: isLandscape ? "landscape" : "portrait",
-              unit: "px",
-              format: [bbox.width, bbox.height]
-            });
+        const { canvas, width, height } = result;
+        const imgData = canvas.toDataURL("image/png");
+        const { jsPDF } = window.jspdf;
 
-            pdf.addImage(imgData, "PNG", 0, 0, bbox.width, bbox.height);
-            pdf.save("mapa_conceptual.pdf");
-          });
-        }
+        const isLandscape = width >= height;
+        const pdf = new jsPDF({
+          orientation: isLandscape ? "landscape" : "portrait",
+          unit: "px",
+          format: [width, height]
+        });
+
+        pdf.addImage(imgData, "PNG", 0, 0, width, height);
+        pdf.save("mapa_conceptual.pdf");
       });
 
-      // EXPORTAR WORD (.doc)
       document.getElementById("btn-export-word")?.addEventListener("click", () => {
         function generateHTMLList(node) {
           let html = `<li><strong>${node.text}</strong>`;
