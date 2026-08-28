@@ -66,12 +66,11 @@ function renderNodeRecursive(node, parentNode = null) {
 
 // Dibujar conectores curvos estilo Bezier
 function drawConnector(parent, child) {
-  const pX = parent.x + 60; // Centro aproximado X
-  const pY = parent.y + 20; // Centro aproximado Y
+  const pX = parent.x + 60;
+  const pY = parent.y + 20;
   const cX = child.x + 60;
   const cY = child.y + 20;
 
-  // Curva de Bezier suave entre nodos
   const controlX = (pX + cX) / 2;
   const pathData = `M ${pX} ${pY} C ${controlX} ${pY}, ${controlX} ${cY}, ${cX} ${cY}`;
 
@@ -119,7 +118,7 @@ function addChildNode() {
 
 function addSiblingNode() {
   const result = findNodeAndParent(selectedNodeId);
-  if (!result || !result.parent) return; // El nodo raíz no puede tener hermanos
+  if (!result || !result.parent) return;
 
   const parent = result.parent;
   const newId = "node_" + Date.now();
@@ -156,7 +155,6 @@ function enableInlineEdit(textEl, node) {
   textEl.contentEditable = true;
   textEl.focus();
   
-  // Seleccionar todo el texto
   const range = document.createRange();
   range.selectNodeContents(textEl);
   const sel = window.getSelection();
@@ -184,7 +182,6 @@ function startDrag(e, node) {
   dragOffset.x = e.clientX - node.x;
   dragOffset.y = e.clientY - node.y;
   
-  // Actualizar picker de color al seleccionar
   colorPicker.value = node.color || "#3b82f6";
   render();
 
@@ -208,7 +205,87 @@ function stopDrag() {
   document.removeEventListener("mouseup", stopDrag);
 }
 
-// --- Eventos de Botones y Teclado ---
+// --- Funciones de Exportación (PNG, PDF, Word) ---
+
+function captureCanvasAsImage() {
+  const canvasContainer = document.getElementById("canvas-container");
+  return html2canvas(canvasContainer, { backgroundColor: "#f8fafc" });
+}
+
+// Exportar PDF
+function exportToPDF() {
+  captureCanvasAsImage().then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({
+      orientation: canvas.width > canvas.height ? "landscape" : "portrait",
+      unit: "px",
+      format: [canvas.width, canvas.height]
+    });
+    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+    pdf.save("mapa_conceptual.pdf");
+  });
+}
+
+// Generar esquema jerárquico en texto para Word
+function buildWordOutline(node, level = 1) {
+  let html = `<h${Math.min(level, 6)} style="color: ${node.color}; font-family: Arial, sans-serif;">${"&nbsp;".repeat((level-1)*4)}${node.text}</h${Math.min(level, 6)}>`;
+  if (node.children && node.children.length > 0) {
+    node.children.forEach(child => {
+      html += buildWordOutline(child, level + 1);
+    });
+  }
+  return html;
+}
+
+// Exportar Word (.docx)
+function exportToWord() {
+  captureCanvasAsImage().then(canvas => {
+    const imgData = canvas.toDataURL("image/png");
+    const outlineHtml = buildWordOutline(mindMapData);
+
+    // Documento HTML compatible con Microsoft Word (.docx)
+    const wordContent = `
+      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+      <head>
+        <meta charset='utf-8'>
+        <title>Mapa Conceptual</title>
+        <style>
+          body { font-family: Arial, sans-serif; margin: 20px; }
+          h1, h2, h3, h4 { margin-bottom: 5px; }
+          .diagram { margin-top: 20px; text-align: center; }
+        </style>
+      </head>
+      <body>
+        <h1>Mapa Conceptual - ${mindMapData.text}</h1>
+        <hr>
+        <h2>Estructura Jerárquica:</h2>
+        ${outlineHtml}
+        <br><hr><br>
+        <h2>Diagrama Visual:</h2>
+        <div class="diagram">
+          <img src="${imgData}" style="max-width: 100%; height: auto;" />
+        </div>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob(['\ufeff', wordContent], {
+      type: 'application/msword'
+    });
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "mapa_conceptual.docx";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
+
+// --- Configuración de Eventos ---
 
 function setupEventListeners() {
   document.getElementById("btn-add-child").addEventListener("click", addChildNode);
@@ -225,21 +302,19 @@ function setupEventListeners() {
 
   // Atajos de Teclado
   document.addEventListener("keydown", (e) => {
-    if (e.target.isContentEditable) return; // Ignorar si está escribiendo
+    if (e.target.isContentEditable) return;
     if (e.key === "Tab") { e.preventDefault(); addChildNode(); }
     if (e.key === "Enter") { e.preventDefault(); addSiblingNode(); }
     if (e.key === "Delete" || e.key === "Backspace") { deleteNode(); }
   });
 
-  // Importar / Exportar JSON
+  // JSON Import/Export
   document.getElementById("btn-export-json").addEventListener("click", () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mindMapData, null, 2));
-    const downloadAnchor = document.createElement("a");
-    downloadAnchor.setAttribute("href", dataStr);
-    downloadAnchor.setAttribute("download", "mapa_mental.json");
-    document.body.appendChild(downloadAnchor);
-    downloadAnchor.click();
-    downloadAnchor.remove();
+    const a = document.createElement("a");
+    a.href = dataStr;
+    a.download = "mapa_mental.json";
+    a.click();
   });
 
   const fileInput = document.getElementById("file-input");
@@ -260,14 +335,16 @@ function setupEventListeners() {
     reader.readAsText(file);
   });
 
-  // Exportar PNG mediante html2canvas
+  // Eventos de los nuevos botones
   document.getElementById("btn-export-png").addEventListener("click", () => {
-    const canvasContainer = document.getElementById("canvas-container");
-    html2canvas(canvasContainer, { backgroundColor: "#f8fafc" }).then(canvas => {
-      const link = document.createElement("a");
-      link.download = "mapa_mental.png";
-      link.href = canvas.toDataURL();
-      link.click();
+    captureCanvasAsImage().then(canvas => {
+      const a = document.createElement("a");
+      a.download = "mapa_conceptual.png";
+      a.href = canvas.toDataURL();
+      a.click();
     });
   });
+
+  document.getElementById("btn-export-pdf").addEventListener("click", exportToPDF);
+  document.getElementById("btn-export-word").addEventListener("click", exportToWord);
 }
