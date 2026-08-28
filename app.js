@@ -1,4 +1,3 @@
-// Estado inicial del mapa mental
 let mindMapData = {
   id: "root",
   text: "Idea Principal",
@@ -15,18 +14,15 @@ let selectedNodeId = "root";
 let draggingNodeId = null;
 let dragOffset = { x: 0, y: 0 };
 
-// Referencias del DOM
 const svgCanvas = document.getElementById("svg-canvas");
 const nodesContainer = document.getElementById("nodes-container");
 const colorPicker = document.getElementById("node-color");
 
-// Inicialización
 document.addEventListener("DOMContentLoaded", () => {
   render();
   setupEventListeners();
 });
 
-// Renderizar todo el mapa (Nodos y Conexiones SVG)
 function render() {
   nodesContainer.innerHTML = "";
   svgCanvas.innerHTML = "";
@@ -34,7 +30,6 @@ function render() {
 }
 
 function renderNodeRecursive(node, parentNode = null) {
-  // 1. Crear elemento DOM del Nodo
   const nodeEl = document.createElement("div");
   nodeEl.className = `node ${node.id === selectedNodeId ? "selected" : ""}`;
   nodeEl.style.left = `${node.x}px`;
@@ -49,22 +44,18 @@ function renderNodeRecursive(node, parentNode = null) {
 
   nodesContainer.appendChild(nodeEl);
 
-  // Eventos de selección y edición
   nodeEl.addEventListener("mousedown", (e) => startDrag(e, node));
   nodeEl.addEventListener("dblclick", () => enableInlineEdit(textEl, node));
 
-  // 2. Dibujar línea/curva SVG si tiene padre
   if (parentNode) {
     drawConnector(parentNode, node);
   }
 
-  // 3. Renderizar hijos de forma recursiva
   if (node.children && node.children.length > 0) {
     node.children.forEach(child => renderNodeRecursive(child, node));
   }
 }
 
-// Dibujar conectores curvos estilo Bezier
 function drawConnector(parent, child) {
   const pX = parent.x + 60;
   const pY = parent.y + 20;
@@ -82,8 +73,6 @@ function drawConnector(parent, child) {
 
   svgCanvas.appendChild(path);
 }
-
-// --- Operaciones con Nodos ---
 
 function findNodeAndParent(id, current = mindMapData, parent = null) {
   if (current.id === id) return { node: current, parent };
@@ -149,8 +138,6 @@ function deleteNode() {
   }
 }
 
-// --- Edición y Arrastre (Drag & Drop) ---
-
 function enableInlineEdit(textEl, node) {
   textEl.contentEditable = true;
   textEl.focus();
@@ -205,87 +192,38 @@ function stopDrag() {
   document.removeEventListener("mouseup", stopDrag);
 }
 
-// --- Funciones de Exportación (PNG, PDF, Word) ---
-
-function captureCanvasAsImage() {
-  const canvasContainer = document.getElementById("canvas-container");
-  return html2canvas(canvasContainer, { backgroundColor: "#f8fafc" });
-}
-
-// Exportar PDF
-function exportToPDF() {
-  captureCanvasAsImage().then(canvas => {
-    const imgData = canvas.toDataURL("image/png");
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-      orientation: canvas.width > canvas.height ? "landscape" : "portrait",
-      unit: "px",
-      format: [canvas.width, canvas.height]
-    });
-    pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
-    pdf.save("mapa_conceptual.pdf");
-  });
-}
-
-// Generar esquema jerárquico en texto para Word
-function buildWordOutline(node, level = 1) {
-  let html = `<h${Math.min(level, 6)} style="color: ${node.color}; font-family: Arial, sans-serif;">${"&nbsp;".repeat((level-1)*4)}${node.text}</h${Math.min(level, 6)}>`;
+function buildWordList(node) {
+  let html = `<li><b>${node.text}</b>`;
   if (node.children && node.children.length > 0) {
+    html += "<ul>";
     node.children.forEach(child => {
-      html += buildWordOutline(child, level + 1);
+      html += buildWordList(child);
     });
+    html += "</ul>";
   }
+  html += "</li>";
   return html;
 }
 
-// Exportar Word (.docx)
 function exportToWord() {
-  captureCanvasAsImage().then(canvas => {
-    const imgData = canvas.toDataURL("image/png");
-    const outlineHtml = buildWordOutline(mindMapData);
-
-    // Documento HTML compatible con Microsoft Word (.docx)
-    const wordContent = `
-      <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-      <head>
-        <meta charset='utf-8'>
-        <title>Mapa Conceptual</title>
-        <style>
-          body { font-family: Arial, sans-serif; margin: 20px; }
-          h1, h2, h3, h4 { margin-bottom: 5px; }
-          .diagram { margin-top: 20px; text-align: center; }
-        </style>
-      </head>
-      <body>
-        <h1>Mapa Conceptual - ${mindMapData.text}</h1>
-        <hr>
-        <h2>Estructura Jerárquica:</h2>
-        ${outlineHtml}
-        <br><hr><br>
-        <h2>Diagrama Visual:</h2>
-        <div class="diagram">
-          <img src="${imgData}" style="max-width: 100%; height: auto;" />
-        </div>
-      </body>
-      </html>
-    `;
-
-    const blob = new Blob(['\ufeff', wordContent], {
-      type: 'application/msword'
-    });
-
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "mapa_conceptual.docx";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  });
+  const listHtml = buildWordList(mindMapData);
+  const wordContent = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Mapa Conceptual</title></head>
+    <body>
+      <h2>Esquema del Mapa Conceptual</h2>
+      <ul>${listHtml}</ul>
+    </body>
+    </html>
+  `;
+  const blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "mapa_conceptual.doc";
+  a.click();
+  URL.revokeObjectURL(url);
 }
-
-// --- Configuración de Eventos ---
 
 function setupEventListeners() {
   document.getElementById("btn-add-child").addEventListener("click", addChildNode);
@@ -300,7 +238,6 @@ function setupEventListeners() {
     }
   });
 
-  // Atajos de Teclado
   document.addEventListener("keydown", (e) => {
     if (e.target.isContentEditable) return;
     if (e.key === "Tab") { e.preventDefault(); addChildNode(); }
@@ -308,7 +245,6 @@ function setupEventListeners() {
     if (e.key === "Delete" || e.key === "Backspace") { deleteNode(); }
   });
 
-  // JSON Import/Export
   document.getElementById("btn-export-json").addEventListener("click", () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mindMapData, null, 2));
     const a = document.createElement("a");
@@ -335,9 +271,9 @@ function setupEventListeners() {
     reader.readAsText(file);
   });
 
-  // Eventos de los nuevos botones
   document.getElementById("btn-export-png").addEventListener("click", () => {
-    captureCanvasAsImage().then(canvas => {
+    const canvasContainer = document.getElementById("canvas-container");
+    html2canvas(canvasContainer, { backgroundColor: "#f8fafc" }).then(canvas => {
       const a = document.createElement("a");
       a.download = "mapa_conceptual.png";
       a.href = canvas.toDataURL();
@@ -345,6 +281,9 @@ function setupEventListeners() {
     });
   });
 
-  document.getElementById("btn-export-pdf").addEventListener("click", exportToPDF);
+  document.getElementById("btn-export-pdf").addEventListener("click", () => {
+    window.print();
+  });
+
   document.getElementById("btn-export-word").addEventListener("click", exportToWord);
 }
