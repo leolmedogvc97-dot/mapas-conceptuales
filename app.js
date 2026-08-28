@@ -1,7 +1,7 @@
 let mindMapData = {
   id: "root",
   text: "Idea Principal",
-  x: 1000,
+  x: 1500,
   y: 100,
   color: "#1e3a8a",
   children: []
@@ -16,11 +16,18 @@ const nodesContainer = document.getElementById("nodes-container");
 const colorPicker = document.getElementById("node-color");
 
 document.addEventListener("DOMContentLoaded", () => {
+  autoLayout(mindMapData);
   render();
   setupEventListeners();
+  
+  const canvasContainer = document.getElementById("canvas-container");
+  if (canvasContainer) {
+    canvasContainer.scrollLeft = 800;
+    canvasContainer.scrollTop = 0;
+  }
 });
 
-// Calcula cuántos nodos hoja (nodos sin hijos) tiene un subárbol
+// Cuenta nodos hoja para distribuir el ancho total
 function getLeafCount(node) {
   if (!node.children || node.children.length === 0) {
     return 1;
@@ -28,12 +35,11 @@ function getLeafCount(node) {
   return node.children.reduce((acc, child) => acc + getLeafCount(child), 0);
 }
 
-// Algoritmo de distribución automática por subárboles para evitar encimamientos
+// Layout automático para evitar encimamientos
 function autoLayout(node, startX = 1500, startY = 100, level = 0) {
-  const NODE_WIDTH = 260; // Ancho estimado con margen
-  const NODE_HEIGHT = 180; // Espaciado vertical entre niveles
+  const NODE_WIDTH = 260;
+  const NODE_HEIGHT = 180;
 
-  // Paleta de colores automática por nivel
   const colors = ["#1e3a8a", "#2563eb", "#059669", "#7c3aed", "#d97706", "#b45309"];
   if (!node.color) {
     node.color = colors[level % colors.length];
@@ -62,6 +68,7 @@ function autoLayout(node, startX = 1500, startY = 100, level = 0) {
 }
 
 function render() {
+  if (!nodesContainer || !svgCanvas) return;
   nodesContainer.innerHTML = "";
   svgCanvas.innerHTML = "";
   renderNodeRecursive(mindMapData);
@@ -151,8 +158,41 @@ function enableInlineEdit(textEl, node) {
   textEl.addEventListener("blur", saveText, { once: true });
 }
 
+function buildWordList(node) {
+  let html = `<li><b>${node.text.replace(/\n/g, '<br>')}</b>`;
+  if (node.children && node.children.length > 0) {
+    html += "<ul>";
+    node.children.forEach(child => {
+      html += buildWordList(child);
+    });
+    html += "</ul>";
+  }
+  html += "</li>";
+  return html;
+}
+
+function exportToWord() {
+  const listHtml = buildWordList(mindMapData);
+  const wordContent = `
+    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+    <head><meta charset='utf-8'><title>Mapa Conceptual</title></head>
+    <body>
+      <h2>Esquema del Mapa Conceptual</h2>
+      <ul>${listHtml}</ul>
+    </body>
+    </html>
+  `;
+  const blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "mapa_conceptual.doc";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function setupEventListeners() {
-  document.getElementById("btn-add-child").addEventListener("click", () => {
+  document.getElementById("btn-add-child")?.addEventListener("click", () => {
     const res = findNodeAndParent(selectedNodeId);
     if (!res) return;
     const newId = "node_" + Date.now();
@@ -162,7 +202,17 @@ function setupEventListeners() {
     render();
   });
 
-  document.getElementById("btn-delete").addEventListener("click", () => {
+  document.getElementById("btn-add-sibling")?.addEventListener("click", () => {
+    const res = findNodeAndParent(selectedNodeId);
+    if (!res || !res.parent) return;
+    const newId = "node_" + Date.now();
+    res.parent.children.push({ id: newId, text: "Nuevo Concepto", children: [] });
+    autoLayout(mindMapData);
+    selectedNodeId = newId;
+    render();
+  });
+
+  document.getElementById("btn-delete")?.addEventListener("click", () => {
     if (selectedNodeId === "root") return;
     const res = findNodeAndParent(selectedNodeId);
     if (res && res.parent) {
@@ -173,7 +223,7 @@ function setupEventListeners() {
     }
   });
 
-  document.getElementById("btn-import-text").addEventListener("click", () => {
+  document.getElementById("btn-import-text")?.addEventListener("click", () => {
     const rawInput = prompt("Pega aquí el JSON del mapa conceptual:");
     if (!rawInput) return;
     try {
@@ -187,13 +237,60 @@ function setupEventListeners() {
     }
   });
 
-  colorPicker.addEventListener("input", (e) => {
-    const res = findNodeAndParent(selectedNodeId);
-    if (res) {
-      res.node.color = e.target.value;
-      render();
+  if (colorPicker) {
+    colorPicker.addEventListener("input", (e) => {
+      const res = findNodeAndParent(selectedNodeId);
+      if (res) {
+        res.node.color = e.target.value;
+        render();
+      }
+    });
+  }
+
+  document.getElementById("btn-export-json")?.addEventListener("click", () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mindMapData, null, 2));
+    const a = document.createElement("a");
+    a.href = dataStr;
+    a.download = "mapa_mental.json";
+    a.click();
+  });
+
+  const fileInput = document.getElementById("file-input");
+  document.getElementById("btn-import-json")?.addEventListener("click", () => fileInput?.click());
+  fileInput?.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        mindMapData = JSON.parse(event.target.result);
+        selectedNodeId = mindMapData.id || "root";
+        autoLayout(mindMapData);
+        render();
+      } catch (err) {
+        alert("El archivo subido no es un JSON válido.");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById("btn-export-png")?.addEventListener("click", () => {
+    const canvasContainer = document.getElementById("canvas-container");
+    if (typeof html2canvas !== "undefined" && canvasContainer) {
+      html2canvas(canvasContainer, { backgroundColor: "#f8fafc" }).then(canvas => {
+        const a = document.createElement("a");
+        a.download = "mapa_conceptual.png";
+        a.href = canvas.toDataURL();
+        a.click();
+      });
     }
   });
+
+  document.getElementById("btn-export-pdf")?.addEventListener("click", () => {
+    window.print();
+  });
+
+  document.getElementById("btn-export-word")?.addEventListener("click", exportToWord);
 }
 
 function startDrag(e, node) {
