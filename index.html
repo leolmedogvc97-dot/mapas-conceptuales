@@ -252,7 +252,7 @@
         <div class="dropdown-content">
           <button type="button" id="btn-export-word">📝 Word (.doc)</button>
           <button type="button" id="btn-export-pdf">📄 PDF (.pdf)</button>
-          <button type="button" id="btn-export-image">🖼️ PNG (.png)</button>
+          <button type="button" id="btn-export-image">🖼️ JPG / PNG</button>
           <button type="button" id="btn-export-json">💾 JSON (.json)</button>
         </div>
       </div>
@@ -422,8 +422,8 @@
       textEl.addEventListener("blur", saveText, { once: true });
     }
 
-    // Renderizador optimizado para reducir drásticamente el peso (menor a 2MB)
-    async function renderCleanCanvas() {
+    // RENDERIZADO ULTRALIGERO CON RE-ESCALADO FÍSICO (PESO MENOR A 1MB)
+    async function renderUltraLightCanvas() {
       const nodeElements = Array.from(document.querySelectorAll(".nodes-layer .node"));
       if (nodeElements.length === 0) return null;
 
@@ -441,7 +441,7 @@
         if (top + height > maxY) maxY = top + height;
       });
 
-      const padding = 50;
+      const padding = 40;
       minX -= padding;
       minY -= padding;
       maxX += padding;
@@ -511,17 +511,40 @@
 
       drawTempConnectors(mindMapData);
 
-      // Usar escala balanceada para alta nitidez pero bajo peso
-      const canvas = await html2canvas(tempWrapper, {
+      // Render de canvas base 1:1 sin sobre-muestreo
+      const rawCanvas = await html2canvas(tempWrapper, {
         width: exportWidth,
         height: exportHeight,
-        scale: 1.5,
+        scale: 1,
         backgroundColor: "#ffffff"
       });
 
       document.body.removeChild(tempWrapper);
 
-      return { canvas, width: exportWidth, height: exportHeight };
+      // Downscaling físico: limitamos la resolución máxima a 1600px para garantizar peso ultra bajo
+      const maxDim = 1600;
+      let targetW = exportWidth;
+      let targetH = exportHeight;
+
+      if (targetW > maxDim || targetH > maxDim) {
+        if (targetW > targetH) {
+          targetH = Math.round((targetH * maxDim) / targetW);
+          targetW = maxDim;
+        } else {
+          targetW = Math.round((targetW * maxDim) / targetH);
+          targetH = maxDim;
+        }
+      }
+
+      const resizedCanvas = document.createElement("canvas");
+      resizedCanvas.width = targetW;
+      resizedCanvas.height = targetH;
+      const ctx = resizedCanvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, targetW, targetH);
+      ctx.drawImage(rawCanvas, 0, 0, targetW, targetH);
+
+      return { canvas: resizedCanvas, width: targetW, height: targetH };
     }
 
     function setupEventListeners() {
@@ -615,24 +638,23 @@
         fileInput.click();
       });
 
-      // EXPORTAR PNG COMPRIMIDO DE ALTA CALIDAD
+      // EXPORTAR IMAGEN LIGERA (JPG COMPRIMIDO < 500KB)
       document.getElementById("btn-export-image")?.addEventListener("click", async () => {
-        const result = await renderCleanCanvas();
+        const result = await renderUltraLightCanvas();
         if (!result) return;
         const a = document.createElement("a");
         a.download = "mapa_conceptual.jpg";
-        a.href = result.canvas.toDataURL("image/jpeg", 0.88);
+        a.href = result.canvas.toDataURL("image/jpeg", 0.75);
         a.click();
       });
 
-      // EXPORTAR PDF COMPRIMIDO (< 2MB)
+      // EXPORTAR PDF COMPRIMIDO Y OPTIMIZADO (< 1 MB)
       document.getElementById("btn-export-pdf")?.addEventListener("click", async () => {
-        const result = await renderCleanCanvas();
+        const result = await renderUltraLightCanvas();
         if (!result || !window.jspdf) return;
 
         const { canvas, width, height } = result;
-        // Compresión JPEG a 0.85 (baja drásticamente el peso de 15MB a menos de 1.5MB)
-        const imgData = canvas.toDataURL("image/jpeg", 0.85);
+        const imgData = canvas.toDataURL("image/jpeg", 0.70);
         const { jsPDF } = window.jspdf;
 
         const isLandscape = width >= height;
@@ -643,28 +665,39 @@
           compress: true
         });
 
-        pdf.addImage(imgData, "JPEG", 0, 0, width, height);
+        pdf.addImage(imgData, "JPEG", 0, 0, width, height, undefined, "FAST");
         pdf.save("mapa_conceptual.pdf");
       });
 
-      // EXPORTAR WORD (.doc) CON LA IMAGEN INCRUSTADA PERFECTAMENTE
+      // EXPORTAR WORD TABULAR (TABLA ORDENADA + MAPA INTEGRADO)
       document.getElementById("btn-export-word")?.addEventListener("click", async () => {
-        const result = await renderCleanCanvas();
+        const result = await renderUltraLightCanvas();
         if (!result) return;
 
-        const imgBase64 = result.canvas.toDataURL("image/jpeg", 0.85);
+        const imgBase64 = result.canvas.toDataURL("image/jpeg", 0.70);
 
-        function generateCleanList(node) {
-          let html = `<li style="margin-bottom: 4px;"><strong>${node.text}</strong>`;
+        function generateTableRows(node, depth = 0) {
+          const indentStyle = `padding-left: ${depth * 18 + 10}px;`;
+          const fontStyle = depth === 0 ? "font-weight: bold; color: #1e3a8a; font-size: 14px;" : (depth === 1 ? "font-weight: bold; color: #2563eb;" : "color: #334155;");
+          const bgStyle = depth === 0 ? "background-color: #f1f5f9;" : (depth === 1 ? "background-color: #f8fafc;" : "");
+
+          let rows = `
+            <tr style="${bgStyle}">
+              <td style="border: 1px solid #cbd5e1; padding: 8px; ${indentStyle} ${fontStyle}">
+                ${depth > 0 ? "└─ " : ""}${node.text}
+              </td>
+              <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center; font-size: 11px; color: #64748b;">
+                Nivel ${depth + 1}
+              </td>
+            </tr>
+          `;
+
           if (node.children && node.children.length > 0) {
-            html += "<ul style='margin-left: 20px; margin-top: 4px;'>";
             node.children.forEach(child => {
-              html += generateCleanList(child);
+              rows += generateTableRows(child, depth + 1);
             });
-            html += "</ul>";
           }
-          html += "</li>";
-          return html;
+          return rows;
         }
 
         const wordContent = `
@@ -673,25 +706,35 @@
             <meta charset='utf-8'>
             <title>Mapa Conceptual</title>
             <style>
-              body { font-family: Arial, sans-serif; padding: 20px; color: #1e293b; }
-              h1 { color: #1e3a8a; text-align: center; font-size: 22px; }
-              .img-container { text-align: center; margin-top: 15px; margin-bottom: 25px; }
-              img { max-width: 100%; height: auto; border: 1px solid #cbd5e1; border-radius: 6px; }
-              ul { list-style-type: square; }
+              body { font-family: Calibri, Arial, sans-serif; padding: 20px; color: #1e293b; }
+              h1 { color: #1e3a8a; text-align: center; font-size: 20px; margin-bottom: 5px; }
+              p.subtitle { text-align: center; color: #64748b; font-size: 12px; margin-bottom: 20px; }
+              .img-box { text-align: center; margin-bottom: 30px; }
+              img { max-width: 100%; height: auto; border: 1px solid #cbd5e1; }
+              table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+              th { background-color: #1e3a8a; color: white; padding: 8px; font-size: 12px; border: 1px solid #1e3a8a; }
             </style>
           </head>
           <body>
-            <h1>Mapa Conceptual</h1>
-            <hr style="border: 0; border-top: 1px solid #cbd5e1; margin-bottom: 20px;"/>
+            <h1>ESQUEMA CONCEPTUAL</h1>
+            <p class="subtitle">Generado automáticamente por MindMap Studio</p>
             
-            <div class="img-container">
-              <img src="${imgBase64}" alt="Mapa Conceptual Visual"/>
+            <div class="img-box">
+              <img src="${imgBase64}" alt="Diagrama Visual"/>
             </div>
 
-            <h3 style="color: #2563eb;">Estructura de Contenidos:</h3>
-            <ul style="font-size: 13px; line-height: 1.5;">
-              ${generateCleanList(mindMapData)}
-            </ul>
+            <h3 style="color: #1e3a8a; margin-top: 20px;">Desglose Jerárquico</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th style="text-align: left;">CONCEPTO / CLASIFICACIÓN</th>
+                  <th style="width: 100px;">JERARQUÍA</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${generateTableRows(mindMapData)}
+              </tbody>
+            </table>
           </body>
           </html>
         `;
