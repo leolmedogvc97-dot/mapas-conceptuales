@@ -1,37 +1,57 @@
-<div class="toolbar">
-  <div class="brand">
-    <span style="font-size:1.5rem;">🧠</span>
-    <h1>MindMap Studio</h1>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MindMap Studio</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+  <div class="toolbar">
+    <div class="brand">
+      <span style="font-size:1.5rem;">🧠</span>
+      <h1>MindMap Studio</h1>
+    </div>
+
+    <div class="actions">
+      <button id="btn-add-child" class="btn primary">+ Nodo Hijo</button>
+      <button id="btn-add-sibling" class="btn secondary">+ Nodo Hermano</button>
+      <button id="btn-delete" class="btn danger">🗑️ Eliminar</button>
+      
+      <div class="separator"></div>
+      
+      <label class="color-picker-label">
+        🎨 Color:
+        <input type="color" id="node-color" value="#3b82f6">
+      </label>
+      
+      <div class="separator"></div>
+
+      <button id="btn-import-text" class="btn outline" style="background-color: #fef08a; font-weight: bold; border-color: #eab308;">
+        📥 Pegar Texto / JSON
+      </button>
+
+      <div class="separator"></div>
+
+      <button id="btn-export-json" class="btn outline">💾 Guardar (JSON)</button>
+      <button id="btn-import-json" class="btn outline">📁 Cargar (JSON)</button>
+      <input type="file" id="file-input" accept=".json" style="display: none;">
+
+      <div class="separator"></div>
+
+      <button id="btn-export-png" class="btn success">🖼️ Exportar PNG</button>
+      <button id="btn-export-pdf" class="btn pdf-btn">📄 Exportar PDF</button>
+      <button id="btn-export-word" class="btn word-btn">📝 Exportar Word</button>
+    </div>
   </div>
 
-  <div class="actions">
-    <button id="btn-add-child" class="btn primary">+ Nodo Hijo</button>
-    <button id="btn-add-sibling" class="btn secondary">+ Nodo Hermano</button>
-    <button id="btn-delete" class="btn danger">🗑️ Eliminar</button>
-    
-    <div class="separator"></div>
-    
-    <label class="color-picker-label">
-      🎨 Color:
-      <input type="color" id="node-color" value="#3b82f6">
-    </label>
-    
-    <div class="separator"></div>
-
-    <button id="btn-import-text" class="btn outline" style="background-color: #fef08a; font-weight: bold;">
-      📥 Pegar Texto / JSON
-    </button>
-
-    <div class="separator"></div>
-
-    <button id="btn-export-json" class="btn outline">💾 Guardar (JSON)</button>
-    <button id="btn-import-json" class="btn outline">📁 Cargar (JSON)</button>
-    <input type="file" id="file-input" accept=".json" style="display: none;">
-
-    <div class="separator"></div>
-
-    <button id="btn-export-png" class="btn success">🖼️ Exportar PNG</button>
-    <button id="btn-export-pdf" class="btn pdf-btn">📄 Exportar PDF</button>
-    <button id="btn-export-word" class="btn word-btn">📝 Exportar Word</button>
+  <div class="canvas-container" id="canvas-container">
+    <svg class="svg-layer" id="svg-canvas"></svg>
+    <div class="nodes-layer" id="nodes-container"></div>
   </div>
-</div>
+
+  <script src="app.js"></script>
+</body>
+</html>
