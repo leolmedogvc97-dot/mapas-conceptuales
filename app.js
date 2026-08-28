@@ -1,7 +1,7 @@
 let mindMapData = {
   id: "root",
   text: "Idea Principal",
-  x: 1500,
+  x: 2000,
   y: 100,
   color: "#1e3a8a",
   children: []
@@ -22,12 +22,11 @@ document.addEventListener("DOMContentLoaded", () => {
   
   const canvasContainer = document.getElementById("canvas-container");
   if (canvasContainer) {
-    canvasContainer.scrollLeft = 800;
+    canvasContainer.scrollLeft = 1200;
     canvasContainer.scrollTop = 0;
   }
 });
 
-// Cuenta nodos hoja para distribuir el ancho total
 function getLeafCount(node) {
   if (!node.children || node.children.length === 0) {
     return 1;
@@ -35,9 +34,8 @@ function getLeafCount(node) {
   return node.children.reduce((acc, child) => acc + getLeafCount(child), 0);
 }
 
-// Layout automático para evitar encimamientos
-function autoLayout(node, startX = 1500, startY = 100, level = 0) {
-  const NODE_WIDTH = 260;
+function autoLayout(node, startX = 2000, startY = 100, level = 0) {
+  const NODE_WIDTH = 270;
   const NODE_HEIGHT = 180;
 
   const colors = ["#1e3a8a", "#2563eb", "#059669", "#7c3aed", "#d97706", "#b45309"];
@@ -158,39 +156,6 @@ function enableInlineEdit(textEl, node) {
   textEl.addEventListener("blur", saveText, { once: true });
 }
 
-function buildWordList(node) {
-  let html = `<li><b>${node.text.replace(/\n/g, '<br>')}</b>`;
-  if (node.children && node.children.length > 0) {
-    html += "<ul>";
-    node.children.forEach(child => {
-      html += buildWordList(child);
-    });
-    html += "</ul>";
-  }
-  html += "</li>";
-  return html;
-}
-
-function exportToWord() {
-  const listHtml = buildWordList(mindMapData);
-  const wordContent = `
-    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-    <head><meta charset='utf-8'><title>Mapa Conceptual</title></head>
-    <body>
-      <h2>Esquema del Mapa Conceptual</h2>
-      <ul>${listHtml}</ul>
-    </body>
-    </html>
-  `;
-  const blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "mapa_conceptual.doc";
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
 function setupEventListeners() {
   document.getElementById("btn-add-child")?.addEventListener("click", () => {
     const res = findNodeAndParent(selectedNodeId);
@@ -273,24 +238,6 @@ function setupEventListeners() {
     };
     reader.readAsText(file);
   });
-
-  document.getElementById("btn-export-png")?.addEventListener("click", () => {
-    const canvasContainer = document.getElementById("canvas-container");
-    if (typeof html2canvas !== "undefined" && canvasContainer) {
-      html2canvas(canvasContainer, { backgroundColor: "#f8fafc" }).then(canvas => {
-        const a = document.createElement("a");
-        a.download = "mapa_conceptual.png";
-        a.href = canvas.toDataURL();
-        a.click();
-      });
-    }
-  });
-
-  document.getElementById("btn-export-pdf")?.addEventListener("click", () => {
-    window.print();
-  });
-
-  document.getElementById("btn-export-word")?.addEventListener("click", exportToWord);
 }
 
 function startDrag(e, node) {
