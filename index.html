@@ -249,7 +249,7 @@
       
       <div class="separator"></div>
 
-      <!-- BOTÓN ÚNICO DE EXPORTAR CON DESPLEGABLE -->
+      <!-- DESPLEGABLE DE EXPORTACIÓN -->
       <div class="dropdown">
         <button class="btn primary" style="background-color: #059669;">📤 Exportar ▼</button>
         <div class="dropdown-content">
@@ -425,6 +425,40 @@
       textEl.addEventListener("blur", saveText, { once: true });
     }
 
+    // Calcula el área exacta que ocupan los nodos con un margen de seguridad
+    function getBoundingBoxOfNodes(padding = 50) {
+      const nodeElements = document.querySelectorAll(".nodes-layer .node");
+      if (!nodeElements || nodeElements.length === 0) {
+        return { x: 0, y: 0, width: 2000, height: 1500 };
+      }
+
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+
+      nodeElements.forEach(el => {
+        const left = parseFloat(el.style.left) || 0;
+        const top = parseFloat(el.style.top) || 0;
+        const width = el.offsetWidth || 200;
+        const height = el.offsetHeight || 100;
+
+        if (left < minX) minX = left;
+        if (top < minY) minY = top;
+        if (left + width > maxX) maxX = left + width;
+        if (top + height > maxY) maxY = top + height;
+      });
+
+      minX = Math.max(0, minX - padding);
+      minY = Math.max(0, minY - padding);
+      maxX = maxX + padding;
+      maxY = maxY + padding;
+
+      return {
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY
+      };
+    }
+
     function setupEventListeners() {
       // Agregar Hijo
       document.getElementById("btn-add-child")?.addEventListener("click", () => {
@@ -523,11 +557,20 @@
         fileInput.click();
       });
 
-      // EXPORTAR PNG
+      // EXPORTAR PNG (Ajustado al contenido)
       document.getElementById("btn-export-image")?.addEventListener("click", () => {
         const exportArea = document.getElementById("export-area");
+        const bbox = getBoundingBoxOfNodes(60);
+
         if (typeof html2canvas !== "undefined") {
-          html2canvas(exportArea, { backgroundColor: "#f8fafc", width: 4000, height: 3000 }).then(canvas => {
+          html2canvas(exportArea, {
+            backgroundColor: "#f8fafc",
+            x: bbox.x,
+            y: bbox.y,
+            width: bbox.width,
+            height: bbox.height,
+            scale: 2
+          }).then(canvas => {
             const a = document.createElement("a");
             a.download = "mapa_conceptual.png";
             a.href = canvas.toDataURL("image/png");
@@ -536,15 +579,31 @@
         }
       });
 
-      // EXPORTAR PDF
+      // EXPORTAR PDF (Ajustado perfectamente sin espacios gigantes)
       document.getElementById("btn-export-pdf")?.addEventListener("click", () => {
         const exportArea = document.getElementById("export-area");
+        const bbox = getBoundingBoxOfNodes(60);
+
         if (typeof html2canvas !== "undefined" && window.jspdf) {
-          html2canvas(exportArea, { backgroundColor: "#f8fafc", width: 4000, height: 3000 }).then(canvas => {
+          html2canvas(exportArea, {
+            backgroundColor: "#f8fafc",
+            x: bbox.x,
+            y: bbox.y,
+            width: bbox.width,
+            height: bbox.height,
+            scale: 2
+          }).then(canvas => {
             const imgData = canvas.toDataURL("image/png");
             const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({ orientation: "landscape", unit: "px", format: [canvas.width, canvas.height] });
-            pdf.addImage(imgData, "PNG", 0, 0, canvas.width, canvas.height);
+            
+            const isLandscape = bbox.width >= bbox.height;
+            const pdf = new jsPDF({
+              orientation: isLandscape ? "landscape" : "portrait",
+              unit: "px",
+              format: [bbox.width, bbox.height]
+            });
+
+            pdf.addImage(imgData, "PNG", 0, 0, bbox.width, bbox.height);
             pdf.save("mapa_conceptual.pdf");
           });
         }
