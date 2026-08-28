@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plataforma de Mapas Mentales</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+
+  <header class="toolbar">
+    <div class="brand">
+      <span class="logo">🧠</span>
+      <h1>MindMap Studio</h1>
+    </div>
+    
+    <div class="actions">
+      <button id="btn-add-child" class="btn primary" title="Agregar nodo hijo (Tab)">+ Nodo Hijo</button>
+      <button id="btn-add-sibling" class="btn secondary" title="Agregar nodo hermano (Enter)">+ Nodo Hermano</button>
+      <button id="btn-delete" class="btn danger" title="Eliminar nodo (Delete/Supr)">🗑️ Eliminar</button>
+      
+      <div class="separator"></div>
+
+      <label for="node-color" class="color-picker-label" title="Cambiar color del nodo">
+        🎨 Color:
+        <input type="color" id="node-color" value="#4a90e2">
+      </label>
+
+      <div class="separator"></div>
+
+      <button id="btn-export-json" class="btn outline">💾 Guardar (JSON)</button>
+      <button id="btn-import-json" class="btn outline">📂 Cargar (JSON)</button>
+      <button id="btn-export-png" class="btn success">🖼️ Exportar PNG</button>
+      <input type="file" id="file-input" accept=".json" style="display: none;">
+    </div>
+  </header>
+
+  <main class="canvas-container" id="canvas-container">
+    <svg id="svg-canvas" class="svg-layer"></svg>
+    <div id="nodes-container" class="nodes-layer"></div>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

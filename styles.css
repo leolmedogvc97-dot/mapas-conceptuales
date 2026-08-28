@@ -1,0 +1,161 @@
+:root {
+  --bg-color: #f8fafc;
+  --grid-color: #e2e8f0;
+  --toolbar-bg: #ffffff;
+  --text-main: #1e293b;
+  --primary: #3b82f6;
+  --primary-hover: #2563eb;
+  --danger: #ef4444;
+  --success: #10b981;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg-color);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barra de herramientas */
+.toolbar {
+  height: 60px;
+  background-color: var(--toolbar-bg);
+  border-bottom: 1px solid var(--grid-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  z-index: 10;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.brand h1 {
+  font-size: 1.2rem;
+  color: var(--text-main);
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.separator {
+  width: 1px;
+  height: 24px;
+  background-color: var(--grid-color);
+  margin: 0 0.5rem;
+}
+
+/* Botones */
+.btn {
+  padding: 0.4rem 0.8rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.btn.primary { background: var(--primary); color: white; }
+.btn.primary:hover { background: var(--primary-hover); }
+.btn.secondary { background: #64748b; color: white; }
+.btn.danger { background: #fee2e2; color: var(--danger); }
+.btn.danger:hover { background: #fca5a5; }
+.btn.success { background: var(--success); color: white; }
+.btn.outline { border-color: #cbd5e1; background: white; color: var(--text-main); }
+.btn.outline:hover { background: #f1f5f9; }
+
+.color-picker-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.875rem;
+  color: var(--text-main);
+  cursor: pointer;
+}
+
+#node-color {
+  border: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+}
+
+/* Contenedor del Lienzo */
+.canvas-container {
+  flex: 1;
+  position: relative;
+  background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+  background-size: 20px 20px;
+  overflow: auto;
+}
+
+.svg-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3000px;
+  height: 3000px;
+  pointer-events: none;
+}
+
+.nodes-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3000px;
+  height: 3000px;
+}
+
+/* Estilo de los Nodos */
+.node {
+  position: absolute;
+  padding: 10px 18px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: move;
+  user-select: none;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: box-shadow 0.2s, transform 0.1s;
+  min-width: 120px;
+  text-align: center;
+}
+
+.node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.node.selected {
+  outline: 3px solid #f59e0b;
+  outline-offset: 2px;
+}
+
+.node [contenteditable="true"] {
+  outline: none;
+  cursor: text;
+}
