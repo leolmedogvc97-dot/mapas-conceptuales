@@ -20,25 +20,44 @@ document.addEventListener("DOMContentLoaded", () => {
   setupEventListeners();
 });
 
-// Función que calcula las coordenadas X, Y automáticas para cualquier texto importado
-function autoLayout(node, startX = 1000, startY = 100, level = 0, siblingOffset = 0) {
-  node.x = startX;
-  node.y = startY;
+// Calcula cuántos nodos hoja (nodos sin hijos) tiene un subárbol
+function getLeafCount(node) {
+  if (!node.children || node.children.length === 0) {
+    return 1;
+  }
+  return node.children.reduce((acc, child) => acc + getLeafCount(child), 0);
+}
 
+// Algoritmo de distribución automática por subárboles para evitar encimamientos
+function autoLayout(node, startX = 1500, startY = 100, level = 0) {
+  const NODE_WIDTH = 260; // Ancho estimado con margen
+  const NODE_HEIGHT = 180; // Espaciado vertical entre niveles
+
+  // Paleta de colores automática por nivel
+  const colors = ["#1e3a8a", "#2563eb", "#059669", "#7c3aed", "#d97706", "#b45309"];
   if (!node.color) {
-    const colors = ["#1e3a8a", "#2563eb", "#059669", "#7c3aed", "#d97706", "#b45309"];
     node.color = colors[level % colors.length];
   }
 
-  if (node.children && node.children.length > 0) {
-    const spacingX = Math.max(280 - level * 20, 180);
-    const spacingY = 180;
-    const totalWidth = (node.children.length - 1) * spacingX;
-    let currentX = startX - totalWidth / 2;
+  node.y = startY;
 
-    node.children.forEach((child, index) => {
-      autoLayout(child, currentX + (index * spacingX), startY + spacingY, level + 1);
+  if (node.children && node.children.length > 0) {
+    const totalLeaves = getLeafCount(node);
+    const totalSubtreeWidth = totalLeaves * NODE_WIDTH;
+    let currentX = startX - totalSubtreeWidth / 2;
+
+    node.children.forEach((child) => {
+      const childLeaves = getLeafCount(child);
+      const childSubtreeWidth = childLeaves * NODE_WIDTH;
+      const childCenterX = currentX + childSubtreeWidth / 2;
+
+      autoLayout(child, childCenterX, startY + NODE_HEIGHT, level + 1);
+      currentX += childSubtreeWidth;
     });
+
+    node.x = startX;
+  } else {
+    node.x = startX;
   }
 }
 
@@ -113,6 +132,25 @@ function findNodeAndParent(id, current = mindMapData, parent = null) {
   return null;
 }
 
+function enableInlineEdit(textEl, node) {
+  textEl.contentEditable = true;
+  textEl.focus();
+  
+  const range = document.createRange();
+  range.selectNodeContents(textEl);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  const saveText = () => {
+    textEl.contentEditable = false;
+    node.text = textEl.innerText.trim() || "Sin título";
+    render();
+  };
+
+  textEl.addEventListener("blur", saveText, { once: true });
+}
+
 function setupEventListeners() {
   document.getElementById("btn-add-child").addEventListener("click", () => {
     const res = findNodeAndParent(selectedNodeId);
@@ -135,9 +173,8 @@ function setupEventListeners() {
     }
   });
 
-  // BOTÓN PARA PEGAR EL TEXTO/JSON
   document.getElementById("btn-import-text").addEventListener("click", () => {
-    const rawInput = prompt("Pega aquí el texto/JSON formateado que te di:");
+    const rawInput = prompt("Pega aquí el JSON del mapa conceptual:");
     if (!rawInput) return;
     try {
       const parsedData = JSON.parse(rawInput);
@@ -146,7 +183,7 @@ function setupEventListeners() {
       autoLayout(mindMapData);
       render();
     } catch (e) {
-      alert("Error: El texto pegado no tiene la estructura de marcas válida.");
+      alert("Error: El texto pegado no es un JSON válido.");
     }
   });
 
