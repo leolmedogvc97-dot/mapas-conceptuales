@@ -4,29 +4,26 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>MindMap & Timeline Studio</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
       --bg-color: #f4f6f9;
-      --panel-bg: #ffffff;
-      --border-color: #e0e6ed;
-      --text-color: #2c3e50;
-      --primary-color: #3b82f6;
-      --accent-color: #10b981;
-      --timeline-line: #475569;
+      --card-bg: #ffffff;
+      --border-blue: #3b82f6;
+      --text-dark: #1e293b;
+      --text-muted: #64748b;
+      --line-color: #475569;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     body {
       background-color: var(--bg-color);
-      color: var(--text-color);
+      color: var(--text-dark);
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -34,280 +31,320 @@
     }
 
     /* BARRA SUPERIOR */
-    .header-toolbar {
-      background: #1e293b;
-      color: #fff;
-      padding: 10px 20px;
+    .toolbar {
+      background: #0f172a;
+      color: white;
+      padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-      z-index: 10;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
     }
 
-    .header-toolbar h1 {
-      font-size: 1.2rem;
-      font-weight: 600;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+    .toolbar h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
     }
 
     .btn-group {
       display: flex;
-      gap: 10px;
-      align-items: center;
+      gap: 12px;
     }
 
     .btn {
-      background: #334155;
-      color: #fff;
+      padding: 8px 16px;
+      border-radius: 8px;
       border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
       cursor: pointer;
-      font-weight: 500;
-      font-size: 0.88rem;
       display: inline-flex;
       align-items: center;
       gap: 6px;
       transition: all 0.2s ease;
     }
 
-    .btn:hover {
-      background: #475569;
-    }
-
-    .btn-primary {
-      background: var(--primary-color);
-    }
-    .btn-primary:hover {
-      background: #2563eb;
-    }
-
     .btn-toggle {
-      background: #0ea5e9;
-    }
-    .btn-toggle:hover {
       background: #0284c7;
+      color: white;
     }
+    .btn-toggle:hover { background: #0369a1; }
 
-    /* ÁREA DE TRABAJO (CANVAS) */
-    .canvas-area {
+    .btn-add {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-add:hover { background: #1d4ed8; }
+
+    /* ÁREA DE TRABAJO CON PATRÓN DE PUNTOS */
+    .viewport {
       flex: 1;
       overflow: auto;
       position: relative;
       background-color: #f8fafc;
-      background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+      background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
       background-size: 24px 24px;
-      padding: 60px;
       display: flex;
       justify-content: center;
       align-items: center;
+      padding: 60px;
     }
 
-    /* LINEA DE TIEMPO */
-    .timeline-wrapper {
+    /* LÍNEA DE TIEMPO BASE */
+    .timeline-container {
       position: relative;
-      transition: all 0.3s ease;
       display: flex;
+      transition: all 0.3s ease;
     }
 
-    /* Orientación Horizontal */
-    .timeline-wrapper.horizontal {
+    /* MODO HORIZONTAL */
+    .timeline-container.horizontal {
       flex-direction: row;
       align-items: center;
       min-width: max-content;
-      padding: 100px 50px;
+      padding: 120px 60px;
     }
 
-    .timeline-wrapper.horizontal .timeline-axis {
+    .timeline-container.horizontal .main-line {
       position: absolute;
       left: 0;
       right: 0;
       top: 50%;
       height: 6px;
-      background: var(--timeline-line);
-      border-radius: 3px;
+      background: var(--line-color);
+      transform: translateY(-50%);
       z-index: 1;
     }
 
-    /* Orientación Vertical */
-    .timeline-wrapper.vertical {
+    /* MODO VERTICAL */
+    .timeline-container.vertical {
       flex-direction: column;
       align-items: center;
       min-height: max-content;
-      padding: 50px 100px;
+      padding: 60px 120px;
     }
 
-    .timeline-wrapper.vertical .timeline-axis {
+    .timeline-container.vertical .main-line {
       position: absolute;
       top: 0;
       bottom: 0;
       left: 50%;
       width: 6px;
-      background: var(--timeline-line);
-      border-radius: 3px;
+      background: var(--line-color);
+      transform: translateX(-50%);
       z-index: 1;
     }
 
-    /* HITOS / ETAPAS DE LA LÍNEA DE TIEMPO */
-    .timeline-item {
+    /* ITEM / HITOS */
+    .timeline-node {
       position: relative;
       z-index: 2;
       display: flex;
       align-items: center;
     }
 
-    /* Layout Horizontal alternado */
-    .timeline-wrapper.horizontal .timeline-item {
+    /* Alineación Horizontal (Arriba / Abajo) */
+    .timeline-container.horizontal .timeline-node {
       flex-direction: column;
-      margin: 0 40px;
-      width: 280px;
+      margin: 0 35px;
+      width: 320px;
     }
 
-    .timeline-wrapper.horizontal .timeline-item.top {
+    .timeline-container.horizontal .timeline-node.top {
       justify-content: flex-end;
-      margin-bottom: 20px;
+      padding-bottom: 30px;
     }
 
-    .timeline-wrapper.horizontal .timeline-item.bottom {
+    .timeline-container.horizontal .timeline-node.bottom {
       justify-content: flex-start;
-      margin-top: 20px;
+      padding-top: 30px;
     }
 
-    /* Layout Vertical alternado */
-    .timeline-wrapper.vertical .timeline-item {
+    /* Alineación Vertical (Izquierda / Derecha) */
+    .timeline-container.vertical .timeline-node {
       flex-direction: row;
-      margin: 30px 0;
-      width: 600px;
+      margin: 35px 0;
+      width: 650px;
     }
 
-    .timeline-wrapper.vertical .timeline-item.left {
+    .timeline-container.vertical .timeline-node.left {
       justify-content: flex-end;
-      padding-right: 40px;
+      padding-right: 30px;
     }
 
-    .timeline-wrapper.vertical .timeline-item.right {
+    .timeline-container.vertical .timeline-node.right {
       justify-content: flex-start;
-      padding-left: 40px;
+      padding-left: 30px;
     }
 
-    /* TARJETA DE ETAPA / EVENTO */
-    .card-stage {
+    /* PUNTO CENTRAL Y LÍNEA PUNTEADA DE CONEXIÓN */
+    .dot-marker {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      background: #2563eb;
+      border: 3px solid white;
+      border-radius: 50%;
+      box-shadow: 0 0 0 2px #2563eb;
+      z-index: 5;
+    }
+
+    .timeline-container.horizontal .timeline-node.top .dot-marker { bottom: -9px; left: calc(50% - 9px); }
+    .timeline-container.horizontal .timeline-node.bottom .dot-marker { top: -9px; left: calc(50% - 9px); }
+    
+    .timeline-container.vertical .timeline-node.left .dot-marker { right: -9px; top: calc(50% - 9px); }
+    .timeline-container.vertical .timeline-node.right .dot-marker { left: -9px; top: calc(50% - 9px); }
+
+    .connector-dashed {
+      position: absolute;
+      border-style: dashed;
+      border-color: #2563eb;
+      z-index: 2;
+    }
+
+    .timeline-container.horizontal .connector-dashed {
+      width: 0;
+      height: 30px;
+      border-width: 0 0 0 2px;
+      left: 50%;
+    }
+    .timeline-container.horizontal .timeline-node.top .connector-dashed { bottom: 0; }
+    .timeline-container.horizontal .timeline-node.bottom .connector-dashed { top: 0; }
+
+    .timeline-container.vertical .connector-dashed {
+      height: 0;
+      width: 30px;
+      border-width: 2px 0 0 0;
+      top: 50%;
+    }
+    .timeline-container.vertical .timeline-node.left .connector-dashed { right: 0; }
+    .timeline-container.vertical .timeline-node.right .connector-dashed { left: 0; }
+
+    /* TARJETA EXACTA (BLUE BORDER) */
+    .stage-card {
       background: #ffffff;
       border: 2px solid #3b82f6;
       border-radius: 14px;
       width: 100%;
-      max-width: 300px;
       padding: 16px;
-      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
       position: relative;
-      transition: transform 0.2s, box-shadow 0.2s;
+      background-clip: padding-box;
     }
 
-    .card-stage:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 14px 30px -5px rgba(0,0,0,0.12);
-    }
-
-    /* ENCABEZADO CON AÑO */
-    .year-input-wrapper {
-      display: flex;
+    /* CAMPO DE AÑO (NO FECHA COMPLETA) */
+    .year-box {
+      display: inline-flex;
       align-items: center;
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 4px 10px;
-      margin-bottom: 12px;
-      width: max-content;
+      border-radius: 6px;
+      padding: 4px 8px;
+      margin-bottom: 10px;
     }
 
-    .year-input-wrapper span {
-      font-size: 0.85rem;
-      margin-right: 6px;
+    .year-box label {
+      font-size: 0.8rem;
       color: #64748b;
+      font-weight: 600;
+      margin-right: 6px;
     }
 
     .year-input {
       border: none;
       background: transparent;
       font-weight: 700;
-      color: #1e293b;
-      font-size: 1rem;
-      width: 70px;
+      color: #2563eb;
+      font-size: 0.95rem;
+      width: 60px;
       outline: none;
     }
 
-    .stage-title {
-      font-weight: 700;
+    /* TÍTULO Y DESCRIPCIÓN EDITABLES */
+    .title-input {
       font-size: 1.1rem;
+      font-weight: 700;
       color: #0f172a;
-      border: none;
+      border: 1px transparent dashed;
+      border-radius: 4px;
       outline: none;
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+      padding: 2px 4px;
     }
 
-    .stage-desc {
-      font-size: 0.9rem;
+    .title-input:hover, .title-input:focus {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .desc-input {
+      font-size: 0.88rem;
       color: #475569;
-      border: none;
+      border: 1px transparent dashed;
+      border-radius: 4px;
       outline: none;
       width: 100%;
       resize: none;
-      min-height: 48px;
+      min-height: 44px;
       line-height: 1.4;
       margin-bottom: 12px;
+      padding: 2px 4px;
+    }
+
+    .desc-input:hover, .desc-input:focus {
+      border-color: #cbd5e1;
+      background: #f8fafc;
     }
 
     /* IMAGEN DE LA ETAPA (OPCIONAL) */
-    .image-container {
+    .image-preview-container {
       position: relative;
       margin-bottom: 12px;
-      border-radius: 10px;
+      border-radius: 8px;
       overflow: hidden;
-      max-height: 160px;
+      max-height: 150px;
       display: flex;
       justify-content: center;
-      align-items: center;
       background: #f1f5f9;
+      border: 1px solid #e2e8f0;
     }
 
-    .image-container img {
+    .image-preview-container img {
       width: 100%;
       height: 100%;
       object-fit: cover;
     }
 
-    .btn-remove-img {
+    .btn-delete-img {
       position: absolute;
       top: 6px;
       right: 6px;
-      background: rgba(0,0,0,0.6);
+      background: rgba(0, 0, 0, 0.7);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       cursor: pointer;
-      font-size: 12px;
+      font-size: 11px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* SECCIÓN DE COMENTARIOS (DIRECTAMENTE EN EL CUADRO) */
-    .comments-box {
+    /* RECUADRO DE COMENTARIOS (REEMPLAZA AL BOTÓN DESPLEGABLE) */
+    .comments-section {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
       padding: 10px;
-      margin-top: 10px;
+      margin-top: 8px;
     }
 
     .comments-header {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 700;
       color: #64748b;
       text-transform: uppercase;
@@ -315,59 +352,65 @@
       margin-bottom: 8px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
     }
 
-    .comment-item {
-      background: white;
-      border: 1px solid #e2e8f0;
-      padding: 6px 8px;
+    .comment-bubble {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
       border-radius: 6px;
-      font-size: 0.83rem;
+      padding: 6px 8px;
+      font-size: 0.82rem;
       color: #334155;
       margin-bottom: 6px;
-      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
       word-break: break-word;
     }
 
-    .comment-item .btn-del-comment {
-      float: right;
+    .btn-del-comment {
+      background: none;
       border: none;
-      background: transparent;
       color: #ef4444;
       cursor: pointer;
       font-size: 0.75rem;
-      margin-left: 4px;
+      font-weight: bold;
     }
 
-    .add-comment-form {
+    .comment-form {
       display: flex;
       gap: 6px;
       margin-top: 8px;
     }
 
-    .input-comment {
+    .comment-input {
       flex: 1;
       border: 1px solid #cbd5e1;
       border-radius: 6px;
-      padding: 6px 8px;
+      padding: 5px 8px;
       font-size: 0.8rem;
       outline: none;
+    }
+
+    .comment-input:focus {
+      border-color: #3b82f6;
     }
 
     .btn-add-comment {
       background: #3b82f6;
       color: white;
       border: none;
-      padding: 6px 10px;
       border-radius: 6px;
-      font-size: 0.8rem;
+      padding: 0 10px;
+      font-size: 0.85rem;
+      font-weight: bold;
       cursor: pointer;
-      font-weight: 600;
     }
 
-    /* ACCIONES DE LA TARJETA */
-    .card-actions {
+    /* FOOTER DE LA TARJETA / OPCIONES */
+    .card-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -376,126 +419,125 @@
       border-top: 1px dashed #e2e8f0;
     }
 
-    .file-input-label {
-      font-size: 0.8rem;
-      color: #3b82f6;
+    .upload-btn-label {
+      font-size: 0.78rem;
+      color: #2563eb;
+      font-weight: 600;
       cursor: pointer;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       gap: 4px;
-      font-weight: 600;
     }
 
-    .file-input-label input {
-      display: none;
-    }
+    .upload-btn-label input { display: none; }
 
-    .btn-delete-card {
-      background: transparent;
+    .btn-delete-node {
+      background: none;
       border: none;
       color: #ef4444;
-      cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       font-weight: 600;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-  <!-- BARRA DE HERRAMIENTAS -->
-  <div class="header-toolbar">
-    <h1>📅 Línea de Tiempo interactiva</h1>
+  <!-- ENCABEZADO Y CONTROLES -->
+  <div class="toolbar">
+    <h1>📅 Creador de Línea de Tiempo</h1>
     <div class="btn-group">
       <button class="btn btn-toggle" onclick="toggleOrientation()">
         🔄 Orientación: <span id="orientationLabel">Horizontal</span>
       </button>
-      <button class="btn btn-primary" onclick="addStage()">
+      <button class="btn btn-add" onclick="addStage()">
         ➕ Agregar Etapa
       </button>
     </div>
   </div>
 
-  <!-- CANVAS PRINCIPAL -->
-  <div class="canvas-area">
-    <div id="timelineWrapper" class="timeline-wrapper horizontal">
-      <div class="timeline-axis"></div>
+  <!-- CANVAS O ÁREA DE DIBUJO -->
+  <div class="viewport">
+    <div id="timeline" class="timeline-container horizontal">
+      <div class="main-line"></div>
     </div>
   </div>
 
   <script>
     let isHorizontal = true;
 
-    // Datos por defecto
+    // DATOS DE EJEMPLO
     let stages = [
       {
-        id: 'stage-1',
+        id: 1,
         year: '1995',
-        title: 'Inicio del Proyecto',
-        description: 'Fundación y definición de los primeros objetivos institucionales.',
+        title: 'Fase Inicial',
+        description: 'Definición de requerimientos y arranque de operaciones.',
         imageUrl: '',
-        comments: ['Se inició con un presupuesto reducido.', 'Revisión aprobada por la mesa directiva.']
+        comments: ['Primer análisis de factibilidad completado.']
       },
       {
-        id: 'stage-2',
+        id: 2,
         year: '2006',
-        title: 'Lanzamiento Oficial',
-        description: 'Apertura al público general y expansión de servicios.',
+        title: 'Lanzamiento de Producto',
+        description: 'Despliegue de la plataforma para los primeros clientes.',
         imageUrl: '',
-        comments: ['Llegamos a los primeros 10,000 usuarios activos.']
+        comments: ['Se alcanzaron los objetivos del primer trimestre.', 'Comentario de evaluación técnica.']
       },
       {
-        id: 'stage-3',
+        id: 3,
         year: '2018',
-        title: 'Modernización',
-        description: 'Actualización tecnológica completa e integración de nuevas herramientas.',
+        title: 'Consolidación',
+        description: 'Integración de nuevas herramientas tecnológicas y alcance global.',
         imageUrl: '',
-        comments: ['Se rediseñó por completo la arquitectura del sistema.']
+        comments: ['Revisión del sistema ejecutada con éxito.']
       }
     ];
 
     function toggleOrientation() {
       isHorizontal = !isHorizontal;
-      const wrapper = document.getElementById('timelineWrapper');
+      const container = document.getElementById('timeline');
       const label = document.getElementById('orientationLabel');
-      
+
       if (isHorizontal) {
-        wrapper.className = 'timeline-wrapper horizontal';
+        container.className = 'timeline-container horizontal';
         label.textContent = 'Horizontal';
       } else {
-        wrapper.className = 'timeline-wrapper vertical';
+        container.className = 'timeline-container vertical';
         label.textContent = 'Vertical';
       }
-      renderTimeline();
+      render();
     }
 
     function addStage() {
-      const newId = 'stage-' + Date.now();
-      const lastYear = stages.length > 0 ? parseInt(stages[stages.length - 1].year) || 2020 : 2020;
-      
+      const lastYear = stages.length > 0 ? (parseInt(stages[stages.length - 1].year) || 2020) + 4 : 2026;
       stages.push({
-        id: newId,
-        year: (lastYear + 5).toString(),
+        id: Date.now(),
+        year: lastYear.toString(),
         title: 'Nueva Etapa',
-        description: 'Descripción breve de los acontecimientos de este periodo.',
+        description: 'Escribe aquí la descripción de esta etapa.',
         imageUrl: '',
         comments: []
       });
-
-      renderTimeline();
+      render();
     }
 
-    function deleteStage(index) {
+    function removeStage(index) {
       stages.splice(index, 1);
-      renderTimeline();
+      render();
     }
 
-    function handleImageUpload(event, index) {
+    function updateField(index, field, value) {
+      stages[index][field] = value;
+    }
+
+    function handleImage(event, index) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
           stages[index].imageUrl = e.target.result;
-          renderTimeline();
+          render();
         };
         reader.readAsDataURL(file);
       }
@@ -503,7 +545,7 @@
 
     function removeImage(index) {
       stages[index].imageUrl = '';
-      renderTimeline();
+      render();
     }
 
     function addComment(index, inputId) {
@@ -511,85 +553,88 @@
       const text = input.value.trim();
       if (text) {
         stages[index].comments.push(text);
-        renderTimeline();
+        render();
       }
     }
 
-    function deleteComment(stageIndex, commentIndex) {
-      stages[stageIndex].comments.splice(commentIndex, 1);
-      renderTimeline();
+    function removeComment(stageIdx, commentIdx) {
+      stages[stageIdx].comments.splice(commentIdx, 1);
+      render();
     }
 
-    function updateStageData(index, field, value) {
-      stages[index][field] = value;
-    }
-
-    function renderTimeline() {
-      const wrapper = document.getElementById('timelineWrapper');
-      wrapper.innerHTML = '<div class="timeline-axis"></div>';
+    function render() {
+      const container = document.getElementById('timeline');
+      container.innerHTML = '<div class="main-line"></div>';
 
       stages.forEach((stage, idx) => {
-        const item = document.createElement('div');
+        const node = document.createElement('div');
         
+        // Asignar clases de posición alternada
         if (isHorizontal) {
-          item.className = `timeline-item ${idx % 2 === 0 ? 'top' : 'bottom'}`;
+          node.className = `timeline-node ${idx % 2 === 0 ? 'top' : 'bottom'}`;
         } else {
-          item.className = `timeline-item ${idx % 2 === 0 ? 'left' : 'right'}`;
+          node.className = `timeline-node ${idx % 2 === 0 ? 'left' : 'right'}`;
         }
 
-        const inputCommentId = `comment-input-${idx}`;
+        const inputCommentId = `input-c-${idx}`;
 
+        // Renderizar lista de comentarios directo en el cuadro
         const commentsHtml = stage.comments.map((c, cIdx) => `
-          <div class="comment-item">
-            ${c}
-            <button class="btn-del-comment" onclick="deleteComment(${idx}, ${cIdx})">✕</button>
+          <div class="comment-bubble">
+            <span>${c}</span>
+            <button class="btn-del-comment" onclick="removeComment(${idx}, ${cIdx})">✕</button>
           </div>
         `).join('');
 
-        const cardHtml = `
-          <div class="card-stage">
-            <div class="year-input-wrapper">
-              <span>📅 Año:</span>
-              <input type="number" class="year-input" value="${stage.year}" onchange="updateStageData(${idx}, 'year', this.value)" />
+        node.innerHTML = `
+          <div class="dot-marker"></div>
+          <div class="connector-dashed"></div>
+          <div class="stage-card">
+            <!-- CAMPO DE AÑO -->
+            <div class="year-box">
+              <label>Año:</label>
+              <input type="number" class="year-input" value="${stage.year}" onchange="updateField(${idx}, 'year', this.value)" />
             </div>
 
-            <input type="text" class="stage-title" value="${stage.title}" oninput="updateStageData(${idx}, 'title', this.value)" placeholder="Título de etapa" />
-            <textarea class="stage-desc" oninput="updateStageData(${idx}, 'description', this.value)" placeholder="¿Qué pasó en esta etapa?">${stage.description}</textarea>
+            <!-- TITULO Y DESCRIPCION EDITABLES -->
+            <input type="text" class="title-input" value="${stage.title}" oninput="updateField(${idx}, 'title', this.value)" placeholder="Título" />
+            <textarea class="desc-input" oninput="updateField(${idx}, 'description', this.value)" placeholder="Descripción...">${stage.description}</textarea>
 
+            <!-- IMAGEN OPCIONAL -->
             ${stage.imageUrl ? `
-              <div class="image-container">
-                <img src="${stage.imageUrl}" alt="Imagen de la etapa" />
-                <button class="btn-remove-img" onclick="removeImage(${idx})">✕</button>
+              <div class="image-preview-container">
+                <img src="${stage.imageUrl}" alt="Imagen de etapa" />
+                <button class="btn-delete-img" onclick="removeImage(${idx})">✕</button>
               </div>
             ` : ''}
 
-            <!-- COMENTARIOS VISIBLES DENTRO DE LA TARJETA -->
-            <div class="comments-box">
+            <!-- SECCIÓN DE COMENTARIOS (ABIERTA Y VISIBLE) -->
+            <div class="comments-section">
               <div class="comments-header">💬 Comentarios (${stage.comments.length})</div>
               ${commentsHtml}
-              <div class="add-comment-form">
-                <input type="text" id="${inputCommentId}" class="input-comment" placeholder="Agregar comentario..." onkeypress="if(event.key==='Enter') addComment(${idx}, '${inputCommentId}')" />
+              <div class="comment-form">
+                <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Escribir comentario..." onkeypress="if(event.key==='Enter') addComment(${idx}, '${inputCommentId}')" />
                 <button class="btn-add-comment" onclick="addComment(${idx}, '${inputCommentId}')">+</button>
               </div>
             </div>
 
-            <!-- ACCIONES -->
-            <div class="card-actions">
-              <label class="file-input-label">
+            <!-- OPCIONES / ACCIONES -->
+            <div class="card-footer">
+              <label class="upload-btn-label">
                 🖼️ ${stage.imageUrl ? 'Cambiar imagen' : 'Agregar imagen'}
-                <input type="file" accept="image/*" onchange="handleImageUpload(event, ${idx})">
+                <input type="file" accept="image/*" onchange="handleImage(event, ${idx})">
               </label>
-              <button class="btn-delete-card" onclick="deleteStage(${idx})">Eliminar</button>
+              <button class="btn-delete-node" onclick="removeStage(${idx})">Eliminar</button>
             </div>
           </div>
         `;
 
-        item.innerHTML = cardHtml;
-        wrapper.appendChild(item);
+        container.appendChild(node);
       });
     }
 
-    renderTimeline();
+    // Inicializar
+    render();
   </script>
 </body>
 </html>
