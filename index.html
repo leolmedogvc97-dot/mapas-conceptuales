@@ -8,1201 +8,588 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     :root {
-      --bg-color: #f8fafc;
-      --grid-color: #cbd5e1;
-      --toolbar-bg: #ffffff;
-      --text-main: #1e293b;
-      --primary: #3b82f6;
-      --primary-hover: #2563eb;
-      --danger: #ef4444;
-      --timeline-line: #64748b;
+      --bg-color: #f4f6f9;
+      --panel-bg: #ffffff;
+      --border-color: #e0e6ed;
+      --text-color: #2c3e50;
+      --primary-color: #3b82f6;
+      --accent-color: #10b981;
+      --timeline-line: #475569;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
 
     body {
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
       background-color: var(--bg-color);
+      color: var(--text-color);
       display: flex;
       flex-direction: column;
-    }
-
-    /* BARRA DE HERRAMIENTAS */
-    .toolbar {
-      height: 56px;
-      background-color: var(--toolbar-bg);
-      border-bottom: 1px solid var(--grid-color);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 0.8rem;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-      z-index: 10;
-      flex-shrink: 0;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-    }
-
-    .brand h1 {
-      font-size: 1rem;
-      color: var(--text-main);
-      white-space: nowrap;
-    }
-
-    .mode-switch {
-      display: flex;
-      background: #e2e8f0;
-      padding: 3px;
-      border-radius: 6px;
-      gap: 3px;
-    }
-
-    .mode-btn {
-      border: none;
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      background: transparent;
-      color: #64748b;
-      transition: all 0.2s;
-    }
-
-    .mode-btn.active {
-      background: white;
-      color: var(--primary);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    }
-
-    .actions {
-      display: flex;
-      align-items: center;
-      gap: 0.3rem;
-      flex-wrap: nowrap;
-    }
-
-    .separator {
-      width: 1px;
-      height: 20px;
-      background-color: var(--grid-color);
-      margin: 0 0.2rem;
-    }
-
-    .btn {
-      padding: 0.35rem 0.6rem;
-      border-radius: 6px;
-      border: 1px solid #cbd5e1;
-      font-weight: 600;
-      font-size: 0.78rem;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-      white-space: nowrap;
-      background: white;
-      color: var(--text-main);
-    }
-
-    .btn:hover { background: #f1f5f9; }
-    .btn.primary { background: var(--primary); color: white; border-color: transparent; }
-    .btn.primary:hover { background: var(--primary-hover); }
-    .btn.secondary { background: #64748b; color: white; border-color: transparent; }
-    .btn.danger { background: #fee2e2; color: var(--danger); border-color: transparent; }
-
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
-
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      top: 100%;
-      background-color: #ffffff;
-      min-width: 170px;
-      box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.15);
-      border: 1px solid var(--grid-color);
-      border-radius: 6px;
-      z-index: 100;
+      height: 100vh;
       overflow: hidden;
     }
 
-    .dropdown-content button {
-      color: var(--text-main);
-      padding: 10px 14px;
+    /* BARRA SUPERIOR */
+    .header-toolbar {
+      background: #1e293b;
+      color: #fff;
+      padding: 10px 20px;
       display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      width: 100%;
-      border: none;
-      background: none;
-      font-size: 0.82rem;
-      font-weight: 500;
-      text-align: left;
-      cursor: pointer;
-    }
-
-    .dropdown-content button:hover { background-color: #f1f5f9; }
-    .dropdown:hover .dropdown-content { display: block; }
-
-    .color-picker-label {
-      display: flex;
-      align-items: center;
-      gap: 0.2rem;
-      font-size: 0.8rem;
-      color: var(--text-main);
-      cursor: pointer;
-    }
-
-    #node-color {
-      border: none;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      cursor: pointer;
-      background: none;
-    }
-
-    /* LIENZO */
-    .canvas-container {
-      flex: 1;
-      position: relative;
-      background-image: radial-gradient(var(--grid-color) 1.5px, transparent 1.5px);
-      background-size: 24px 24px;
-      overflow: auto;
-      width: 100%;
-      height: calc(100vh - 56px);
-    }
-
-    .export-area {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 5000px;
-      height: 4000px;
-    }
-
-    .svg-layer, .nodes-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 5000px;
-      height: 4000px;
-    }
-
-    .svg-layer { pointer-events: none; }
-
-    /* ESTILOS MAPA CONCEPTUAL */
-    .node {
-      position: absolute;
-      padding: 12px 16px;
-      border-radius: 8px;
-      color: white;
-      font-weight: 600;
-      font-size: 0.88rem;
-      line-height: 1.35;
-      cursor: move;
-      user-select: none;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-      transition: transform 0.1s, box-shadow 0.2s;
-      min-width: 140px;
-      max-width: 250px;
-      text-align: center;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-
-    .node:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    }
-
-    .node.selected {
-      outline: 3px solid #f59e0b;
-      outline-offset: 2px;
-    }
-
-    /* ESTILOS LÍNEA DE TIEMPO */
-    .timeline-node {
-      position: absolute;
-      width: 260px;
-      background: #ffffff;
-      border: 2px solid var(--primary);
-      border-radius: 8px;
-      padding: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-
-    .timeline-node .tl-date {
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .timeline-node .tl-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-main);
-      outline: none;
-    }
-
-    .timeline-node .tl-desc {
-      font-size: 0.82rem;
-      color: #475569;
-      line-height: 1.3;
-      outline: none;
-    }
-
-    .timeline-node .tl-comment-btn {
-      margin-top: 6px;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      color: #334155;
-      padding: 4px 8px;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
       justify-content: space-between;
-    }
-
-    .timeline-node .tl-comment-btn:hover {
-      background: #e2e8f0;
-      color: var(--primary);
-    }
-
-    /* PANEL LATERAL DE COMENTARIOS */
-    .comments-drawer {
-      position: fixed;
-      top: 0;
-      right: -380px;
-      width: 360px;
-      height: 100vh;
-      background: #ffffff;
-      box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-      z-index: 1000;
-      transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      flex-direction: column;
-    }
-
-    .comments-drawer.open {
-      right: 0;
-    }
-
-    .drawer-header {
-      padding: 16px;
-      border-bottom: 1px solid var(--grid-color);
-      display: flex;
       align-items: center;
-      justify-content: space-between;
-      background: #f8fafc;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      z-index: 10;
     }
 
-    .drawer-header h3 {
-      font-size: 1rem;
-      color: var(--text-main);
-    }
-
-    .drawer-close {
-      background: none;
-      border: none;
+    .header-toolbar h1 {
       font-size: 1.2rem;
-      cursor: pointer;
-      color: #64748b;
-    }
-
-    .drawer-body {
-      flex: 1;
-      padding: 16px;
-      overflow-y: auto;
+      font-weight: 600;
       display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .comment-card {
-      background: #f1f5f9;
-      border-radius: 6px;
-      padding: 10px 12px;
-      font-size: 0.82rem;
-    }
-
-    .comment-card .author {
-      font-weight: 700;
-      color: var(--primary);
-      margin-bottom: 2px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .comment-card .timestamp {
-      font-size: 0.7rem;
-      color: #94a3b8;
-      font-weight: normal;
-    }
-
-    .comment-card .text {
-      color: var(--text-main);
-      line-height: 1.35;
-    }
-
-    .drawer-footer {
-      padding: 14px;
-      border-top: 1px solid var(--grid-color);
-      display: flex;
-      flex-direction: column;
+      align-items: center;
       gap: 8px;
     }
 
-    .drawer-footer input, .drawer-footer textarea {
-      width: 100%;
-      padding: 8px;
-      border: 1px solid #cbd5e1;
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .btn {
+      background: #334155;
+      color: #fff;
+      border: none;
+      padding: 8px 14px;
       border-radius: 6px;
-      font-size: 0.82rem;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.88rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn:hover {
+      background: #475569;
+    }
+
+    .btn-primary {
+      background: var(--primary-color);
+    }
+    .btn-primary:hover {
+      background: #2563eb;
+    }
+
+    .btn-toggle {
+      background: #0ea5e9;
+    }
+    .btn-toggle:hover {
+      background: #0284c7;
+    }
+
+    /* ÁREA DE TRABAJO (CANVAS) */
+    .canvas-area {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+      padding: 60px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* LINEA DE TIEMPO */
+    .timeline-wrapper {
+      position: relative;
+      transition: all 0.3s ease;
+      display: flex;
+    }
+
+    /* Orientación Horizontal */
+    .timeline-wrapper.horizontal {
+      flex-direction: row;
+      align-items: center;
+      min-width: max-content;
+      padding: 100px 50px;
+    }
+
+    .timeline-wrapper.horizontal .timeline-axis {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 6px;
+      background: var(--timeline-line);
+      border-radius: 3px;
+      z-index: 1;
+    }
+
+    /* Orientación Vertical */
+    .timeline-wrapper.vertical {
+      flex-direction: column;
+      align-items: center;
+      min-height: max-content;
+      padding: 50px 100px;
+    }
+
+    .timeline-wrapper.vertical .timeline-axis {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 6px;
+      background: var(--timeline-line);
+      border-radius: 3px;
+      z-index: 1;
+    }
+
+    /* HITOS / ETAPAS DE LA LÍNEA DE TIEMPO */
+    .timeline-item {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Layout Horizontal alternado */
+    .timeline-wrapper.horizontal .timeline-item {
+      flex-direction: column;
+      margin: 0 40px;
+      width: 280px;
+    }
+
+    .timeline-wrapper.horizontal .timeline-item.top {
+      justify-content: flex-end;
+      margin-bottom: 20px;
+    }
+
+    .timeline-wrapper.horizontal .timeline-item.bottom {
+      justify-content: flex-start;
+      margin-top: 20px;
+    }
+
+    /* Layout Vertical alternado */
+    .timeline-wrapper.vertical .timeline-item {
+      flex-direction: row;
+      margin: 30px 0;
+      width: 600px;
+    }
+
+    .timeline-wrapper.vertical .timeline-item.left {
+      justify-content: flex-end;
+      padding-right: 40px;
+    }
+
+    .timeline-wrapper.vertical .timeline-item.right {
+      justify-content: flex-start;
+      padding-left: 40px;
+    }
+
+    /* TARJETA DE ETAPA / EVENTO */
+    .card-stage {
+      background: #ffffff;
+      border: 2px solid #3b82f6;
+      border-radius: 14px;
+      width: 100%;
+      max-width: 300px;
+      padding: 16px;
+      box-shadow: 0 10px 25px -5px rgba(0,0,0,0.08);
+      position: relative;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .card-stage:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 30px -5px rgba(0,0,0,0.12);
+    }
+
+    /* ENCABEZADO CON AÑO */
+    .year-input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+      width: max-content;
+    }
+
+    .year-input-wrapper span {
+      font-size: 0.85rem;
+      margin-right: 6px;
+      color: #64748b;
+    }
+
+    .year-input {
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      color: #1e293b;
+      font-size: 1rem;
+      width: 70px;
       outline: none;
     }
 
-    .drawer-footer textarea {
+    .stage-title {
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: #0f172a;
+      border: none;
+      outline: none;
+      width: 100%;
+      margin-bottom: 8px;
+    }
+
+    .stage-desc {
+      font-size: 0.9rem;
+      color: #475569;
+      border: none;
+      outline: none;
+      width: 100%;
       resize: none;
-      height: 60px;
+      min-height: 48px;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    /* IMAGEN DE LA ETAPA (OPCIONAL) */
+    .image-container {
+      position: relative;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      overflow: hidden;
+      max-height: 160px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #f1f5f9;
+    }
+
+    .image-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .btn-remove-img {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0,0,0,0.6);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* SECCIÓN DE COMENTARIOS (DIRECTAMENTE EN EL CUADRO) */
+    .comments-box {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .comments-header {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .comment-item {
+      background: white;
+      border: 1px solid #e2e8f0;
+      padding: 6px 8px;
+      border-radius: 6px;
+      font-size: 0.83rem;
+      color: #334155;
+      margin-bottom: 6px;
+      position: relative;
+      word-break: break-word;
+    }
+
+    .comment-item .btn-del-comment {
+      float: right;
+      border: none;
+      background: transparent;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 0.75rem;
+      margin-left: 4px;
+    }
+
+    .add-comment-form {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .input-comment {
+      flex: 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .btn-add-comment {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    /* ACCIONES DE LA TARJETA */
+    .card-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .file-input-label {
+      font-size: 0.8rem;
+      color: #3b82f6;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: 600;
+    }
+
+    .file-input-label input {
+      display: none;
+    }
+
+    .btn-delete-card {
+      background: transparent;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
     }
   </style>
 </head>
 <body>
 
   <!-- BARRA DE HERRAMIENTAS -->
-  <div class="toolbar">
-    <div class="brand">
-      <span style="font-size:1.2rem;">🧠</span>
-      <h1>MindStudio</h1>
-    </div>
-
-    <!-- SELECTOR DE MÓDULO -->
-    <div class="mode-switch">
-      <button class="mode-btn active" id="btn-mode-map">Mapa Conceptual</button>
-      <button class="mode-btn" id="btn-mode-timeline">Línea de Tiempo</button>
-    </div>
-
-    <div class="actions">
-      <!-- CONTROLES MAPA CONCEPTUAL -->
-      <div id="controls-map" style="display: flex; gap: 0.3rem;">
-        <button type="button" id="btn-add-child" class="btn primary">+ Hijo</button>
-        <button type="button" id="btn-add-sibling" class="btn secondary">+ Hermano</button>
-        <button type="button" id="btn-delete" class="btn danger">🗑️ Eliminar</button>
-        <div class="separator"></div>
-        <label class="color-picker-label">
-          🎨
-          <input type="color" id="node-color" value="#3b82f6">
-        </label>
-      </div>
-
-      <!-- CONTROLES LÍNEA DE TIEMPO -->
-      <div id="controls-timeline" style="display: none; gap: 0.3rem;">
-        <button type="button" id="btn-add-event" class="btn primary">+ Nuevo Evento</button>
-      </div>
-      
-      <div class="separator"></div>
-
-      <button type="button" id="btn-import-text" class="btn" style="background-color: #fef08a; border-color: #eab308;">
-        📥 JSON
+  <div class="header-toolbar">
+    <h1>📅 Línea de Tiempo interactiva</h1>
+    <div class="btn-group">
+      <button class="btn btn-toggle" onclick="toggleOrientation()">
+        🔄 Orientación: <span id="orientationLabel">Horizontal</span>
       </button>
-
-      <button type="button" id="btn-import-json" class="btn">📁 Cargar</button>
-      
-      <div class="separator"></div>
-
-      <div class="dropdown">
-        <button class="btn primary" style="background-color: #059669;">📤 Exportar ▼</button>
-        <div class="dropdown-content">
-          <button type="button" id="btn-export-word">📝 Word (.doc)</button>
-          <button type="button" id="btn-export-pdf">📄 PDF (.pdf)</button>
-          <button type="button" id="btn-export-image">🖼️ JPG / PNG</button>
-          <button type="button" id="btn-export-json">💾 JSON (.json)</button>
-        </div>
-      </div>
+      <button class="btn btn-primary" onclick="addStage()">
+        ➕ Agregar Etapa
+      </button>
     </div>
   </div>
 
-  <!-- LIENZO -->
-  <div class="canvas-container" id="canvas-container">
-    <div class="export-area" id="export-area">
-      <svg class="svg-layer" id="svg-canvas"></svg>
-      <div class="nodes-layer" id="nodes-container"></div>
-    </div>
-  </div>
-
-  <!-- PANEL LATERAL DE COMENTARIOS PARA LÍNEA DE TIEMPO -->
-  <div class="comments-drawer" id="comments-drawer">
-    <div class="drawer-header">
-      <h3 id="drawer-event-title">Comentarios del Evento</h3>
-      <button class="drawer-close" id="btn-close-drawer">✕</button>
-    </div>
-    <div class="drawer-body" id="drawer-comments-list"></div>
-    <div class="drawer-footer">
-      <input type="text" id="comment-user" placeholder="Tu nombre..." value="Usuario" />
-      <textarea id="comment-text" placeholder="Escribe un comentario o nota sobre este evento..."></textarea>
-      <button class="btn primary" id="btn-submit-comment" style="justify-content: center;">Publicar Comentario</button>
+  <!-- CANVAS PRINCIPAL -->
+  <div class="canvas-area">
+    <div id="timelineWrapper" class="timeline-wrapper horizontal">
+      <div class="timeline-axis"></div>
     </div>
   </div>
 
   <script>
-    // ESTADO GENERAL
-    let currentMode = "map"; // "map" | "timeline"
+    let isHorizontal = true;
 
-    // DATOS MAPA CONCEPTUAL
-    let mindMapData = {
-      id: "root",
-      text: "Idea Principal",
-      x: 2000,
-      y: 100,
-      color: "#1e3a8a",
-      children: []
-    };
-
-    // DATOS LÍNEA DE TIEMPO (REQUERIMIENTO 1: MODELO DE DATOS)
-    let timelineEvents = [
+    // Datos por defecto
+    let stages = [
       {
-        id: "ev_1",
-        date: "2026-01-15",
-        title: "Fase Inicial",
-        description: "Definición de requerimientos del proyecto.",
-        comments: [
-          { id: "c1", user: "Coordinador", text: "Requerimientos aprobados por el cliente.", timestamp: "15/01/2026 10:30" }
-        ]
+        id: 'stage-1',
+        year: '1995',
+        title: 'Inicio del Proyecto',
+        description: 'Fundación y definición de los primeros objetivos institucionales.',
+        imageUrl: '',
+        comments: ['Se inició con un presupuesto reducido.', 'Revisión aprobada por la mesa directiva.']
       },
       {
-        id: "ev_2",
-        date: "2026-04-10",
-        title: "Desarrollo del Prototipo",
-        description: "Construcción de módulos y arquitectura base.",
-        comments: []
+        id: 'stage-2',
+        year: '2006',
+        title: 'Lanzamiento Oficial',
+        description: 'Apertura al público general y expansión de servicios.',
+        imageUrl: '',
+        comments: ['Llegamos a los primeros 10,000 usuarios activos.']
       },
       {
-        id: "ev_3",
-        date: "2026-08-20",
-        title: "Despliegue y Pruebas",
-        description: "Pruebas integrales y puesta en marcha.",
-        comments: []
+        id: 'stage-3',
+        year: '2018',
+        title: 'Modernización',
+        description: 'Actualización tecnológica completa e integración de nuevas herramientas.',
+        imageUrl: '',
+        comments: ['Se rediseñó por completo la arquitectura del sistema.']
       }
     ];
 
-    let selectedNodeId = "root";
-    let activeTimelineEventId = null;
-    let draggingNodeId = null;
-    let dragOffset = { x: 0, y: 0 };
-
-    let svgCanvas, nodesContainer, colorPicker;
-
-    document.addEventListener("DOMContentLoaded", () => {
-      svgCanvas = document.getElementById("svg-canvas");
-      nodesContainer = document.getElementById("nodes-container");
-      colorPicker = document.getElementById("node-color");
-
-      autoLayout(mindMapData);
-      render();
-      setupEventListeners();
+    function toggleOrientation() {
+      isHorizontal = !isHorizontal;
+      const wrapper = document.getElementById('timelineWrapper');
+      const label = document.getElementById('orientationLabel');
       
-      const canvasContainer = document.getElementById("canvas-container");
-      if (canvasContainer) {
-        canvasContainer.scrollLeft = 1400;
-        canvasContainer.scrollTop = 0;
-      }
-    });
-
-    // MÁQUINA DE RENDERIZADO PRINCIPAL
-    function render() {
-      if (!nodesContainer || !svgCanvas) return;
-      nodesContainer.innerHTML = "";
-      svgCanvas.innerHTML = "";
-
-      if (currentMode === "map") {
-        renderNodeRecursive(mindMapData);
+      if (isHorizontal) {
+        wrapper.className = 'timeline-wrapper horizontal';
+        label.textContent = 'Horizontal';
       } else {
+        wrapper.className = 'timeline-wrapper vertical';
+        label.textContent = 'Vertical';
+      }
+      renderTimeline();
+    }
+
+    function addStage() {
+      const newId = 'stage-' + Date.now();
+      const lastYear = stages.length > 0 ? parseInt(stages[stages.length - 1].year) || 2020 : 2020;
+      
+      stages.push({
+        id: newId,
+        year: (lastYear + 5).toString(),
+        title: 'Nueva Etapa',
+        description: 'Descripción breve de los acontecimientos de este periodo.',
+        imageUrl: '',
+        comments: []
+      });
+
+      renderTimeline();
+    }
+
+    function deleteStage(index) {
+      stages.splice(index, 1);
+      renderTimeline();
+    }
+
+    function handleImageUpload(event, index) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          stages[index].imageUrl = e.target.result;
+          renderTimeline();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function removeImage(index) {
+      stages[index].imageUrl = '';
+      renderTimeline();
+    }
+
+    function addComment(index, inputId) {
+      const input = document.getElementById(inputId);
+      const text = input.value.trim();
+      if (text) {
+        stages[index].comments.push(text);
         renderTimeline();
       }
     }
 
-    /* -------------------------------------------------------------
-       LÓGICA DEL MAPA CONCEPTUAL
-    ------------------------------------------------------------- */
-    function getLeafCount(node) {
-      if (!node.children || node.children.length === 0) return 1;
-      return node.children.reduce((acc, child) => acc + getLeafCount(child), 0);
+    function deleteComment(stageIndex, commentIndex) {
+      stages[stageIndex].comments.splice(commentIndex, 1);
+      renderTimeline();
     }
 
-    function autoLayout(node, startX = 2000, startY = 100, level = 0) {
-      const NODE_WIDTH = 270;
-      const NODE_HEIGHT = 180;
-      const colors = ["#1e3a8a", "#2563eb", "#059669", "#7c3aed", "#d97706", "#b45309"];
-      if (!node.color) node.color = colors[level % colors.length];
-
-      node.y = startY;
-
-      if (node.children && node.children.length > 0) {
-        const totalLeaves = getLeafCount(node);
-        const totalSubtreeWidth = totalLeaves * NODE_WIDTH;
-        let currentX = startX - totalSubtreeWidth / 2;
-
-        node.children.forEach((child) => {
-          const childLeaves = getLeafCount(child);
-          const childSubtreeWidth = childLeaves * NODE_WIDTH;
-          const childCenterX = currentX + childSubtreeWidth / 2;
-          autoLayout(child, childCenterX, startY + NODE_HEIGHT, level + 1);
-          currentX += childSubtreeWidth;
-        });
-
-        node.x = startX;
-      } else {
-        node.x = startX;
-      }
-    }
-
-    function renderNodeRecursive(node, parentNode = null) {
-      const nodeEl = document.createElement("div");
-      nodeEl.className = `node ${node.id === selectedNodeId ? "selected" : ""}`;
-      nodeEl.style.left = `${node.x}px`;
-      nodeEl.style.top = `${node.y}px`;
-      nodeEl.style.backgroundColor = node.color || "#3b82f6";
-      nodeEl.dataset.id = node.id;
-
-      const textEl = document.createElement("span");
-      textEl.innerText = node.text;
-      textEl.contentEditable = false;
-      nodeEl.appendChild(textEl);
-
-      nodesContainer.appendChild(nodeEl);
-
-      nodeEl.addEventListener("mousedown", (e) => startDrag(e, node));
-      nodeEl.addEventListener("dblclick", () => enableInlineEdit(textEl, node));
-
-      if (parentNode) {
-        requestAnimationFrame(() => {
-          const parentEl = document.querySelector(`[data-id="${parentNode.id}"]`);
-          if (parentEl && nodeEl) {
-            const pRect = parentEl.getBoundingClientRect();
-            const cRect = nodeEl.getBoundingClientRect();
-            const containerRect = nodesContainer.getBoundingClientRect();
-
-            const pX = pRect.left + pRect.width / 2 - containerRect.left;
-            const pY = pRect.top + pRect.height - containerRect.top;
-            const cX = cRect.left + cRect.width / 2 - containerRect.left;
-            const cY = cRect.top - containerRect.top;
-
-            drawConnector(pX, pY, cX, cY, node.color);
-          }
-        });
-      }
-
-      if (node.children && node.children.length > 0) {
-        node.children.forEach(child => renderNodeRecursive(child, node));
-      }
-    }
-
-    function drawConnector(pX, pY, cX, cY, color) {
-      const controlY = (pY + cY) / 2;
-      const pathData = `M ${pX} ${pY} C ${pX} ${controlY}, ${cX} ${controlY}, ${cX} ${cY}`;
-      const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-      path.setAttribute("d", pathData);
-      path.setAttribute("stroke", color || "#cbd5e1");
-      path.setAttribute("stroke-width", "3");
-      path.setAttribute("fill", "none");
-      svgCanvas.appendChild(path);
-    }
-
-    /* -------------------------------------------------------------
-       LÓGICA DE LA LÍNEA DE TIEMPO (REQUERIMIENTO 2 & 3)
-    ------------------------------------------------------------- */
-    function sortTimelineEvents() {
-      timelineEvents.sort((a, b) => new Date(a.date) - new Date(b.date));
+    function updateStageData(index, field, value) {
+      stages[index][field] = value;
     }
 
     function renderTimeline() {
-      sortTimelineEvents();
+      const wrapper = document.getElementById('timelineWrapper');
+      wrapper.innerHTML = '<div class="timeline-axis"></div>';
 
-      const startX = 1500;
-      const startY = 600; // Eje central horizontal
-      const stepX = 320;
-
-      const lineLength = Math.max(timelineEvents.length * stepX + 300, 1200);
-
-      // Dibujar Eje Horizontal Central
-      const mainLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-      mainLine.setAttribute("x1", startX - 100);
-      mainLine.setAttribute("y1", startY);
-      mainLine.setAttribute("x2", startX + lineLength);
-      mainLine.setAttribute("y2", startY);
-      mainLine.setAttribute("stroke", "#64748b");
-      mainLine.setAttribute("stroke-width", "6");
-      mainLine.setAttribute("stroke-linecap", "round");
-      svgCanvas.appendChild(mainLine);
-
-      timelineEvents.forEach((ev, idx) => {
-        const evX = startX + idx * stepX;
-        const isTop = idx % 2 === 0; // Distribución bidireccional (arriba / abajo)
-        const evY = isTop ? startY - 210 : startY + 50;
-
-        // Dibujar Conector Vertical al Eje
-        const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        line.setAttribute("x1", evX + 130);
-        line.setAttribute("y1", startY);
-        line.setAttribute("x2", evX + 130);
-        line.setAttribute("y2", isTop ? evY + 140 : evY);
-        line.setAttribute("stroke", "#3b82f6");
-        line.setAttribute("stroke-width", "3");
-        line.setAttribute("stroke-dasharray", "4");
-        svgCanvas.appendChild(line);
-
-        // Nodo Punto Eje Central
-        const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-        circle.setAttribute("cx", evX + 130);
-        circle.setAttribute("cy", startY);
-        circle.setAttribute("r", "9");
-        circle.setAttribute("fill", "#3b82f6");
-        circle.setAttribute("stroke", "#ffffff");
-        circle.setAttribute("stroke-width", "3");
-        svgCanvas.appendChild(circle);
-
-        // Tarjeta Visual del Evento
-        const card = document.createElement("div");
-        card.className = "timeline-node";
-        card.style.left = `${evX}px`;
-        card.style.top = `${evY}px`;
-
-        card.innerHTML = `
-          <input type="date" class="tl-date" value="${ev.date}" onchange="updateEventField('${ev.id}', 'date', this.value)"/>
-          <div class="tl-title" contenteditable="true" onblur="updateEventField('${ev.id}', 'title', this.innerText)">${ev.title}</div>
-          <div class="tl-desc" contenteditable="true" onblur="updateEventField('${ev.id}', 'description', this.innerText)">${ev.description}</div>
-          <button class="tl-comment-btn" onclick="openCommentsDrawer('${ev.id}')">
-            💬 Comentarios <span>(${ev.comments ? ev.comments.length : 0})</span>
-          </button>
-        `;
-
-        nodesContainer.appendChild(card);
-      });
-    }
-
-    function updateEventField(eventId, field, value) {
-      const ev = timelineEvents.find(e => e.id === eventId);
-      if (ev) {
-        ev[field] = value;
-        if (field === 'date') render(); // Reordenar al cambiar fecha
-      }
-    }
-
-    // ADJUNTAR COMENTARIOS A UN EVENTO ESPECÍFICO (REQUERIMIENTO 3)
-    function addComment(eventId, commentText, userName = "Usuario") {
-      if (!commentText.trim()) return;
-      const ev = timelineEvents.find(e => e.id === eventId);
-      if (ev) {
-        if (!ev.comments) ev.comments = [];
-        const now = new Date();
-        const timestamp = `${now.toLocaleDateString()} ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+      stages.forEach((stage, idx) => {
+        const item = document.createElement('div');
         
-        ev.comments.push({
-          id: "c_" + Date.now(),
-          user: userName.trim() || "Anónimo",
-          text: commentText.trim(),
-          timestamp: timestamp
-        });
+        if (isHorizontal) {
+          item.className = `timeline-item ${idx % 2 === 0 ? 'top' : 'bottom'}`;
+        } else {
+          item.className = `timeline-item ${idx % 2 === 0 ? 'left' : 'right'}`;
+        }
 
-        renderCommentsList(ev);
-        render(); // Actualizar contador en la tarjeta
-      }
-    }
+        const inputCommentId = `comment-input-${idx}`;
 
-    /* -------------------------------------------------------------
-       GESTIÓN DEL PANEL DE COMENTARIOS
-    ------------------------------------------------------------- */
-    function openCommentsDrawer(eventId) {
-      activeTimelineEventId = eventId;
-      const ev = timelineEvents.find(e => e.id === eventId);
-      if (!ev) return;
-
-      document.getElementById("drawer-event-title").innerText = `💬 ${ev.title}`;
-      renderCommentsList(ev);
-      document.getElementById("comments-drawer").classList.add("open");
-    }
-
-    function closeCommentsDrawer() {
-      document.getElementById("comments-drawer").classList.remove("open");
-      activeTimelineEventId = null;
-    }
-
-    function renderCommentsList(event) {
-      const container = document.getElementById("drawer-comments-list");
-      container.innerHTML = "";
-
-      if (!event.comments || event.comments.length === 0) {
-        container.innerHTML = `<p style="font-size: 0.8rem; color: #94a3b8; text-align: center; margin-top: 20px;">No hay comentarios en este evento aún.</p>`;
-        return;
-      }
-
-      event.comments.forEach(c => {
-        const card = document.createElement("div");
-        card.className = "comment-card";
-        card.innerHTML = `
-          <div class="author">
-            <span>${c.user}</span>
-            <span class="timestamp">${c.timestamp}</span>
+        const commentsHtml = stage.comments.map((c, cIdx) => `
+          <div class="comment-item">
+            ${c}
+            <button class="btn-del-comment" onclick="deleteComment(${idx}, ${cIdx})">✕</button>
           </div>
-          <div class="text">${c.text}</div>
-        `;
-        container.appendChild(card);
-      });
+        `).join('');
 
-      container.scrollTop = container.scrollHeight;
-    }
+        const cardHtml = `
+          <div class="card-stage">
+            <div class="year-input-wrapper">
+              <span>📅 Año:</span>
+              <input type="number" class="year-input" value="${stage.year}" onchange="updateStageData(${idx}, 'year', this.value)" />
+            </div>
 
-    /* -------------------------------------------------------------
-       AUXILIARES Y NAVEGACIÓN DE ESTADO
-    ------------------------------------------------------------- */
-    function findNodeAndParent(id, current = mindMapData, parent = null) {
-      if (current.id === id) return { node: current, parent };
-      if (current.children) {
-        for (let child of current.children) {
-          const res = findNodeAndParent(id, child, current);
-          if (res) return res;
-        }
-      }
-      return null;
-    }
+            <input type="text" class="stage-title" value="${stage.title}" oninput="updateStageData(${idx}, 'title', this.value)" placeholder="Título de etapa" />
+            <textarea class="stage-desc" oninput="updateStageData(${idx}, 'description', this.value)" placeholder="¿Qué pasó en esta etapa?">${stage.description}</textarea>
 
-    function enableInlineEdit(textEl, node) {
-      textEl.contentEditable = true;
-      textEl.focus();
-      const range = document.createRange();
-      range.selectNodeContents(textEl);
-      const sel = window.getSelection();
-      sel.removeAllRanges();
-      sel.addRange(range);
+            ${stage.imageUrl ? `
+              <div class="image-container">
+                <img src="${stage.imageUrl}" alt="Imagen de la etapa" />
+                <button class="btn-remove-img" onclick="removeImage(${idx})">✕</button>
+              </div>
+            ` : ''}
 
-      const saveText = () => {
-        textEl.contentEditable = false;
-        node.text = textEl.innerText.trim() || "Sin título";
-        render();
-      };
+            <!-- COMENTARIOS VISIBLES DENTRO DE LA TARJETA -->
+            <div class="comments-box">
+              <div class="comments-header">💬 Comentarios (${stage.comments.length})</div>
+              ${commentsHtml}
+              <div class="add-comment-form">
+                <input type="text" id="${inputCommentId}" class="input-comment" placeholder="Agregar comentario..." onkeypress="if(event.key==='Enter') addComment(${idx}, '${inputCommentId}')" />
+                <button class="btn-add-comment" onclick="addComment(${idx}, '${inputCommentId}')">+</button>
+              </div>
+            </div>
 
-      textEl.addEventListener("blur", saveText, { once: true });
-    }
-
-    // RENDERIZADO EXPORTADOR MULTI-MÓDULO
-    async function renderUltraLightCanvas() {
-      const nodeElements = Array.from(document.querySelectorAll(".nodes-layer > div"));
-      if (nodeElements.length === 0) return null;
-
-      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-
-      nodeElements.forEach(el => {
-        const left = el.offsetLeft;
-        const top = el.offsetTop;
-        const width = el.offsetWidth;
-        const height = el.offsetHeight;
-
-        if (left < minX) minX = left;
-        if (top < minY) minY = top;
-        if (left + width > maxX) maxX = left + width;
-        if (top + height > maxY) maxY = top + height;
-      });
-
-      const padding = 50;
-      minX -= padding;
-      minY -= padding;
-      maxX += padding;
-      maxY += padding;
-
-      const exportWidth = maxX - minX;
-      const exportHeight = maxY - minY;
-
-      const tempWrapper = document.createElement("div");
-      tempWrapper.style.position = "absolute";
-      tempWrapper.style.left = "-9999px";
-      tempWrapper.style.top = "-9999px";
-      tempWrapper.style.width = `${exportWidth}px`;
-      tempWrapper.style.height = `${exportHeight}px`;
-      tempWrapper.style.backgroundColor = "#ffffff";
-      tempWrapper.style.overflow = "hidden";
-
-      const tempSvg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-      tempSvg.setAttribute("width", exportWidth);
-      tempSvg.setAttribute("height", exportHeight);
-      tempSvg.style.position = "absolute";
-      tempSvg.style.top = "0";
-      tempSvg.style.left = "0";
-
-      tempWrapper.appendChild(tempSvg);
-
-      nodeElements.forEach(el => {
-        const clone = el.cloneNode(true);
-        clone.classList.remove("selected");
-        const currentLeft = parseFloat(el.style.left);
-        const currentTop = parseFloat(el.style.top);
-        clone.style.left = `${currentLeft - minX}px`;
-        clone.style.top = `${currentTop - minY}px`;
-        tempWrapper.appendChild(clone);
-      });
-
-      document.body.appendChild(tempWrapper);
-
-      if (currentMode === "map") {
-        function drawTempConnectors(node, parentNode = null) {
-          if (parentNode) {
-            const pEl = tempWrapper.querySelector(`[data-id="${parentNode.id}"]`);
-            const cEl = tempWrapper.querySelector(`[data-id="${node.id}"]`);
-
-            if (pEl && cEl) {
-              const pX = pEl.offsetLeft + pEl.offsetWidth / 2;
-              const pY = pEl.offsetTop + pEl.offsetHeight;
-              const cX = cEl.offsetLeft + cEl.offsetWidth / 2;
-              const cY = cEl.offsetTop;
-              const controlY = (pY + cY) / 2;
-              const pathData = `M ${pX} ${pY} C ${pX} ${controlY}, ${cX} ${controlY}, ${cX} ${cY}`;
-              const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-              path.setAttribute("d", pathData);
-              path.setAttribute("stroke", node.color || "#cbd5e1");
-              path.setAttribute("stroke-width", "3");
-              path.setAttribute("fill", "none");
-              tempSvg.appendChild(path);
-            }
-          }
-          if (node.children) node.children.forEach(child => drawTempConnectors(child, node));
-        }
-        drawTempConnectors(mindMapData);
-      } else {
-        const startX = 1500 - minX;
-        const startY = 600 - minY;
-        const stepX = 320;
-        const lineLength = Math.max(timelineEvents.length * stepX + 300, 1200);
-
-        const mainLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
-        mainLine.setAttribute("x1", startX - 100);
-        mainLine.setAttribute("y1", startY);
-        mainLine.setAttribute("x2", startX + lineLength);
-        mainLine.setAttribute("y2", startY);
-        mainLine.setAttribute("stroke", "#64748b");
-        mainLine.setAttribute("stroke-width", "6");
-        tempSvg.appendChild(mainLine);
-
-        timelineEvents.forEach((ev, idx) => {
-          const evX = startX + idx * stepX;
-          const isTop = idx % 2 === 0;
-          const evY = isTop ? startY - 210 : startY + 50;
-
-          const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-          line.setAttribute("x1", evX + 130);
-          line.setAttribute("y1", startY);
-          line.setAttribute("x2", evX + 130);
-          line.setAttribute("y2", isTop ? evY + 140 : evY);
-          line.setAttribute("stroke", "#3b82f6");
-          line.setAttribute("stroke-width", "3");
-          line.setAttribute("stroke-dasharray", "4");
-          tempSvg.appendChild(line);
-        });
-      }
-
-      const rawCanvas = await html2canvas(tempWrapper, {
-        width: exportWidth,
-        height: exportHeight,
-        scale: 1,
-        backgroundColor: "#ffffff"
-      });
-
-      document.body.removeChild(tempWrapper);
-
-      const maxDim = 1600;
-      let targetW = exportWidth;
-      let targetH = exportHeight;
-
-      if (targetW > maxDim || targetH > maxDim) {
-        if (targetW > targetH) {
-          targetH = Math.round((targetH * maxDim) / targetW);
-          targetW = maxDim;
-        } else {
-          targetW = Math.round((targetW * maxDim) / targetH);
-          targetH = maxDim;
-        }
-      }
-
-      const resizedCanvas = document.createElement("canvas");
-      resizedCanvas.width = targetW;
-      resizedCanvas.height = targetH;
-      const ctx = resizedCanvas.getContext("2d");
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(0, 0, targetW, targetH);
-      ctx.drawImage(rawCanvas, 0, 0, targetW, targetH);
-
-      return { canvas: resizedCanvas, width: targetW, height: targetH };
-    }
-
-    /* -------------------------------------------------------------
-       CONFIGURACIÓN DE MANIPULADORES Y EVENTOS
-    ------------------------------------------------------------- */
-    function setupEventListeners() {
-      // Cambio de Modos
-      document.getElementById("btn-mode-map")?.addEventListener("click", () => {
-        currentMode = "map";
-        document.getElementById("btn-mode-map").classList.add("active");
-        document.getElementById("btn-mode-timeline").classList.remove("active");
-        document.getElementById("controls-map").style.display = "flex";
-        document.getElementById("controls-timeline").style.display = "none";
-        render();
-      });
-
-      document.getElementById("btn-mode-timeline")?.addEventListener("click", () => {
-        currentMode = "timeline";
-        document.getElementById("btn-mode-timeline").classList.add("active");
-        document.getElementById("btn-mode-map").classList.remove("active");
-        document.getElementById("controls-map").style.display = "none";
-        document.getElementById("controls-timeline").style.display = "flex";
-        render();
-      });
-
-      // Añadir evento a la línea de tiempo
-      document.getElementById("btn-add-event")?.addEventListener("click", () => {
-        const newEv = {
-          id: "ev_" + Date.now(),
-          date: new Date().toISOString().split('T')[0],
-          title: "Nuevo Evento",
-          description: "Descripción del hito o fase.",
-          comments: []
-        };
-        timelineEvents.push(newEv);
-        render();
-      });
-
-      // Comentarios
-      document.getElementById("btn-close-drawer")?.addEventListener("click", closeCommentsDrawer);
-      document.getElementById("btn-submit-comment")?.addEventListener("click", () => {
-        const user = document.getElementById("comment-user").value;
-        const text = document.getElementById("comment-text").value;
-        if (activeTimelineEventId && text) {
-          addComment(activeTimelineEventId, text, user);
-          document.getElementById("comment-text").value = "";
-        }
-      });
-
-      // Botones Mapa Conceptual
-      document.getElementById("btn-add-child")?.addEventListener("click", () => {
-        const res = findNodeAndParent(selectedNodeId);
-        if (!res) return;
-        const newId = "node_" + Date.now();
-        res.node.children.push({ id: newId, text: "Nuevo Concepto", children: [] });
-        autoLayout(mindMapData);
-        selectedNodeId = newId;
-        render();
-      });
-
-      document.getElementById("btn-add-sibling")?.addEventListener("click", () => {
-        const res = findNodeAndParent(selectedNodeId);
-        if (!res || !res.parent) return;
-        const newId = "node_" + Date.now();
-        res.parent.children.push({ id: newId, text: "Nuevo Concepto", children: [] });
-        autoLayout(mindMapData);
-        selectedNodeId = newId;
-        render();
-      });
-
-      document.getElementById("btn-delete")?.addEventListener("click", () => {
-        if (selectedNodeId === "root") return;
-        const res = findNodeAndParent(selectedNodeId);
-        if (res && res.parent) {
-          res.parent.children = res.parent.children.filter(c => c.id !== selectedNodeId);
-          selectedNodeId = res.parent.id;
-          autoLayout(mindMapData);
-          render();
-        }
-      });
-
-      if (colorPicker) {
-        colorPicker.addEventListener("input", (e) => {
-          const res = findNodeAndParent(selectedNodeId);
-          if (res) {
-            res.node.color = e.target.value;
-            render();
-          }
-        });
-      }
-
-      // IMPORTAR Y EXPORTAR JSON
-      document.getElementById("btn-import-text")?.addEventListener("click", () => {
-        const rawInput = prompt("Pega aquí el JSON del Mapa o Línea de Tiempo:");
-        if (!rawInput) return;
-        try {
-          const parsedData = JSON.parse(rawInput);
-          if (Array.isArray(parsedData)) {
-            timelineEvents = parsedData;
-            document.getElementById("btn-mode-timeline").click();
-          } else {
-            mindMapData = parsedData;
-            document.getElementById("btn-mode-map").click();
-          }
-          render();
-        } catch (e) {
-          alert("Error: El texto pegado no es un JSON válido.");
-        }
-      });
-
-      document.getElementById("btn-export-json")?.addEventListener("click", () => {
-        const payload = currentMode === "map" ? mindMapData : timelineEvents;
-        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(payload, null, 2));
-        const a = document.createElement("a");
-        a.href = dataStr;
-        a.download = currentMode === "map" ? "mapa_conceptual.json" : "linea_de_tiempo.json";
-        a.click();
-      });
-
-      // EXPORTAR IMAGEN LIGERA (< 500 KB)
-      document.getElementById("btn-export-image")?.addEventListener("click", async () => {
-        const result = await renderUltraLightCanvas();
-        if (!result) return;
-        const a = document.createElement("a");
-        a.download = `${currentMode}_estudio.jpg`;
-        a.href = result.canvas.toDataURL("image/jpeg", 0.75);
-        a.click();
-      });
-
-      // EXPORTAR PDF COMPRIMIDO (< 1 MB)
-      document.getElementById("btn-export-pdf")?.addEventListener("click", async () => {
-        const result = await renderUltraLightCanvas();
-        if (!result || !window.jspdf) return;
-
-        const { canvas, width, height } = result;
-        const imgData = canvas.toDataURL("image/jpeg", 0.70);
-        const { jsPDF } = window.jspdf;
-
-        const isLandscape = width >= height;
-        const pdf = new jsPDF({
-          orientation: isLandscape ? "landscape" : "portrait",
-          unit: "px",
-          format: [width, height],
-          compress: true
-        });
-
-        pdf.addImage(imgData, "JPEG", 0, 0, width, height, undefined, "FAST");
-        pdf.save(`${currentMode}_estudio.pdf`);
-      });
-
-      // EXPORTAR WORD TABULAR LIGERO
-      document.getElementById("btn-export-word")?.addEventListener("click", async () => {
-        const result = await renderUltraLightCanvas();
-        if (!result) return;
-
-        const imgBase64 = result.canvas.toDataURL("image/jpeg", 0.70);
-
-        let bodyHTML = "";
-        if (currentMode === "map") {
-          function generateTableRows(node, depth = 0) {
-            let rows = `
-              <tr>
-                <td style="border: 1px solid #cbd5e1; padding: 8px; padding-left: ${depth * 18 + 10}px;">${depth > 0 ? "└─ " : ""}${node.text}</td>
-                <td style="border: 1px solid #cbd5e1; padding: 8px; text-align: center;">Nivel ${depth + 1}</td>
-              </tr>
-            `;
-            if (node.children) node.children.forEach(c => rows += generateTableRows(c, depth + 1));
-            return rows;
-          }
-          bodyHTML = `
-            <h3>Desglose Jerárquico</h3>
-            <table style="width:100%; border-collapse:collapse;">
-              <thead><tr style="background:#1e3a8a; color:white;"><th>CONCEPTO</th><th>NIVEL</th></tr></thead>
-              <tbody>${generateTableRows(mindMapData)}</tbody>
-            </table>
-          `;
-        } else {
-          sortTimelineEvents();
-          let rows = timelineEvents.map(ev => `
-            <tr>
-              <td style="border: 1px solid #cbd5e1; padding: 8px; font-weight:bold; color:#2563eb;">${ev.date}</td>
-              <td style="border: 1px solid #cbd5e1; padding: 8px;">
-                <strong>${ev.title}</strong><br/>
-                <span style="color:#475569;">${ev.description}</span>
-                ${ev.comments && ev.comments.length > 0 ? `<br/><small style="color:#059669;">💬 Comentarios (${ev.comments.length}): ${ev.comments.map(c=>c.text).join(' | ')}</small>` : ''}
-              </td>
-            </tr>
-          `).join('');
-
-          bodyHTML = `
-            <h3>Cronología del Proyecto</h3>
-            <table style="width:100%; border-collapse:collapse;">
-              <thead><tr style="background:#1e3a8a; color:white;"><th style="width:120px;">FECHA</th><th>EVENTO Y DETALLES</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          `;
-        }
-
-        const wordContent = `
-          <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
-          <head><meta charset='utf-8'><title>Reporte</title></head>
-          <body style="font-family: Arial, sans-serif; padding: 20px;">
-            <h1 style="color: #1e3a8a; text-align: center;">${currentMode === 'map' ? 'MAPA CONCEPTUAL' : 'LÍNEA DE TIEMPO'}</h1>
-            <div style="text-align: center; margin: 20px 0;"><img src="${imgBase64}" style="max-width: 100%;"/></div>
-            ${bodyHTML}
-          </body>
-          </html>
+            <!-- ACCIONES -->
+            <div class="card-actions">
+              <label class="file-input-label">
+                🖼️ ${stage.imageUrl ? 'Cambiar imagen' : 'Agregar imagen'}
+                <input type="file" accept="image/*" onchange="handleImageUpload(event, ${idx})">
+              </label>
+              <button class="btn-delete-card" onclick="deleteStage(${idx})">Eliminar</button>
+            </div>
+          </div>
         `;
 
-        const blob = new Blob(['\ufeff', wordContent], { type: 'application/msword' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${currentMode}_estudio.doc`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
+        item.innerHTML = cardHtml;
+        wrapper.appendChild(item);
       });
     }
 
-    /* -------------------------------------------------------------
-       ARRASTRE EN MAPA CONCEPTUAL
-    ------------------------------------------------------------- */
-    function startDrag(e, node) {
-      if (currentMode !== "map") return;
-      selectedNodeId = node.id;
-      draggingNodeId = node.id;
-      dragOffset.x = e.clientX - node.x;
-      dragOffset.y = e.clientY - node.y;
-      render();
-      document.addEventListener("mousemove", onDrag);
-      document.addEventListener("mouseup", stopDrag);
-    }
-
-    function onDrag(e) {
-      if (!draggingNodeId) return;
-      const res = findNodeAndParent(draggingNodeId);
-      if (res) {
-        res.node.x = e.clientX - dragOffset.x;
-        res.node.y = e.clientY - dragOffset.y;
-        render();
-      }
-    }
-
-    function stopDrag() {
-      draggingNodeId = null;
-      document.removeEventListener("mousemove", onDrag);
-      document.removeEventListener("mouseup", stopDrag);
-    }
+    renderTimeline();
   </script>
 </body>
 </html>
