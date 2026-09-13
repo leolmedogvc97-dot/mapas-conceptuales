@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Características de ley penal y tipos penales</title>
-    <!-- Importación de Mermaid.js para GitHub Pages -->
+    <!-- Carga la librería Mermaid para dibujar el gráfico -->
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ 
@@ -73,54 +73,43 @@
     <div class="container">
         <pre class="mermaid">
         graph TD
-            %% NODO CENTRAL
             ROOT["Características de ley penal y tipos penales"]
 
-            %% NIVEL SUPERIOR: FUNDAMENTOS NORMÁTICOS
             ROOT -->|se ejerce mediante| B1["Potestad Punitiva del Estado<br/>(Ius Puniendi)<br/>Emisión, Aplicación y Ejecución"]
             ROOT -->|se expresa en| B2["Ley Penal<br/>Norma que define conductas delictivas y sanciones"]
             ROOT -->|se estructura en| B3["Proposiciones Jurídico-Penales<br/>(Mir Puig)"]
             ROOT -->|se rige por| B4["Jerarquía y Principios Constitucionales<br/>(Díaz-Aranda / CPEUM)"]
 
-            %% DESGLOSE NORMAS
             B3 -->|comprende| B3_1["Disposiciones Incompletas<br/>Requieren complementación normativo-sistemática"]
             B3 -->|incluye| B3_2["Leyes Penales en Blanco<br/>Remiten a otras normas o autoridades para integrar el supuesto"]
 
-            %% PRINCIPIOS
             B4 -->|exige| B4_1["• Subordinación a la Constitución y Tratados (DDHH)<br/>• Legalidad y Taxatividad (Nullum crimen, nulla poena sine lege)<br/>• Lesividad y protección exclusiva de Bienes Jurídicos"]
 
-            %% ESTRUCTURA DE LA LEY
             B2 -->|se compone de| E1["Estructura de la Norma<br/>(Mir Puig)"]
             E1 -->|contiene| E1_A["Supuesto de Hecho"]
             E1 -->|adscribe| E1_B["Consecuencia Jurídica"]
             E1 -->|garantiza| E1_C["Garantía de Estricta Legalidad<br/>Límite al arbitrio estatal"]
 
-            %% TIPO PENAL
             E1 -->|da lugar al| TP["El Tipo Penal<br/>Descripción legal de la conducta prohibida o mandada"]
 
-            %% ELEMENTOS ESTRUCTURALES DEL TIPO (MIR PUIG)
             TP -->|se integra por| TP_EST["Elementos Estructurales del Tipo"]
             TP_EST -->|comprende| TP_SUJ["Sujetos<br/>• Activo (ejecutor)<br/>• Pasivo (titular del bien)<br/>• Estado"]
             TP_EST -->|recae sobre| TP_OBJ["Objetos<br/>• Material (ente físico/persona)<br/>• Jurídico (Bien Jurídico Tutelado)"]
             TP_EST -->|desarrolla| TP_COND["Conducta Típica<br/>Acción u Omisión"]
 
-            %% ELEMENTOS DEL TIPO Y ANÁLISIS DEL DELITO (DÍAZ-ARANDA)
             TP_COND -->|se analiza mediante| EL["Elementos de la Conducta-Típica<br/>(Art. 405 CNPP / Díaz-Aranda)"]
             
             EL -->|incluye| EL_OBJ["Objetivos<br/>• Acción / Omisión<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado material (cuando el tipo lo exija)"]
             EL -->|incluye| EL_SUBJ["Subjetivos<br/>• Dolo (Directo/Eventual)<br/>• Culpa o Imprudencia<br/>• Elementos subjetivos específicos (ánimo, fin, propósito)"]
             EL -->|incluye| EL_NORM["Normativos<br/>• Valoraciones culturales<br/>• Conceptos estrictamente jurídicos"]
 
-            %% FUNCIONES Y CLASIFICACIÓN
             TP -->|cumple| TP_FUNC["Funciones del Tipo<br/>• Seleccionadora de conductas<br/>• De garantía ciudadana<br/>• Motivadora del comportamiento"]
             
             TP -->|se clasifica en| TP_CLAS["Clasificación Dogmática<br/>• Resultado vs. Mera Actividad<br/>• Instantáneo vs. Permanente / Continuado<br/>• Doloso vs. Imprudente<br/>• Lesión vs. Peligro (Concreto/Abstracto)"]
 
-            %% SECUENCIA DOGMÁTICA DE LA TEORÍA DEL DELITO
             EL -->|presupone la| ANT["Antijuridicidad<br/>Desvalor de la conducta y resultado.<br/>Se excluye por Causas de Justificación (ej. legítima defensa)"]
             ANT -->|permite el juicio de| CULP["Culpabilidad<br/>Juicio de reproche personal basado en Imputabilidad,<br/>conciencia de la antijuridicidad y exigibilidad de conducta"]
 
-            %% SANCIÓN PENAL Y FASES
             CULP -->|determina la| PE["Punibilidad, Punición y Ejecución"]
             PE -->|Fase Legislativa| PE_1["Punibilidad: Amenaza abstracta en la norma (mínimos y máximos)"]
             PE -->|Fase Judicial| PE_2["Punición: Concreción judicial de la pena en la sentencia (CNPP)"]
@@ -128,7 +117,6 @@
         </pre>
     </div>
 
-    <!-- SECCIÓN DE REFERENCIAS BIBLIOGRÁFICAS EXPLICITAS -->
     <div class="references">
         <h3>Referencias Bibliográficas</h3>
         <ul>
