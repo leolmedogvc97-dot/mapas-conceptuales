@@ -3,329 +3,629 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creador de Mapas Conceptuales</title>
+  <title>Línea de Tiempo Interactiva</title>
   <style>
+    :root {
+      --bg-color: #f8fafc;
+      --card-bg: #ffffff;
+      --border-blue: #3b82f6;
+      --text-dark: #0f172a;
+      --text-muted: #64748b;
+      --line-color: #334155;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
     body {
-      background-color: #f0f4f8;
-      height: 100vh;
+      background-color: var(--bg-color);
+      color: var(--text-dark);
       display: flex;
       flex-direction: column;
+      height: 100vh;
       overflow: hidden;
     }
 
-    /* BARRA DE HERRAMIENTAS */
+    /* BARRA SUPERIOR */
     .toolbar {
-      background: #1e293b;
+      background: #0f172a;
       color: white;
-      padding: 12px 20px;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
+    }
+
+    .toolbar h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+    }
+
+    .btn-group {
       display: flex;
       gap: 12px;
-      align-items: center;
-      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-      z-index: 10;
     }
 
     .btn {
       padding: 8px 16px;
+      border-radius: 8px;
       border: none;
-      border-radius: 6px;
       font-weight: 600;
+      font-size: 0.9rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: background 0.2s;
+      transition: all 0.2s ease;
     }
 
-    .btn-add { background: #0284c7; color: white; }
-    .btn-add:hover { background: #0369a1; }
-
-    .btn-clear { background: #ef4444; color: white; }
-    .btn-clear:hover { background: #dc2626; }
-
-    .instructions {
-      margin-left: auto;
-      font-size: 0.85rem;
-      color: #94a3b8;
+    .btn-toggle {
+      background: #0284c7;
+      color: white;
     }
+    .btn-toggle:hover { background: #0369a1; }
 
-    /* CANVAS DE DIBUJO */
-    #canvas {
+    .btn-add {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-add:hover { background: #1d4ed8; }
+
+    /* ÁREA DE TRABAJO CON PATRÓN DE PUNTOS */
+    .viewport {
       flex: 1;
+      overflow: auto;
       position: relative;
       background-color: #f8fafc;
-      background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
+      background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
       background-size: 24px 24px;
-      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 60px;
     }
 
-    /* SVG PARA LÍNEAS DE CONEXIÓN */
-    #svgLines {
+    /* LÍNEA DE TIEMPO BASE */
+    .timeline-container {
+      position: relative;
+      display: flex;
+      transition: all 0.3s ease;
+    }
+
+    /* MODO HORIZONTAL */
+    .timeline-container.horizontal {
+      flex-direction: row;
+      align-items: center;
+      min-width: max-content;
+      padding: 120px 60px;
+    }
+
+    .timeline-container.horizontal .main-line {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 5px;
+      background: var(--line-color);
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+
+    /* MODO VERTICAL */
+    .timeline-container.vertical {
+      flex-direction: column;
+      align-items: center;
+      min-height: max-content;
+      padding: 60px 120px;
+    }
+
+    .timeline-container.vertical .main-line {
       position: absolute;
       top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
+      bottom: 0;
+      left: 50%;
+      width: 5px;
+      background: var(--line-color);
+      transform: translateX(-50%);
+      z-index: 1;
     }
 
-    /* ESTILO DE LOS NODOS / CAJAS */
-    .node {
-      position: absolute;
-      min-width: 140px;
-      padding: 12px 16px;
-      background: #ffffff;
-      border: 2px solid #0284c7;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-      cursor: move;
-      user-select: none;
+    /* ITEM / HITOS */
+    .timeline-node {
+      position: relative;
+      z-index: 2;
       display: flex;
-      flex-direction: column;
       align-items: center;
     }
 
-    .node.selected {
-      border-color: #10b981;
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+    /* Alineación Horizontal (Arriba / Abajo) */
+    .timeline-container.horizontal .timeline-node {
+      flex-direction: column;
+      margin: 0 30px;
+      width: 320px;
     }
 
-    .node-text {
-      width: 100%;
-      border: none;
-      outline: none;
-      background: transparent;
-      text-align: center;
-      font-size: 1rem;
-      font-weight: bold;
-      color: #0f172a;
-      resize: none;
-      overflow: hidden;
+    .timeline-container.horizontal .timeline-node.top {
+      justify-content: flex-end;
+      padding-bottom: 35px;
     }
 
-    /* PUNTOS DE CONEXIÓN (PUERTOS) */
-    .port {
-      width: 14px;
-      height: 14px;
-      background: #0284c7;
-      border: 2px solid white;
+    .timeline-container.horizontal .timeline-node.bottom {
+      justify-content: flex-start;
+      padding-top: 35px;
+    }
+
+    /* Alineación Vertical (Izquierda / Derecha) */
+    .timeline-container.vertical .timeline-node {
+      flex-direction: row;
+      margin: 30px 0;
+      width: 650px;
+    }
+
+    .timeline-container.vertical .timeline-node.left {
+      justify-content: flex-end;
+      padding-right: 35px;
+    }
+
+    .timeline-container.vertical .timeline-node.right {
+      justify-content: flex-start;
+      padding-left: 35px;
+    }
+
+    /* PUNTO CENTRAL Y LÍNEA PUNTEADA DE CONEXIÓN */
+    .dot-marker {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      background: white;
+      border: 4px solid #2563eb;
       border-radius: 50%;
-      position: absolute;
-      bottom: -7px;
-      cursor: crosshair;
-      transition: transform 0.2s;
+      box-shadow: 0 0 0 2px white;
+      z-index: 5;
     }
 
-    .port:hover {
-      transform: scale(1.3);
-      background: #10b981;
+    .timeline-container.horizontal .timeline-node.top .dot-marker { bottom: -10px; left: calc(50% - 10px); }
+    .timeline-container.horizontal .timeline-node.bottom .dot-marker { top: -10px; left: calc(50% - 10px); }
+    
+    .timeline-container.vertical .timeline-node.left .dot-marker { right: -10px; top: calc(50% - 10px); }
+    .timeline-container.vertical .timeline-node.right .dot-marker { left: -10px; top: calc(50% - 10px); }
+
+    .connector-dashed {
+      position: absolute;
+      border-style: dashed;
+      border-color: #2563eb;
+      z-index: 2;
     }
 
-    .btn-delete-node {
+    .timeline-container.horizontal .connector-dashed {
+      width: 0;
+      height: 35px;
+      border-width: 0 0 0 2px;
+      left: 50%;
+    }
+    .timeline-container.horizontal .timeline-node.top .connector-dashed { bottom: 0; }
+    .timeline-container.horizontal .timeline-node.bottom .connector-dashed { top: 0; }
+
+    .timeline-container.vertical .connector-dashed {
+      height: 0;
+      width: 35px;
+      border-width: 2px 0 0 0;
+      top: 50%;
+    }
+    .timeline-container.vertical .timeline-node.left .connector-dashed { right: 0; }
+    .timeline-container.vertical .timeline-node.right .connector-dashed { left: 0; }
+
+    /* TARJETA EXACTA */
+    .stage-card {
+      background: #ffffff;
+      border: 2px solid #3b82f6;
+      border-radius: 14px;
+      width: 100%;
+      padding: 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      position: relative;
+    }
+
+    /* CAMPO DE AÑO */
+    .year-box {
+      display: inline-flex;
+      align-items: center;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+    }
+
+    .year-box label {
+      font-size: 0.82rem;
+      color: #64748b;
+      font-weight: 600;
+      margin-right: 6px;
+    }
+
+    .year-input {
+      border: none;
+      background: transparent;
+      font-weight: 700;
+      color: #2563eb;
+      font-size: 0.95rem;
+      width: 60px;
+      outline: none;
+    }
+
+    /* TÍTULO Y DESCRIPCIÓN EDITABLES */
+    .title-input {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0f172a;
+      border: 1px transparent dashed;
+      border-radius: 4px;
+      outline: none;
+      width: 100%;
+      margin-bottom: 8px;
+      padding: 2px 4px;
+    }
+
+    .title-input:hover, .title-input:focus {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    .desc-input {
+      font-size: 0.9rem;
+      color: #475569;
+      border: 1px transparent dashed;
+      border-radius: 4px;
+      outline: none;
+      width: 100%;
+      resize: none;
+      min-height: 48px;
+      line-height: 1.4;
+      margin-bottom: 12px;
+      padding: 2px 4px;
+    }
+
+    .desc-input:hover, .desc-input:focus {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+
+    /* IMAGEN DE LA ETAPA */
+    .image-preview-container {
+      position: relative;
+      margin-bottom: 12px;
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 160px;
+      display: flex;
+      justify-content: center;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+    }
+
+    .image-preview-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .btn-delete-img {
       position: absolute;
-      top: -8px;
-      right: -8px;
-      background: #ef4444;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.7);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      font-size: 10px;
+      width: 22px;
+      height: 22px;
       cursor: pointer;
-      display: none;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .node:hover .btn-delete-node {
-      display: block;
+    /* RECUADRO DE COMENTARIOS */
+    .comments-section {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px;
+      margin-top: 8px;
+    }
+
+    .comments-header {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .comment-bubble {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 0.85rem;
+      color: #334155;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+      word-break: break-word;
+    }
+
+    .btn-del-comment {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .comment-input {
+      flex: 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.82rem;
+      outline: none;
+    }
+
+    .comment-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .btn-add-comment {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0 12px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* FOOTER DE LA TARJETA */
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .upload-btn-label {
+      font-size: 0.8rem;
+      color: #2563eb;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .upload-btn-label input { display: none; }
+
+    .btn-delete-node {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
+  <!-- ENCABEZADO Y CONTROLES -->
   <div class="toolbar">
-    <button class="btn btn-add" onclick="createNode(150, 150, 'Concepto')">➕ Agregar Concepto</button>
-    <button class="btn btn-clear" onclick="clearMap()">🗑️ Limpiar Todo</button>
-    <span class="instructions">💡 <b>Arrastra</b> los conceptos para moverlos. <b>Arrastra el punto azul inferior</b> hacia otro concepto para conectarlos.</span>
+    <h1>📅 Creador de Línea de Tiempo</h1>
+    <div class="btn-group">
+      <button class="btn btn-toggle" onclick="toggleOrientation()">
+        🔄 Orientación: <span id="orientationLabel">Horizontal</span>
+      </button>
+      <button class="btn btn-add" onclick="addStage()">
+        ➕ Agregar Etapa
+      </button>
+    </div>
   </div>
 
-  <div id="canvas">
-    <svg id="svgLines"></svg>
+  <!-- ÁREA DE TRABAJO -->
+  <div class="viewport">
+    <div id="timeline" class="timeline-container horizontal">
+      <div class="main-line"></div>
+    </div>
   </div>
 
   <script>
-    const canvas = document.getElementById('canvas');
-    const svgLines = document.getElementById('svgLines');
-    
-    let nodes = [];
-    let connections = [];
-    let draggedNode = null;
-    let dragOffset = { x: 0, y: 0 };
-    let connectingPortNode = null;
-    let tempLine = null;
+    let isHorizontal = true;
 
-    // Crear un nuevo nodo
-    function createNode(x, y, text = "Nuevo Concepto") {
-      const nodeData = {
+    // DATOS INICIALES
+    let stages = [
+      {
+        id: 1,
+        year: '1995',
+        title: 'Fase Inicial',
+        description: 'Definición de requerimientos y arranque de operaciones.',
+        imageUrl: '',
+        comments: ['Primer análisis de factibilidad completado.']
+      },
+      {
+        id: 2,
+        year: '2006',
+        title: 'Lanzamiento de Producto',
+        description: 'Despliegue de la plataforma para los primeros clientes.',
+        imageUrl: '',
+        comments: ['Se alcanzaron los objetivos del primer trimestre.', 'Comentario de evaluación técnica.']
+      },
+      {
+        id: 3,
+        year: '2018',
+        title: 'Consolidación',
+        description: 'Integración de nuevas herramientas tecnológicas y alcance global.',
+        imageUrl: '',
+        comments: ['Revisión del sistema ejecutada con éxito.']
+      }
+    ];
+
+    function toggleOrientation() {
+      isHorizontal = !isHorizontal;
+      const container = document.getElementById('timeline');
+      const label = document.getElementById('orientationLabel');
+
+      if (isHorizontal) {
+        container.className = 'timeline-container horizontal';
+        label.textContent = 'Horizontal';
+      } else {
+        container.className = 'timeline-container vertical';
+        label.textContent = 'Vertical';
+      }
+      render();
+    }
+
+    function addStage() {
+      const lastYear = stages.length > 0 ? (parseInt(stages[stages.length - 1].year) || 2020) + 4 : 2026;
+      stages.push({
         id: Date.now(),
-        x: x,
-        y: y,
-        text: text
-      };
-
-      nodes.push(nodeData);
-      renderNode(nodeData);
-    }
-
-    function renderNode(nodeData) {
-      const nodeEl = document.createElement('div');
-      nodeEl.className = 'node';
-      nodeEl.id = `node-${nodeData.id}`;
-      nodeEl.style.left = `${nodeData.x}px`;
-      nodeEl.style.top = `${nodeData.y}px`;
-
-      nodeEl.innerHTML = `
-        <button class="btn-delete-node" onclick="deleteNode(${nodeData.id})">✕</button>
-        <textarea class="node-text" rows="1" oninput="autoResize(this)" placeholder="Concepto...">${nodeData.text}</textarea>
-        <div class="port" onmousedown="startConnecting(event, ${nodeData.id})"></div>
-      `;
-
-      // Evento arrastrar nodo
-      nodeEl.addEventListener('mousedown', (e) => {
-        if (e.target.classList.contains('port') || e.target.classList.contains('btn-delete-node') || e.target.classList.contains('node-text')) return;
-        draggedNode = nodeData;
-        dragOffset.x = e.clientX - nodeData.x;
-        dragOffset.y = e.clientY - nodeData.y;
+        year: lastYear.toString(),
+        title: 'Nueva Etapa',
+        description: 'Escribe aquí la descripción de esta etapa.',
+        imageUrl: '',
+        comments: []
       });
-
-      canvas.appendChild(nodeEl);
-      const textarea = nodeEl.querySelector('.node-text');
-      autoResize(textarea);
+      render();
     }
 
-    // Movimiento global en el lienzo
-    window.addEventListener('mousemove', (e) => {
-      // Mover nodo
-      if (draggedNode) {
-        draggedNode.x = e.clientX - dragOffset.x;
-        draggedNode.y = e.clientY - dragOffset.y;
-
-        const el = document.getElementById(`node-${draggedNode.id}`);
-        el.style.left = `${draggedNode.x}px`;
-        el.style.top = `${draggedNode.y}px`;
-
-        updateLines();
-      }
-
-      // Dibujar línea temporal al conectar
-      if (connectingPortNode && tempLine) {
-        const rect = canvas.getBoundingClientRect();
-        tempLine.setAttribute('x2', e.clientX - rect.left);
-        tempLine.setAttribute('y2', e.clientY - rect.top);
-      }
-    });
-
-    window.addEventListener('mouseup', (e) => {
-      if (draggedNode) draggedNode = null;
-
-      if (connectingPortNode) {
-        const targetEl = document.elementFromPoint(e.clientX, e.clientY)?.closest('.node');
-        if (targetEl) {
-          const targetId = parseInt(targetEl.id.replace('node-', ''));
-          if (targetId !== connectingPortNode.id) {
-            connections.push({ from: connectingPortNode.id, to: targetId });
-          }
-        }
-        connectingPortNode = null;
-        if (tempLine) tempLine.remove();
-        tempLine = null;
-        updateLines();
-      }
-    });
-
-    // Conectar nodos mediante líneas
-    function startConnecting(e, nodeId) {
-      e.stopPropagation();
-      connectingPortNode = nodes.find(n => n.id === nodeId);
-
-      tempLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      tempLine.setAttribute('stroke', '#0284c7');
-      tempLine.setAttribute('stroke-width', '2');
-      tempLine.setAttribute('stroke-dasharray', '4');
-
-      const startPos = getNodeCenter(connectingPortNode);
-      tempLine.setAttribute('x1', startPos.x);
-      tempLine.setAttribute('y1', startPos.y);
-      tempLine.setAttribute('x2', startPos.x);
-      tempLine.setAttribute('y2', startPos.y);
-
-      svgLines.appendChild(tempLine);
+    function removeStage(index) {
+      stages.splice(index, 1);
+      render();
     }
 
-    function updateLines() {
-      svgLines.innerHTML = '';
-      connections.forEach(conn => {
-        const fromNode = nodes.find(n => n.id === conn.from);
-        const toNode = nodes.find(n => n.id === conn.to);
+    function updateField(index, field, value) {
+      stages[index][field] = value;
+    }
 
-        if (fromNode && toNode) {
-          const p1 = getNodeCenter(fromNode);
-          const p2 = getNodeCenter(toNode);
+    function handleImage(event, index) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          stages[index].imageUrl = e.target.result;
+          render();
+        };
+        reader.readAsDataURL(file);
+      }
+    }
 
-          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          line.setAttribute('x1', p1.x);
-          line.setAttribute('y1', p1.y);
-          line.setAttribute('x2', p2.x);
-          line.setAttribute('y2', p2.y);
-          line.setAttribute('stroke', '#64748b');
-          line.setAttribute('stroke-width', '2');
+    function removeImage(index) {
+      stages[index].imageUrl = '';
+      render();
+    }
 
-          svgLines.appendChild(line);
+    function addComment(index, inputId) {
+      const input = document.getElementById(inputId);
+      const text = input.value.trim();
+      if (text) {
+        stages[index].comments.push(text);
+        render();
+      }
+    }
+
+    function removeComment(stageIdx, commentIdx) {
+      stages[stageIdx].comments.splice(commentIdx, 1);
+      render();
+    }
+
+    function render() {
+      const container = document.getElementById('timeline');
+      container.innerHTML = '<div class="main-line"></div>';
+
+      stages.forEach((stage, idx) => {
+        const node = document.createElement('div');
+        
+        if (isHorizontal) {
+          node.className = `timeline-node ${idx % 2 === 0 ? 'top' : 'bottom'}`;
+        } else {
+          node.className = `timeline-node ${idx % 2 === 0 ? 'left' : 'right'}`;
         }
+
+        const inputCommentId = `input-c-${idx}`;
+
+        const commentsHtml = stage.comments.map((c, cIdx) => `
+          <div class="comment-bubble">
+            <span>${c}</span>
+            <button class="btn-del-comment" onclick="removeComment(${idx}, ${cIdx})">✕</button>
+          </div>
+        `).join('');
+
+        node.innerHTML = `
+          <div class="dot-marker"></div>
+          <div class="connector-dashed"></div>
+          <div class="stage-card">
+            <div class="year-box">
+              <label>Año:</label>
+              <input type="number" class="year-input" value="${stage.year}" onchange="updateField(${idx}, 'year', this.value)" />
+            </div>
+
+            <input type="text" class="title-input" value="${stage.title}" oninput="updateField(${idx}, 'title', this.value)" placeholder="Título" />
+            <textarea class="desc-input" oninput="updateField(${idx}, 'description', this.value)" placeholder="Descripción...">${stage.description}</textarea>
+
+            ${stage.imageUrl ? `
+              <div class="image-preview-container">
+                <img src="${stage.imageUrl}" alt="Imagen de etapa" />
+                <button class="btn-delete-img" onclick="removeImage(${idx})">✕</button>
+              </div>
+            ` : ''}
+
+            <div class="comments-section">
+              <div class="comments-header">💬 Comentarios (${stage.comments.length})</div>
+              ${commentsHtml}
+              <div class="comment-form">
+                <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Escribir comentario..." onkeypress="if(event.key==='Enter') addComment(${idx}, '${inputCommentId}')" />
+                <button class="btn-add-comment" onclick="addComment(${idx}, '${inputCommentId}')">+</button>
+              </div>
+            </div>
+
+            <div class="card-footer">
+              <label class="upload-btn-label">
+                🖼️ ${stage.imageUrl ? 'Cambiar imagen' : 'Agregar imagen'}
+                <input type="file" accept="image/*" onchange="handleImage(event, ${idx})">
+              </label>
+              <button class="btn-delete-node" onclick="removeStage(${idx})">Eliminar</button>
+            </div>
+          </div>
+        `;
+
+        container.appendChild(node);
       });
     }
 
-    function getNodeCenter(nodeData) {
-      const el = document.getElementById(`node-${nodeData.id}`);
-      return {
-        x: nodeData.x + el.offsetWidth / 2,
-        y: nodeData.y + el.offsetHeight / 2
-      };
-    }
-
-    function deleteNode(id) {
-      nodes = nodes.filter(n => n.id !== id);
-      connections = connections.filter(c => c.from !== id && c.to !== id);
-      document.getElementById(`node-${id}`).remove();
-      updateLines();
-    }
-
-    function clearMap() {
-      nodes = [];
-      connections = [];
-      document.querySelectorAll('.node').forEach(el => el.remove());
-      svgLines.innerHTML = '';
-    }
-
-    function autoResize(textarea) {
-      textarea.style.height = 'auto';
-      textarea.style.height = textarea.scrollHeight + 'px';
-    }
-
-    // Mapa inicial
-    createNode(200, 100, "Idea Principal");
-    createNode(100, 250, "Subconcepto A");
-    createNode(300, 250, "Subconcepto B");
-    connections.push({ from: nodes[0].id, to: nodes[1].id });
-    connections.push({ from: nodes[0].id, to: nodes[2].id });
-    setTimeout(updateLines, 100);
+    render();
   </script>
 </body>
 </html>
