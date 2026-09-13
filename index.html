@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Características de la Ley Penal y de los Tipos Penales - Unidad 2</title>
-
-    <!-- Carga de la librería Mermaid.js -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -46,6 +42,8 @@
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.15);
             transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-block;
         }
         .btn:hover {
             background-color: #003d80;
@@ -59,10 +57,12 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             overflow-x: auto;
+            text-align: center;
         }
-        .mermaid {
-            display: flex;
-            justify-content: center;
+        .map-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -71,38 +71,37 @@
     <h1>Características de la Ley Penal y de los Tipos Penales</h1>
     <p class="subtitle">Programa Oficial Unidad 2 | Integración Doctrinal: Mir Puig & Díaz-Aranda</p>
 
-    <!-- Botones de Descarga Directa -->
+    <!-- Botón con descarga directa de archivo PNG estático -->
     <div class="btn-container">
-        <button class="btn" id="btn-png">📥 Descargar Imagen (PNG)</button>
-        <button class="btn" id="btn-svg" style="background-color: #28a745;">📥 Descargar Vector (SVG)</button>
+        <button class="btn" onclick="descargarPNGDirecto()">📥 Descargar Imagen (PNG)</button>
     </div>
 
     <div class="container">
-        <div class="mermaid" id="diagrama">
-        graph TD
-            %% NODO PRINCIPAL DE LA UNIDAD
+        <!-- Renderizado de alta resolución directamente a imagen PNG -->
+        <img id="mapa-img" class="map-img" alt="Mapa Conceptual Unidad 2" />
+    </div>
+
+    <script>
+        // Definición del código de la Unidad 2
+        const mermaidCode = `graph TD
             ROOT["Características de la Ley Penal<br/>y de los Tipos Penales"]
 
-            %% SECCIÓN 1: LEY PENAL Y ESTRUCTURA
             ROOT -->|define el marco de| B1["La Ley Penal<br/>Norma jurídica estatal que determina delitos y sanciones"]
             B1 -->|se conforma de| B1_EST["Estructura de la Ley Penal"]
             B1_EST -->|hipótesis legal| B1_SUP["Supuesto de Hecho<br/>(Conducta prohibida o mandada)"]
             B1_EST -->|sanción adscrita| B1_CONS["Consecuencia Jurídica<br/>(Pena o Medida de Seguridad)"]
 
-            %% SECCIÓN 2: EL TIPO PENAL Y SUS DOS DIMENSIONES
             ROOT -->|se concreta en| TP["El Tipo Penal<br/>Descripción concreta de la conducta delictiva en la ley"]
             
             TP -->|se concibe como| TP_DIM["Dimensiones Dogmáticas del Tipo"]
             TP_DIM -->|perspectiva estricta| TP_INJ["Tipo de Injusto<br/>Características que fundamentan la materia de la prohibición y el desvalor"]
             TP_DIM -->|perspectiva amplia| TP_AMP["Tipo en Sentido Amplio<br/>Conjunto de todos los presupuestos necesarios para la punibilidad"]
 
-            %% SECCIÓN 3: FUNCIONES DEL TIPO PENAL
             TP -->|desempeña| TP_FUNC["Funciones del Tipo Penal"]
             TP_FUNC -->|función 1| F1["Seleccionadora<br/>Elige las conductas más graves que lesionan Bienes Jurídicos"]
             TP_FUNC -->|función 2| F2["De Garantía<br/>Límite al arbitrio judicial (Nullum crimen sine lege)"]
             TP_FUNC -->|función 3| F3["Motivadora<br/>Incita a los ciudadanos a abstenerse de cometer el delito"]
 
-            %% SECCIÓN 4: ELEMENTOS DEL TIPO PENAL (OBJETIVO / SUBJETIVO / NORMATIVO)
             TP -->|se estructura en| EL["Elementos del Tipo Penal"]
             
             EL -->|dimensión material| EL_OBJ["Tipo Objetivo<br/>• Acción / Omisión humana<br/>• Sujeto Activo, Pasivo y Estado<br/>• Objeto Material y Bien Jurídico<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado (cuando el tipo lo exija)"]
@@ -111,7 +110,6 @@
             
             EL -->|dimensión valorativa| EL_NORM["Elementos Normativos<br/>Términos que requieren valoración cultural o concepto estrictamente jurídico"]
 
-            %% DESGLOSE DEL TIPO SUBJETIVO: DOLO Y CULPA
             EL_SUBJ -->|forma dolo| SUBJ_DOLO["El Dolo<br/>Conocimiento y voluntad de realizar el tipo objetivo"]
             SUBJ_DOLO -->|modalidad 1| D1["Intención / Dolo Directo de 1er Grado<br/>El autor busca expresamente la realización del resultado"]
             SUBJ_DOLO -->|modalidad 2| D2["Dolo Directo de 2do Grado / Consecuencias Necesarias"]
@@ -123,101 +121,39 @@
 
             EL_SUBJ -->|requiere a veces| SUBJ_ESP["Elementos Subjetivos Específicos<br/>Ánimo, fin, intención o propósito particular exigido normativamente"]
 
-            %% SECCIÓN 5: CLASIFICACIÓN DEL TIPO PENAL
             TP -->|se clasifica en| TP_CLAS["Clasificación de los Tipos Penales<br/>• Por el resultado: Mera Actividad vs. Resultado<br/>• Por la temporalidad: Instantáneo, Permanente y Continuado<br/>• Por la afectación: Lesión vs. Peligro (Concreto/Abstracto)<br/>• Por los sujetos: Unisubjetivo vs. Plurisubjetivo / Común vs. Especial"]
 
-            %% SECCIÓN 6: TRIADA CONCEPTUAL (PUNIBILIDAD, PUNICIÓN Y PENA)
             TP -->|determina la consecuencia| TRIADA["Fases de la Sanción Penal"]
             
             TRIADA -->|1. Fase Legislativa| PUN_1["Punibilidad<br/>Merecimiento abstracto de pena fijado en la ley con límites mínimos y máximos"]
             TRIADA -->|2. Fase Judicial| PUN_2["Punición<br/>Fijación concreta e individualizada de la pena impuesta por el Juez en la sentencia"]
-            TRIADA -->|3. Fase Ejecutiva| PUN_3["Pena<br/>Ejecución y aplicación efectiva de la sanción orientada a la Reinserción Social"]
-        </div>
-    </div>
+            TRIADA -->|3. Fase Ejecutiva| PUN_3["Pena<br/>Ejecución y aplicación efectiva de la sanción orientada a la Reinserción Social"]`;
 
-    <!-- Script de Inicialización Garantizada y Eventos de Descarga -->
-    <script>
-        // Inicializar Mermaid
-        mermaid.initialize({ 
-            startOnLoad: true, 
-            theme: 'default',
-            flowchart: { curve: 'basis' }
-        });
-
-        // Esperar a que el DOM cargue completamente
-        document.addEventListener('DOMContentLoaded', () => {
-            const btnPNG = document.getElementById('btn-png');
-            const btnSVG = document.getElementById('btn-svg');
-
-            btnPNG.addEventListener('click', () => exportarMapa('png'));
-            btnSVG.addEventListener('click', () => exportarMapa('svg'));
-        });
-
-        function exportarMapa(formato) {
-            const svgContainer = document.querySelector('.mermaid svg');
-            
-            if (!svgContainer) {
-                alert('El diagrama se está dibujando en pantalla. Por favor reintenta en 2 segundos.');
-                return;
-            }
-
-            // Clonar SVG y preparar atributos
-            const svgClon = svgContainer.cloneNode(true);
-            svgClon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-
-            // Añadir fondo blanco
-            const fondo = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-            fondo.setAttribute('width', '100%');
-            fondo.setAttribute('height', '100%');
-            fondo.setAttribute('fill', '#ffffff');
-            svgClon.insertBefore(fondo, svgClon.firstChild);
-
-            const serializer = new XMLSerializer();
-            const svgText = serializer.serializeToString(svgClon);
-
-            if (formato === 'svg') {
-                const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-                descargarArchivo(blob, 'Mapa_Conceptual_Unidad2.svg');
-            } else if (formato === 'png') {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                const img = new Image();
-
-                const viewBox = svgContainer.viewBox.baseVal;
-                const ancho = viewBox.width || 1300;
-                const alto = viewBox.height || 900;
-
-                // Escala de calidad
-                const escala = 2;
-                canvas.width = (ancho + 40) * escala;
-                canvas.height = (alto + 40) * escala;
-
-                const blobSVG = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-                const url = URL.createObjectURL(blobSVG);
-
-                img.onload = () => {
-                    ctx.scale(escala, escala);
-                    ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.drawImage(img, 20, 20);
-                    URL.revokeObjectURL(url);
-
-                    canvas.toBlob((blobPNG) => {
-                        descargarArchivo(blobPNG, 'Mapa_Conceptual_Unidad2.png');
-                    }, 'image/png');
-                };
-
-                img.src = url;
-            }
+        // Generar URL directa de imagen PNG desde servidor de renderizado
+        function encodeMermaid(str) {
+            return btoa(unescape(encodeURIComponent(str)));
         }
 
-        function descargarArchivo(blob, nombreArchivo) {
-            const enlace = document.createElement('a');
-            enlace.href = URL.createObjectURL(blob);
-            enlace.download = nombreArchivo;
-            document.body.appendChild(enlace);
-            enlace.click();
-            document.body.removeChild(enlace);
+        const pngUrl = 'https://kroki.io/mermaid/png/' + encodeMermaid(mermaidCode);
+
+        // Asignar imagen a la pantalla
+        document.getElementById('mapa-img').src = pngUrl;
+
+        // Función de descarga que fuerza el archivo .png real
+        function descargarPNGDirecto() {
+            fetch(pngUrl)
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales_Unidad2.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(() => alert('No se pudo descargar la imagen. Intenta de nuevo.'));
         }
     </script>
 
