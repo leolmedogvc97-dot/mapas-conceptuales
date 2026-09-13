@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mapa Conceptual - Derecho Penal</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
       --bg-color: #f8fafc;
@@ -31,14 +32,43 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 40px 20px;
+      padding: 20px;
     }
 
+    /* BOTÓN PARA DESCARGAR IMAGEN */
+    .btn-download {
+      margin-bottom: 20px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      color: #ffffff;
+      background-color: #0284c7;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: background-color 0.2s ease, transform 0.1s ease;
+      z-index: 10;
+    }
+
+    .btn-download:hover {
+      background-color: #0369a1;
+    }
+
+    .btn-download:active {
+      transform: scale(0.98);
+    }
+
+    /* CONTENEDOR PRINCIPAL QUE SE CONVERTIRÁ EN IMAGEN */
     .map-viewport {
       position: relative;
       width: 1350px;
-      height: 1050px;
+      height: 720px;
       margin: auto;
+      background-color: var(--bg-color);
+      background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
+      background-size: 24px 24px;
+      padding: 10px;
     }
 
     #svgCanvas {
@@ -103,6 +133,9 @@
   </style>
 </head>
 <body>
+
+  <!-- BOTÓN DE DESCARGA -->
+  <button class="btn-download" onclick="downloadImage()">📷 Descargar Imagen para Word</button>
 
   <div class="map-viewport" id="viewport">
     <svg id="svgCanvas"></svg>
@@ -198,17 +231,6 @@
       <p><b>• Punibilidad:</b> Amenaza legal abstracta (Legislativo).<br><b>• Punición:</b> Fijación judicial en sentencia (Judicial).<br><b>• Pena:</b> Ejecución penitenciaria (Ejecutivo).</p>
       <div class="dot dot-bottom"></div>
     </div>
-
-    <!-- DOCTRINA APA 7 -->
-    <div class="node node-main" id="n_doctrina" style="top: 760px; left: 225px; width: 900px;">
-      <h3>Referencias Bibliográficas (APA 7.ª ed.)</h3>
-      <p style="margin-top: 6px;">
-        • <b>Díaz Aranda, E. (2014).</b> <i>Lecciones de derecho penal (para el nuevo sistema de justicia en México)</i>. IIJ-UNAM / Straff.<br>
-        • <b>Mir Puig, S. (2006).</b> <i>Derecho penal. Parte general</i> (8.ª ed.). Reppertor.<br>
-        • <b>Muñoz Conde, F., & García Arán, M. (2010).</b> <i>Derecho penal. Parte general</i> (8.ª ed.). Tirant lo Blanch.<br>
-        • <b>Zaffaroni, E. R., Alagia, A., & Slokar, A. (2002).</b> <i>Manual de derecho penal. Parte general</i>. Ediar.
-      </p>
-    </div>
   </div>
 
   <script>
@@ -228,8 +250,7 @@
       ['n7', 'n_antijuridicidad'],
       ['n_antijuridicidad', 'n_culpabilidad'],
       ['n9', 'n10'],
-      ['n10', 'n11'],
-      ['n11', 'n_doctrina']
+      ['n10', 'n11']
     ];
 
     function getIntersectionPoint(rect, targetPoint) {
@@ -277,6 +298,21 @@
 
           svg.appendChild(line);
         }
+      });
+    }
+
+    // FUNCIONALIDAD PARA DESCARGAR EL MAPA COMO IMAGEN PNG
+    function downloadImage() {
+      const viewport = document.getElementById('viewport');
+      html2canvas(viewport, {
+        scale: 2, // Alta resolución para Word
+        useCORS: true,
+        backgroundColor: "#f8fafc"
+      }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = 'Mapa_Conceptual_Derecho_Penal.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
       });
     }
 
