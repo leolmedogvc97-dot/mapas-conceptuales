@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa Conceptual - La Ley Penal</title>
+  <title>Mapa Conceptual - Derecho Penal Completo</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -12,7 +12,7 @@
       --border-blue: #0070f3;
       --border-dark: #0f172a;
       --text-dark: #0f172a;
-      --line-color: #718096;
+      --line-color: #64748b;
     }
 
     * {
@@ -35,7 +35,6 @@
       padding: 20px 0;
     }
 
-    /* BARRA DE HERRAMIENTAS SUPERIOR */
     .toolbar {
       display: flex;
       gap: 12px;
@@ -60,23 +59,20 @@
 
     .btn-edit { background-color: #0f172a; }
     .btn-edit:hover { background-color: #334155; }
-    
     .btn-edit.active { background-color: #16a34a; }
 
     .btn:active { transform: scale(0.97); }
 
-    /* LIENZO PRINCIPAL DEL MAPA CONCEPTUAL */
     .map-viewport {
       position: relative;
-      width: 1350px;
-      height: 720px;
+      width: 1380px;
+      height: 750px;
       margin: auto;
       background-color: var(--bg-color);
       background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
       background-size: 24px 24px;
     }
 
-    /* SVG PARA LÍNEAS */
     #svgCanvas {
       position: absolute;
       top: 0;
@@ -89,16 +85,15 @@
 
     line {
       stroke: var(--line-color);
-      stroke-width: 1.8;
+      stroke-width: 2;
     }
 
-    /* ESTILO DE LOS NODOS */
     .node {
       position: absolute;
       background: var(--card-bg);
       border: 2px solid var(--border-blue);
       border-radius: 10px;
-      padding: 12px 16px;
+      padding: 12px 14px;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
       z-index: 2;
       display: flex;
@@ -114,26 +109,26 @@
       background: #e2e8f0;
     }
 
-    /* ESTILO CUANDO LA EDICIÓN ESTÁ ACTIVA */
     .editing .node {
       border-style: dashed;
       cursor: text;
     }
 
     .node h3 {
-      font-size: 0.98rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--text-dark);
-      margin-bottom: 3px;
+      margin-bottom: 4px;
     }
 
     .node p {
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       color: #1e293b;
       line-height: 1.35;
+      text-align: left;
+      width: 100%;
     }
 
-    /* PUNTOS AZULES */
     .dot {
       position: absolute;
       width: 8px;
@@ -141,7 +136,6 @@
       background-color: var(--border-blue);
       border-radius: 50%;
     }
-    .dot-top { top: -5px; left: calc(50% - 4px); }
     .dot-bottom { bottom: -5px; left: calc(50% - 4px); }
   </style>
 </head>
@@ -155,110 +149,109 @@
   <div class="map-viewport" id="viewport">
     <svg id="svgCanvas"></svg>
 
-    <!-- NODO PRINCIPAL -->
-    <div class="node node-main" id="n_root" style="top: 20px; left: 495px; width: 360px;">
+    <!-- RAIZ -->
+    <div class="node node-main" id="n_root" style="top: 20px; left: 510px; width: 360px;">
       <h3>Derecho Penal y Teoría del Delito</h3>
       <p style="text-align: center;"><b>Sistema Normativo, Dogmática y Sanción Penal</b></p>
       <div class="dot dot-bottom"></div>
     </div>
 
     <!-- NIVEL 1 -->
-    <div class="node" id="n1" style="top: 150px; left: 30px; width: 270px;">
+    <div class="node" id="n1" style="top: 140px; left: 20px; width: 260px;">
       <p><b>Sistema normativo jurídico y formal</b></p>
       <p>Potestad punitiva del Estado (Ius Puniendi): Emisión, Aplicación y Ejecución.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n2" style="top: 150px; left: 340px; width: 210px;">
+    <div class="node" id="n2" style="top: 140px; left: 310px; width: 210px;">
       <h3>Ley Penal</h3>
       <p>Norma que define conductas delictivas y sanciones.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n3" style="top: 150px; left: 590px; width: 220px;">
+    <div class="node" id="n3" style="top: 140px; left: 550px; width: 220px;">
       <h3>Tipos de Normas Penales</h3>
       <p>Clasificación técnica de los preceptos legales.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n5" style="top: 150px; left: 850px; width: 190px;">
+    <div class="node" id="n5" style="top: 140px; left: 800px; width: 190px;">
       <p>• Completa<br>• Incompleta<br>• En blanco</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n_jerarquia" style="top: 150px; left: 1070px; width: 250px;">
+    <div class="node" id="n_jerarquia" style="top: 140px; left: 1020px; width: 340px;">
       <h3>Jerarquía y Principios</h3>
-      <p>• Subordinación CPEUM / DDHH<br>• Legalidad y Taxatividad<br>• Lesividad de Bienes Jurídicos</p>
+      <p>• Subordinación a la Constitución y Tratados Internacionales (DDHH)<br>• Principio de Legalidad y Taxatividad (Nullum crimen, nulla poena sine lege)<br>• Lesividad y protección exclusiva de Bienes Jurídicos</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n4" style="top: 280px; left: 340px; width: 210px;">
+    <div class="node" id="n4" style="top: 280px; left: 310px; width: 210px;">
       <h3>Estructura</h3>
       <p>• Supuesto de hecho<br>• Consecuencia jurídica</p>
       <div class="dot dot-bottom"></div>
     </div>
 
     <!-- NIVEL 2 -->
-    <div class="node" id="n6" style="top: 400px; left: 30px; width: 270px;">
+    <div class="node" id="n6" style="top: 410px; left: 20px; width: 260px;">
       <p><b>Descripción del supuesto y consecuencia</b></p>
       <p>Garantía de estricta legalidad frente al arbitrio estatal.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n7" style="top: 400px; left: 340px; width: 210px;">
+    <div class="node" id="n7" style="top: 410px; left: 310px; width: 210px;">
       <h3>El Tipo Penal</h3>
       <p>Conducta-típica descrita en la ley penal.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n8" style="top: 400px; left: 590px; width: 230px;">
-      <h3>Elementos</h3>
-      <p><b>• Objetivos:</b> Acción/omisión, nexo causal, resultado.<br><b>• Subjetivos:</b> Dolo o Culpa.<br><b>• Normativos:</b> Valoraciones jurídicas y culturales.</p>
+    <div class="node" id="n8" style="top: 410px; left: 550px; width: 270px;">
+      <h3>Elementos del Tipo</h3>
+      <p><b>• Objetivos:</b> Acción/omisión, nexo causal, resultado material.<br><b>• Subjetivos:</b> Dolo, Culpa o Imprudencia e intenciones específicas.<br><b>• Normativos:</b> Valoraciones culturales y conceptos jurídicos.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n_antijuridicidad" style="top: 400px; left: 860px; width: 220px;">
+    <div class="node" id="n_antijuridicidad" style="top: 410px; left: 850px; width: 240px;">
       <h3>Antijuridicidad</h3>
-      <p>Desvalor de acción y resultado. Ausencia de causas de justificación.</p>
+      <p>Desvalor de la conducta y resultado. Ausencia de causas de justificación (ej. legítima defensa).</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n_culpabilidad" style="top: 400px; left: 1110px; width: 210px;">
+    <div class="node" id="n_culpabilidad" style="top: 410px; left: 1120px; width: 240px;">
       <h3>Culpabilidad</h3>
-      <p>Imputabilidad, conciencia de ilicitud y juicio de reproche.</p>
+      <p>Imputabilidad, conocimiento de la antijuridicidad y juicio de reproche personal.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
     <!-- NIVEL 3 -->
-    <div class="node" id="n9" style="top: 570px; left: 30px; width: 280px;">
-      <p><b>Clasificación de los tipos</b></p>
-      <p>• <b>Estructura:</b> Básico, agravado, atenuado.<br>• <b>Subjetivo:</b> Doloso y Culposo.<br>• <b>Bien Jurídico:</b> Daño o Peligro.</p>
+    <div class="node" id="n9" style="top: 590px; left: 20px; width: 270px;">
+      <p><b>Clasificación Dogmática</b></p>
+      <p>• Resultado vs. Mera Actividad<br>• Instantáneo vs. Permanente<br>• Doloso vs. Culposo / Daño vs. Peligro</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n10" style="top: 570px; left: 350px; width: 200px;">
+    <div class="node" id="n10" style="top: 590px; left: 320px; width: 190px;">
       <h3>Funciones</h3>
       <p>• Seleccionadora<br>• De garantía<br>• Motivadora</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n11" style="top: 570px; left: 590px; width: 290px;">
-      <p><b>Punibilidad, Punición y Pena</b></p>
-      <p><b>• Punibilidad:</b> Amenaza legal abstracta (Legislativo).<br><b>• Punición:</b> Fijación judicial en sentencia (Judicial).<br><b>• Pena:</b> Ejecución penitenciaria (Ejecutivo).</p>
+    <div class="node" id="n11" style="top: 590px; left: 540px; width: 380px;">
+      <p><b>Punibilidad, Punición y Ejecución</b></p>
+      <p><b>• Punibilidad (Fase Legislativa):</b> Amenaza abstracta fijada en la norma con mínimos y máximos.<br><b>• Punición (Fase Judicial):</b> Fijación concreta de la pena por el juez al dictar sentencia.<br><b>• Ejecución Penal (Fase Administrativa):</b> Cumplimiento en el sistema penitenciario.</p>
       <div class="dot dot-bottom"></div>
     </div>
   </div>
 
   <script>
-    /* CONEXIONES CORREGIDAS DOGMÁTICAMENTE */
     const connections = [
       ['n_root', 'n1'],
       ['n_root', 'n2'],
       ['n_root', 'n_jerarquia'],
       ['n1', 'n2'],
-      ['n2', 'n3'],            /* Ley Penal -> Tipos de Normas Penales */
-      ['n2', 'n4'],            /* Ley Penal -> Estructura */
-      ['n3', 'n5'],            /* Tipos de Normas Penales -> Completa / Incompleta / En blanco */
+      ['n2', 'n3'],
+      ['n2', 'n4'],
+      ['n3', 'n5'],
       ['n4', 'n7'],
       ['n6', 'n7'],
       ['n7', 'n8'],
@@ -353,7 +346,7 @@
         backgroundColor: "#f4f7fa"
       }).then(canvas => {
         const a = document.createElement('a');
-        a.download = 'Mapa_Conceptual_Ley_Penal.png';
+        a.download = 'Mapa_Conceptual_Derecho_Penal_Completo.png';
         a.href = canvas.toDataURL('image/png');
         a.click();
       });
