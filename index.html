@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editor Visual Interactivo - Ley Penal y Tipos Penales</title>
     
-    <!-- Tailwind CSS para Interfaz -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- jsPDF para exportación vectorial a PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -32,11 +30,22 @@
             cursor: move;
             transition: border 0.15s ease, box-shadow 0.15s ease;
             touch-action: none;
+            user-select: text;
         }
 
         .node-card.selected {
             outline: 3px solid #3b82f6 !important;
             box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
+        }
+
+        .editable-text {
+            outline: none;
+            cursor: text;
+        }
+
+        .editable-text:focus {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-radius: 4px;
         }
 
         svg.connections-layer {
@@ -48,7 +57,7 @@
             pointer-events: none;
         }
 
-        svg.connections-layer path, svg.connections-layer text {
+        svg.connections-layer path, svg.connections-layer g {
             pointer-events: visiblePainted;
             cursor: pointer;
         }
@@ -58,24 +67,22 @@
             stroke-width: 3.5px !important;
         }
 
-        /* Ocultar barra de scroll en paneles */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="w-screen h-screen flex flex-col font-sans">
 
-    <!-- BARRA SUPERIOR (TOOLBAR) -->
+    <!-- BARRA SUPERIOR -->
     <header class="h-14 bg-slate-900 text-white flex items-center justify-between px-4 z-40 border-b border-slate-700 shadow-md">
         <div class="flex items-center space-x-2">
             <span class="font-bold text-base text-blue-400">Editor Penal U2</span>
             <span class="text-slate-500">|</span>
-            <button onclick="agregarNodoPrompt()" class="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">➕ Nuevo Concepto</button>
+            <button onclick="agregarNodo()" class="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">➕ Nuevo Concepto</button>
             <button onclick="activarModoConexion()" id="btn-connect" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">🔗 Nueva Conexión</button>
             <button onclick="eliminarSeleccionado()" class="bg-rose-600 hover:bg-rose-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">🗑️ Eliminar</button>
         </div>
 
-        <!-- Controles de Historial y Zoom -->
         <div class="flex items-center space-x-2">
             <button onclick="deshacer()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↶ Deshacer</button>
             <button onclick="rehacer()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↷ Rehacer</button>
@@ -86,7 +93,6 @@
             <button onclick="resetZoom()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↔ Restablecer</button>
         </div>
 
-        <!-- Guardado y Exportación -->
         <div class="flex items-center space-x-2">
             <button onclick="guardarJSON()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded text-xs font-semibold">💾 Guardar</button>
             <label class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer">
@@ -100,7 +106,6 @@
     </header>
 
     <div class="flex-1 flex relative overflow-hidden">
-        <!-- LIENZO PRINCIPAL (WORKSPACE) -->
         <main id="workspace" class="flex-1 relative overflow-hidden w-full h-full">
             <div id="canvas-container" class="absolute top-0 left-0 w-[10000px] h-[10000px] origin-top-left">
                 <svg id="svg-layer" class="connections-layer">
@@ -113,12 +118,10 @@
                         </marker>
                     </defs>
                 </svg>
-                <!-- Nodos insertados dinámicamente -->
                 <div id="nodes-container"></div>
             </div>
         </main>
 
-        <!-- PANEL LATERAL DE PROPIEDADES -->
         <aside id="inspector-panel" class="w-80 bg-white border-l border-slate-200 shadow-xl flex flex-col z-30">
             <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                 <h3 class="font-bold text-slate-800 text-sm">Panel de Estilos</h3>
@@ -126,14 +129,12 @@
             </div>
             
             <div id="inspector-content" class="p-4 space-y-4 overflow-y-auto flex-1 no-scrollbar text-xs">
-                <p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea de conexión para editar sus propiedades visuales.</p>
+                <p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea para modificar su formato en este panel, o haz clic en cualquier texto del cuadro para escribir directamente.</p>
             </div>
         </aside>
     </div>
 
-    <!-- SISTEMA INTERACTIVO JS -->
     <script>
-        // Estructura de Datos Nativa inicial (Mapa Conceptual Unidad 2 Derecho Penal completísimo)
         let appState = {
             zoom: 1,
             pan: { x: 50, y: 50 },
@@ -176,7 +177,6 @@
         let historyStack = [];
         let redoStack = [];
 
-        // Inicialización de la Interfaz
         window.onload = () => {
             guardarHistorial();
             render();
@@ -211,18 +211,16 @@
             }
         }
 
-        // Renderizador Vectorial del Lienzo
         function render() {
             const container = document.getElementById("nodes-container");
             const svgLayer = document.getElementById("svg-layer");
             container.innerHTML = "";
             
-            // Limpiar líneas anteriores excepto defs
             const defs = svgLayer.querySelector("defs");
             svgLayer.innerHTML = "";
             svgLayer.appendChild(defs);
 
-            // Renderizar Nodos
+            // Renderizar Nodos con Edición Directa Inline
             appState.nodes.forEach(node => {
                 const div = document.createElement("div");
                 div.className = `node-card p-3 rounded-lg shadow-md border ${selectedNodeId === node.id ? 'selected' : ''}`;
@@ -236,12 +234,27 @@
                 div.style.fontSize = `${node.fontSize}px`;
 
                 div.innerHTML = `
-                    <div class="font-bold border-b border-black/10 pb-1 mb-1 pointer-events-none">${node.title}</div>
-                    <div class="whitespace-pre-wrap pointer-events-none opacity-90">${node.text}</div>
+                    <div contenteditable="true" class="editable-text font-bold border-b border-black/10 pb-1 mb-1" data-field="title">${node.title}</div>
+                    <div contenteditable="true" class="editable-text whitespace-pre-wrap opacity-90" data-field="text">${node.text}</div>
                 `;
 
+                // Guardar cambios al editar el texto directamente dentro del cuadro
+                const editables = div.querySelectorAll(".editable-text");
+                editables.forEach(elem => {
+                    elem.addEventListener("input", (e) => {
+                        const field = e.target.getAttribute("data-field");
+                        node[field] = e.target.innerText;
+                        renderInspector();
+                    });
+                    elem.addEventListener("blur", () => {
+                        guardarHistorial();
+                    });
+                    elem.addEventListener("mousedown", (e) => {
+                        e.stopPropagation(); // Evitar arrastre mientras editas texto
+                    });
+                });
+
                 div.addEventListener("mousedown", (e) => iniciarArrastreNodo(e, node.id));
-                div.addEventListener("dblclick", () => editarTextoNodo(node.id));
                 div.addEventListener("click", (e) => {
                     e.stopPropagation();
                     if (connectingSourceId) {
@@ -261,11 +274,9 @@
                 if (!fromNode || !toNode) return;
 
                 const pos = calcularPuntosConexion(fromNode, toNode);
-                
                 const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 
-                // Línea curva Bezier
                 const dx = pos.x2 - pos.x1;
                 const dy = pos.y2 - pos.y1;
                 const d = `M ${pos.x1} ${pos.y1} C ${pos.x1 + dx/2} ${pos.y1}, ${pos.x2 - dx/2} ${pos.y2}, ${pos.x2} ${pos.y2}`;
@@ -285,7 +296,6 @@
 
                 g.appendChild(path);
 
-                // Etiqueta de la Línea (Palabra de enlace)
                 if (conn.label) {
                     const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
                     const midX = (pos.x1 + pos.x2) / 2;
@@ -297,13 +307,7 @@
                     text.setAttribute("font-size", "11px");
                     text.setAttribute("font-weight", "600");
                     text.setAttribute("text-anchor", "middle");
-                    text.setAttribute("class", "bg-white px-1");
                     text.textContent = conn.label;
-
-                    text.addEventListener("dblclick", (e) => {
-                        e.stopPropagation();
-                        editarTextoConexion(conn.id);
-                    });
 
                     g.appendChild(text);
                 }
@@ -314,7 +318,6 @@
             renderInspector();
         }
 
-        // Cálculo dinámico de puntos de borde entre rectángulos
         function calcularPuntosConexion(n1, n2) {
             const w1 = n1.width || 220;
             const h1 = document.getElementById(`node-${n1.id}`)?.offsetHeight || 80;
@@ -332,7 +335,6 @@
             };
         }
 
-        // Arrastre e Interacción de Nodos
         function iniciarArrastreNodo(e, id) {
             if (e.button !== 0 || connectingSourceId) return;
             e.stopPropagation();
@@ -360,7 +362,6 @@
             window.addEventListener("mouseup", soltar);
         }
 
-        // Pan & Zoom en Lienzo
         function setupPanZoom() {
             const workspace = document.getElementById("workspace");
             let isPanning = false;
@@ -409,16 +410,17 @@
             container.style.transform = `translate(${appState.pan.x}px, ${appState.pan.y}px) scale(${appState.zoom})`;
         }
 
-        // Selección y Panel de Inspección
         function seleccionarNodo(id) {
             selectedNodeId = id;
             selectedConnectionId = null;
+            renderInspector();
             render();
         }
 
         function seleccionarConexion(id) {
             selectedConnectionId = id;
             selectedNodeId = null;
+            renderInspector();
             render();
         }
 
@@ -493,7 +495,7 @@
                 `;
             } else {
                 targetType.textContent = "Ninguno";
-                panel.innerHTML = `<p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea de conexión para editar sus propiedades visuales.</p>`;
+                panel.innerHTML = `<p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea para modificar su formato en este panel, o haz clic en cualquier texto del cuadro para escribir directamente.</p>`;
             }
         }
 
@@ -518,16 +520,11 @@
             return "#3b82f6";
         }
 
-        // Operaciones CRUD
-        function agregarNodoPrompt() {
-            const title = prompt("Título del concepto:", "Nuevo Concepto");
-            if (!title) return;
-            const text = prompt("Descripción / Contenido:", "Detalle o subtemas");
-            
+        function agregarNodo() {
             const newNode = {
                 id: "node_" + Date.now(),
-                title: title,
-                text: text || "",
+                title: "Nuevo Concepto",
+                text: "Haz clic para editar este texto",
                 x: 300 - appState.pan.x,
                 y: 200 - appState.pan.y,
                 bg: "#ffffff",
@@ -549,17 +546,15 @@
             }
             connectingSourceId = selectedNodeId;
             document.getElementById("btn-connect").classList.add("ring-2", "ring-yellow-400");
-            alert("Ahora haz clic en el nodo de destino.");
         }
 
         function finalizarConexion(targetId) {
             if (connectingSourceId && connectingSourceId !== targetId) {
-                const label = prompt("Palabra de enlace (opcional):", "se relaciona con");
                 appState.connections.push({
                     id: "conn_" + Date.now(),
                     from: connectingSourceId,
                     to: targetId,
-                    label: label || "",
+                    label: "se relaciona con",
                     color: "#64748b",
                     width: 1.5,
                     dashed: false
@@ -571,60 +566,31 @@
             render();
         }
 
-        function editarTextoNodo(id) {
-            const node = appState.nodes.find(n => n.id === id);
-            const title = prompt("Editar Título:", node.title);
-            if (title !== null) {
-                const text = prompt("Editar Contenido (usa \\n para saltos de línea):", node.text);
-                if (text !== null) {
-                    node.title = title;
-                    node.text = text;
-                    guardarHistorial();
-                    render();
-                }
-            }
-        }
-
-        function editarTextoConexion(id) {
-            const conn = appState.connections.find(c => c.id === id);
-            const label = prompt("Editar palabra de enlace:", conn.label);
-            if (label !== null) {
-                conn.label = label;
+        function eliminarSeleccionado() {
+            if (selectedNodeId) {
+                appState.nodes = appState.nodes.filter(n => n.id !== selectedNodeId);
+                appState.connections = appState.connections.filter(c => c.from !== selectedNodeId && c.to !== selectedNodeId);
+                selectedNodeId = null;
+                guardarHistorial();
+                render();
+            } else if (selectedConnectionId) {
+                appState.connections = appState.connections.filter(c => c.id !== selectedConnectionId);
+                selectedConnectionId = null;
                 guardarHistorial();
                 render();
             }
         }
 
-        function eliminarSeleccionado() {
-            if (selectedNodeId) {
-                if (confirm("¿Eliminar este concepto y sus conexiones?")) {
-                    appState.nodes = appState.nodes.filter(n => n.id !== selectedNodeId);
-                    appState.connections = appState.connections.filter(c => c.from !== selectedNodeId && c.to !== selectedNodeId);
-                    selectedNodeId = null;
-                    guardarHistorial();
-                    render();
-                }
-            } else if (selectedConnectionId) {
-                if (confirm("¿Eliminar esta conexión?")) {
-                    appState.connections = appState.connections.filter(c => c.id !== selectedConnectionId);
-                    selectedConnectionId = null;
-                    guardarHistorial();
-                    render();
-                }
-            }
-        }
-
         function setupKeyboardShortcuts() {
             window.addEventListener("keydown", (e) => {
-                if (e.key === "Delete" || e.key === "Backspace") {
-                    if (document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+                if (e.key === "Delete") {
+                    if (document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA" && !document.activeElement.isContentEditable) {
                         eliminarSeleccionado();
                     }
                 }
             });
         }
 
-        // Guardar & Cargar Proyecto JSON
         function guardarJSON() {
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
             const dlAnchorElem = document.createElement('a');
@@ -650,7 +616,6 @@
             fileReader.readAsText(event.target.files[0]);
         }
 
-        // EXPORTACIÓN A SVG, PNG Y PDF (Cero pixelado)
         function exportarSVG() {
             const svgLayer = document.getElementById("svg-layer").cloneNode(true);
             const container = document.getElementById("nodes-container").cloneNode(true);
@@ -661,7 +626,6 @@
             wrapper.setAttribute("height", "2500");
             wrapper.style.backgroundColor = "#ffffff";
 
-            // Inyectar HTML renderizado en foreignObject para SVG vectorial perfecto
             const foreignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
             foreignObject.setAttribute("width", "100%");
             foreignObject.setAttribute("height", "100%");
@@ -688,7 +652,6 @@
         }
 
         function exportarPNG() {
-            alert("Generando PNG en Ultra HD (4x)...");
             const svgLayer = document.getElementById("svg-layer").cloneNode(true);
             const container = document.getElementById("nodes-container").cloneNode(true);
             
@@ -733,9 +696,7 @@
         function exportarPDF() {
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            alert("Exportando PDF A4...");
             
-            // Reutiliza render PNG para incrustar en PDF nítido
             const canvas = document.createElement("canvas");
             canvas.width = 2400;
             canvas.height = 3200;
