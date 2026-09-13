@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Línea de Tiempo Interactiva</title>
+  <title>Mapa Conceptual - La Ley Penal y el Tipo Penal</title>
   <style>
     :root {
       --bg-color: #f8fafc;
@@ -40,24 +40,27 @@
       align-items: center;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       z-index: 100;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .toolbar h1 {
-      font-size: 1.25rem;
+      font-size: 1.15rem;
       font-weight: 700;
     }
 
     .btn-group {
       display: flex;
-      gap: 12px;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .btn {
-      padding: 8px 16px;
+      padding: 8px 14px;
       border-radius: 8px;
       border: none;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -65,17 +68,11 @@
       transition: all 0.2s ease;
     }
 
-    .btn-toggle {
-      background: #0284c7;
-      color: white;
-    }
-    .btn-toggle:hover { background: #0369a1; }
-
-    .btn-add {
-      background: #2563eb;
-      color: white;
-    }
+    .btn-add { background: #2563eb; color: white; }
     .btn-add:hover { background: #1d4ed8; }
+
+    .btn-secondary { background: #475569; color: white; }
+    .btn-secondary:hover { background: #334155; }
 
     /* ÁREA DE TRABAJO CON PATRÓN DE PUNTOS */
     .viewport {
@@ -85,184 +82,59 @@
       background-color: #f8fafc;
       background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
       background-size: 24px 24px;
+      padding: 60px;
       display: flex;
       justify-content: center;
-      align-items: center;
-      padding: 60px;
     }
 
-    /* LÍNEA DE TIEMPO BASE */
-    .timeline-container {
-      position: relative;
+    /* ESQUEMA / MAPA CONCEPTUAL */
+    .map-container {
       display: flex;
-      transition: all 0.3s ease;
-    }
-
-    /* MODO HORIZONTAL */
-    .timeline-container.horizontal {
-      flex-direction: row;
-      align-items: center;
-      min-width: max-content;
-      padding: 120px 60px;
-    }
-
-    .timeline-container.horizontal .main-line {
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: 50%;
-      height: 5px;
-      background: var(--line-color);
-      transform: translateY(-50%);
-      z-index: 1;
-    }
-
-    /* MODO VERTICAL */
-    .timeline-container.vertical {
       flex-direction: column;
       align-items: center;
-      min-height: max-content;
-      padding: 60px 120px;
+      gap: 40px;
+      min-width: 1000px;
     }
 
-    .timeline-container.vertical .main-line {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      width: 5px;
-      background: var(--line-color);
-      transform: translateX(-50%);
-      z-index: 1;
-    }
-
-    /* ITEM / HITOS */
-    .timeline-node {
-      position: relative;
-      z-index: 2;
+    .row {
       display: flex;
-      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      width: 100%;
+      position: relative;
     }
 
-    /* Alineación Horizontal (Arriba / Abajo) */
-    .timeline-container.horizontal .timeline-node {
-      flex-direction: column;
-      margin: 0 30px;
-      width: 320px;
-    }
-
-    .timeline-container.horizontal .timeline-node.top {
-      justify-content: flex-end;
-      padding-bottom: 35px;
-    }
-
-    .timeline-container.horizontal .timeline-node.bottom {
-      justify-content: flex-start;
-      padding-top: 35px;
-    }
-
-    /* Alineación Vertical (Izquierda / Derecha) */
-    .timeline-container.vertical .timeline-node {
-      flex-direction: row;
-      margin: 30px 0;
-      width: 650px;
-    }
-
-    .timeline-container.vertical .timeline-node.left {
-      justify-content: flex-end;
-      padding-right: 35px;
-    }
-
-    .timeline-container.vertical .timeline-node.right {
-      justify-content: flex-start;
-      padding-left: 35px;
-    }
-
-    /* PUNTO CENTRAL Y LÍNEA PUNTEADA DE CONEXIÓN */
-    .dot-marker {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background: white;
-      border: 4px solid #2563eb;
-      border-radius: 50%;
-      box-shadow: 0 0 0 2px white;
-      z-index: 5;
-    }
-
-    .timeline-container.horizontal .timeline-node.top .dot-marker { bottom: -10px; left: calc(50% - 10px); }
-    .timeline-container.horizontal .timeline-node.bottom .dot-marker { top: -10px; left: calc(50% - 10px); }
-    
-    .timeline-container.vertical .timeline-node.left .dot-marker { right: -10px; top: calc(50% - 10px); }
-    .timeline-container.vertical .timeline-node.right .dot-marker { left: -10px; top: calc(50% - 10px); }
-
-    .connector-dashed {
-      position: absolute;
-      border-style: dashed;
-      border-color: #2563eb;
-      z-index: 2;
-    }
-
-    .timeline-container.horizontal .connector-dashed {
-      width: 0;
-      height: 35px;
-      border-width: 0 0 0 2px;
-      left: 50%;
-    }
-    .timeline-container.horizontal .timeline-node.top .connector-dashed { bottom: 0; }
-    .timeline-container.horizontal .timeline-node.bottom .connector-dashed { top: 0; }
-
-    .timeline-container.vertical .connector-dashed {
-      height: 0;
-      width: 35px;
-      border-width: 2px 0 0 0;
-      top: 50%;
-    }
-    .timeline-container.vertical .timeline-node.left .connector-dashed { right: 0; }
-    .timeline-container.vertical .timeline-node.right .connector-dashed { left: 0; }
-
-    /* TARJETA EXACTA */
-    .stage-card {
+    /* CARD ESTILO DERECHO PENAL */
+    .node-card {
       background: #ffffff;
       border: 2px solid #3b82f6;
-      border-radius: 14px;
-      width: 100%;
-      padding: 18px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      border-radius: 12px;
+      width: 280px;
+      padding: 16px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
       position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
     }
 
-    /* CAMPO DE AÑO */
-    .year-box {
-      display: inline-flex;
-      align-items: center;
-      background: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 4px 10px;
-      margin-bottom: 12px;
+    .node-card.main-root {
+      border-color: #1d4ed8;
+      background: #eff6ff;
+      width: 320px;
+      text-align: center;
     }
 
-    .year-box label {
-      font-size: 0.82rem;
-      color: #64748b;
-      font-weight: 600;
-      margin-right: 6px;
+    .node-card.core-node {
+      border-color: #1e40af;
+      background: #f0f9ff;
+      width: 320px;
+      text-align: center;
     }
 
-    .year-input {
-      border: none;
-      background: transparent;
-      font-weight: 700;
-      color: #2563eb;
-      font-size: 0.95rem;
-      width: 60px;
-      outline: none;
-    }
-
-    /* TÍTULO Y DESCRIPCIÓN EDITABLES */
+    /* CAMPOS EDITABLES */
     .title-input {
-      font-size: 1.15rem;
+      font-size: 1.05rem;
       font-weight: 700;
       color: #0f172a;
       border: 1px transparent dashed;
@@ -275,35 +147,35 @@
 
     .title-input:hover, .title-input:focus {
       border-color: #cbd5e1;
-      background: #f8fafc;
+      background: #ffffff;
     }
 
     .desc-input {
-      font-size: 0.9rem;
-      color: #475569;
+      font-size: 0.88rem;
+      color: #334155;
       border: 1px transparent dashed;
       border-radius: 4px;
       outline: none;
       width: 100%;
-      resize: none;
-      min-height: 48px;
+      resize: vertical;
+      min-height: 60px;
       line-height: 1.4;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       padding: 2px 4px;
     }
 
     .desc-input:hover, .desc-input:focus {
       border-color: #cbd5e1;
-      background: #f8fafc;
+      background: #ffffff;
     }
 
-    /* IMAGEN DE LA ETAPA */
+    /* IMÁGENES */
     .image-preview-container {
       position: relative;
-      margin-bottom: 12px;
-      border-radius: 8px;
+      margin-bottom: 8px;
+      border-radius: 6px;
       overflow: hidden;
-      max-height: 160px;
+      max-height: 120px;
       display: flex;
       justify-content: center;
       background: #f1f5f9;
@@ -318,55 +190,50 @@
 
     .btn-delete-img {
       position: absolute;
-      top: 6px;
-      right: 6px;
+      top: 4px;
+      right: 4px;
       background: rgba(0, 0, 0, 0.7);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       cursor: pointer;
-      font-size: 11px;
+      font-size: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    /* RECUADRO DE COMENTARIOS */
+    /* COMENTARIOS */
     .comments-section {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px;
-      margin-top: 8px;
+      border-radius: 6px;
+      padding: 8px;
+      margin-top: 6px;
     }
 
     .comments-header {
-      font-size: 0.78rem;
+      font-size: 0.72rem;
       font-weight: 700;
       color: #64748b;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 8px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      margin-bottom: 6px;
     }
 
     .comment-bubble {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: 0.85rem;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
       color: #334155;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      gap: 6px;
-      word-break: break-word;
+      gap: 4px;
     }
 
     .btn-del-comment {
@@ -374,58 +241,51 @@
       border: none;
       color: #ef4444;
       cursor: pointer;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: bold;
     }
 
     .comment-form {
       display: flex;
-      gap: 6px;
-      margin-top: 8px;
+      gap: 4px;
+      margin-top: 6px;
     }
 
     .comment-input {
       flex: 1;
       border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 6px 10px;
-      font-size: 0.82rem;
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-size: 0.78rem;
       outline: none;
-    }
-
-    .comment-input:focus {
-      border-color: #3b82f6;
     }
 
     .btn-add-comment {
       background: #3b82f6;
       color: white;
       border: none;
-      border-radius: 6px;
-      padding: 0 12px;
-      font-size: 0.9rem;
+      border-radius: 4px;
+      padding: 0 8px;
+      font-size: 0.8rem;
       font-weight: bold;
       cursor: pointer;
     }
 
-    /* FOOTER DE LA TARJETA */
+    /* FOOTER CARD */
     .card-footer {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-top: 12px;
-      padding-top: 10px;
+      margin-top: 8px;
+      padding-top: 6px;
       border-top: 1px dashed #e2e8f0;
     }
 
     .upload-btn-label {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #2563eb;
       font-weight: 600;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
     .upload-btn-label input { display: none; }
@@ -434,7 +294,7 @@
       background: none;
       border: none;
       color: #ef4444;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 600;
       cursor: pointer;
     }
@@ -442,187 +302,299 @@
 </head>
 <body>
 
-  <!-- ENCABEZADO Y CONTROLES -->
+  <!-- BARRA DE HERRAMIENTAS -->
   <div class="toolbar">
-    <h1>📅 Creador de Línea de Tiempo</h1>
+    <h1>⚖️ Mapa Conceptual: La Ley Penal</h1>
     <div class="btn-group">
-      <button class="btn btn-toggle" onclick="toggleOrientation()">
-        🔄 Orientación: <span id="orientationLabel">Horizontal</span>
-      </button>
-      <button class="btn btn-add" onclick="addStage()">
-        ➕ Agregar Etapa
-      </button>
+      <button class="btn btn-add" onclick="addCustomNode()">➕ Agregar Nodo Libre</button>
+      <button class="btn btn-secondary" onclick="exportJSON()">💾 Exportar JSON</button>
+      <label class="btn btn-secondary">
+        📂 Importar JSON
+        <input type="file" accept=".json" onchange="importJSON(event)" style="display: none;">
+      </label>
     </div>
   </div>
 
-  <!-- ÁREA DE TRABAJO -->
+  <!-- VIAPORT / MAPA -->
   <div class="viewport">
-    <div id="timeline" class="timeline-container horizontal">
-      <div class="main-line"></div>
+    <div id="mapContainer" class="map-container">
+      <!-- Generado dinámicamente -->
     </div>
   </div>
 
   <script>
-    let isHorizontal = true;
+    // DATOS DE TU MAPA CON LA REESTRUCTURACIÓN CORREGIDA
+    let mapData = JSON.parse(localStorage.getItem('penal_map_data')) || {
+      root: {
+        title: "Ley Penal",
+        description: "Fundamento y marco legal del delito."
+      },
+      level1: [
+        {
+          id: "def",
+          title: "Sistema normativo jurídico y formal",
+          description: "Definición del marco normativo del derecho penal.",
+          imageUrl: "",
+          comments: []
+        },
+        {
+          id: "est",
+          title: "Estructura",
+          description: "• Supuesto de hecho\n• Consecuencia jurídica",
+          imageUrl: "",
+          comments: []
+        },
+        {
+          id: "tip_norm",
+          title: "Tipos de normas",
+          description: "• Completa\n• Incompleta\n• En blanco",
+          imageUrl: "",
+          comments: []
+        }
+      ],
+      core: {
+        id: "tipo_penal",
+        title: "El Tipo Penal",
+        description: "Descripción legal de la conducta prohibida y su consecuencia."
+      },
+      level2: [
+        {
+          id: "orig",
+          title: "Origen / Garantía",
+          description: "• Descripción del supuesto de hecho y consecuencia\n• Principio de legalidad (nullum crimen sine lege)",
+          imageUrl: "",
+          comments: []
+        },
+        {
+          id: "elem",
+          title: "Elementos",
+          description: "• Objetivos\n• Subjetivos\n• Normativos",
+          imageUrl: "",
+          comments: []
+        },
+        {
+          id: "func",
+          title: "Funciones",
+          description: "• Seleccionadora\n• De garantía\n• Motivadora",
+          imageUrl: "",
+          comments: []
+        },
+        {
+          id: "clas",
+          title: "Clasificación de los tipos",
+          description: "• Estructura: Básico, agravado, atenuado, especial, etc.\n• Tipo subjetivo: Doloso y Culposo\n• Daño / Peligro",
+          imageUrl: "",
+          comments: []
+        },
+        {
+          id: "puni",
+          title: "Punibilidad, punición y pena",
+          description: "• Punibilidad: Merecimiento de pena / Conminación legal\n• Punición: Fijación del juez\n• Pena: Ejecución administrativa",
+          imageUrl: "",
+          comments: []
+        }
+      ]
+    };
 
-    // DATOS INICIALES
-    let stages = [
-      {
-        id: 1,
-        year: '1995',
-        title: 'Fase Inicial',
-        description: 'Definición de requerimientos y arranque de operaciones.',
-        imageUrl: '',
-        comments: ['Primer análisis de factibilidad completado.']
-      },
-      {
-        id: 2,
-        year: '2006',
-        title: 'Lanzamiento de Producto',
-        description: 'Despliegue de la plataforma para los primeros clientes.',
-        imageUrl: '',
-        comments: ['Se alcanzaron los objetivos del primer trimestre.', 'Comentario de evaluación técnica.']
-      },
-      {
-        id: 3,
-        year: '2018',
-        title: 'Consolidación',
-        description: 'Integración de nuevas herramientas tecnológicas y alcance global.',
-        imageUrl: '',
-        comments: ['Revisión del sistema ejecutada con éxito.']
+    function saveState() {
+      localStorage.setItem('penal_map_data', JSON.stringify(mapData));
+    }
+
+    function createCardHtml(node, path) {
+      const inputCommentId = `input-c-${path.replace(/\[|\]|\./g, '_')}`;
+
+      const commentsHtml = (node.comments || []).map((c, cIdx) => `
+        <div class="comment-bubble">
+          <span>${c}</span>
+          <button class="btn-del-comment" onclick="removeComment('${path}', ${cIdx})">✕</button>
+        </div>
+      `).join('');
+
+      return `
+        <div class="node-card ${node.isRoot ? 'main-root' : ''} ${node.isCore ? 'core-node' : ''}">
+          <input type="text" class="title-input" value="${node.title}" onchange="updatePath('${path}.title', this.value)" placeholder="Título" />
+          <textarea class="desc-input" onchange="updatePath('${path}.description', this.value)" placeholder="Descripción...">${node.description}</textarea>
+
+          ${node.imageUrl ? `
+            <div class="image-preview-container">
+              <img src="${node.imageUrl}" alt="Imagen" />
+              <button class="btn-delete-img" onclick="removeImage('${path}')">✕</button>
+            </div>
+          ` : ''}
+
+          <div class="comments-section">
+            <div class="comments-header">💬 Comentarios (${node.comments ? node.comments.length : 0})</div>
+            ${commentsHtml}
+            <div class="comment-form">
+              <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Comentario..." onkeypress="if(event.key==='Enter') addComment('${path}', '${inputCommentId}')" />
+              <button class="btn-add-comment" onclick="addComment('${path}', '${inputCommentId}')">+</button>
+            </div>
+          </div>
+
+          <div class="card-footer">
+            <label class="upload-btn-label">
+              🖼️ ${node.imageUrl ? 'Cambiar' : 'Imagen'}
+              <input type="file" accept="image/*" onchange="handleImage(event, '${path}')">
+            </label>
+            ${(!node.isRoot && !node.isCore) ? `<button class="btn-delete-node" onclick="removeNode('${path}')">Eliminar</button>` : ''}
+          </div>
+        </div>
+      `;
+    }
+
+    function getByPath(obj, path) {
+      return path.split('.').reduce((acc, part) => {
+        const match = part.match(/(.+)\[(\d+)\]/);
+        if (match) {
+          return acc[match[1]][parseInt(match[2])];
+        }
+        return acc[part];
+      }, obj);
+    }
+
+    function setByPath(obj, path, value) {
+      const parts = path.split('.');
+      let current = obj;
+      for (let i = 0; i < parts.length - 1; i++) {
+        const match = parts[i].match(/(.+)\[(\d+)\]/);
+        if (match) {
+          current = current[match[1]][parseInt(match[2])];
+        } else {
+          current = current[parts[i]];
+        }
       }
-    ];
-
-    function toggleOrientation() {
-      isHorizontal = !isHorizontal;
-      const container = document.getElementById('timeline');
-      const label = document.getElementById('orientationLabel');
-
-      if (isHorizontal) {
-        container.className = 'timeline-container horizontal';
-        label.textContent = 'Horizontal';
+      const last = parts[parts.length - 1];
+      const match = last.match(/(.+)\[(\d+)\]/);
+      if (match) {
+        current[match[1]][parseInt(match[2])] = value;
       } else {
-        container.className = 'timeline-container vertical';
-        label.textContent = 'Vertical';
+        current[last] = value;
       }
+    }
+
+    function updatePath(path, value) {
+      setByPath(mapData, path, value);
+      saveState();
+    }
+
+    function addComment(path, inputId) {
+      const input = document.getElementById(inputId);
+      const text = input.value.trim();
+      if (text) {
+        const node = getByPath(mapData, path);
+        if (!node.comments) node.comments = [];
+        node.comments.push(text);
+        saveState();
+        render();
+      }
+    }
+
+    function removeComment(path, commentIdx) {
+      const node = getByPath(mapData, path);
+      node.comments.splice(commentIdx, 1);
+      saveState();
       render();
     }
 
-    function addStage() {
-      const lastYear = stages.length > 0 ? (parseInt(stages[stages.length - 1].year) || 2020) + 4 : 2026;
-      stages.push({
-        id: Date.now(),
-        year: lastYear.toString(),
-        title: 'Nueva Etapa',
-        description: 'Escribe aquí la descripción de esta etapa.',
-        imageUrl: '',
-        comments: []
-      });
-      render();
-    }
-
-    function removeStage(index) {
-      stages.splice(index, 1);
-      render();
-    }
-
-    function updateField(index, field, value) {
-      stages[index][field] = value;
-    }
-
-    function handleImage(event, index) {
+    function handleImage(event, path) {
       const file = event.target.files[0];
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          stages[index].imageUrl = e.target.result;
+          setByPath(mapData, path + '.imageUrl', e.target.result);
+          saveState();
           render();
         };
         reader.readAsDataURL(file);
       }
     }
 
-    function removeImage(index) {
-      stages[index].imageUrl = '';
+    function removeImage(path) {
+      setByPath(mapData, path + '.imageUrl', '');
+      saveState();
       render();
     }
 
-    function addComment(index, inputId) {
-      const input = document.getElementById(inputId);
-      const text = input.value.trim();
-      if (text) {
-        stages[index].comments.push(text);
+    function removeNode(path) {
+      const match = path.match(/(.+)\[(\d+)\]/);
+      if (match) {
+        const arr = getByPath(mapData, match[1]);
+        arr.splice(parseInt(match[2]), 1);
+        saveState();
         render();
       }
     }
 
-    function removeComment(stageIdx, commentIdx) {
-      stages[stageIdx].comments.splice(commentIdx, 1);
+    function addCustomNode() {
+      mapData.level2.push({
+        id: Date.now().toString(),
+        title: "Nuevo Concepto",
+        description: "Escribe la descripción aquí...",
+        imageUrl: "",
+        comments: []
+      });
+      saveState();
       render();
     }
 
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mapData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "mapa_ley_penal.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importJSON(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            mapData = JSON.parse(e.target.result);
+            saveState();
+            render();
+          } catch (err) {
+            alert('El archivo JSON no es válido.');
+          }
+        };
+        reader.readAsText(file);
+      }
+    }
+
     function render() {
-      const container = document.getElementById('timeline');
-      container.innerHTML = '<div class="main-line"></div>';
+      const container = document.getElementById('mapContainer');
+      container.innerHTML = '';
 
-      stages.forEach((stage, idx) => {
-        const node = document.createElement('div');
-        
-        if (isHorizontal) {
-          node.className = `timeline-node ${idx % 2 === 0 ? 'top' : 'bottom'}`;
-        } else {
-          node.className = `timeline-node ${idx % 2 === 0 ? 'left' : 'right'}`;
-        }
+      // NIVEL 1: RAÍZ
+      const row1 = document.createElement('div');
+      row1.className = 'row';
+      row1.innerHTML = createCardHtml({ ...mapData.root, isRoot: true }, 'root');
+      container.appendChild(row1);
 
-        const inputCommentId = `input-c-${idx}`;
-
-        const commentsHtml = stage.comments.map((c, cIdx) => `
-          <div class="comment-bubble">
-            <span>${c}</span>
-            <button class="btn-del-comment" onclick="removeComment(${idx}, ${cIdx})">✕</button>
-          </div>
-        `).join('');
-
-        node.innerHTML = `
-          <div class="dot-marker"></div>
-          <div class="connector-dashed"></div>
-          <div class="stage-card">
-            <div class="year-box">
-              <label>Año:</label>
-              <input type="number" class="year-input" value="${stage.year}" onchange="updateField(${idx}, 'year', this.value)" />
-            </div>
-
-            <input type="text" class="title-input" value="${stage.title}" oninput="updateField(${idx}, 'title', this.value)" placeholder="Título" />
-            <textarea class="desc-input" oninput="updateField(${idx}, 'description', this.value)" placeholder="Descripción...">${stage.description}</textarea>
-
-            ${stage.imageUrl ? `
-              <div class="image-preview-container">
-                <img src="${stage.imageUrl}" alt="Imagen de etapa" />
-                <button class="btn-delete-img" onclick="removeImage(${idx})">✕</button>
-              </div>
-            ` : ''}
-
-            <div class="comments-section">
-              <div class="comments-header">💬 Comentarios (${stage.comments.length})</div>
-              ${commentsHtml}
-              <div class="comment-form">
-                <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Escribir comentario..." onkeypress="if(event.key==='Enter') addComment(${idx}, '${inputCommentId}')" />
-                <button class="btn-add-comment" onclick="addComment(${idx}, '${inputCommentId}')">+</button>
-              </div>
-            </div>
-
-            <div class="card-footer">
-              <label class="upload-btn-label">
-                🖼️ ${stage.imageUrl ? 'Cambiar imagen' : 'Agregar imagen'}
-                <input type="file" accept="image/*" onchange="handleImage(event, ${idx})">
-              </label>
-              <button class="btn-delete-node" onclick="removeStage(${idx})">Eliminar</button>
-            </div>
-          </div>
-        `;
-
-        container.appendChild(node);
+      // NIVEL 2: RAMAS PRINCIPALES
+      const row2 = document.createElement('div');
+      row2.className = 'row';
+      mapData.level1.forEach((n, idx) => {
+        row2.innerHTML += createCardHtml(n, `level1[${idx}]`);
       });
+      container.appendChild(row2);
+
+      // NIVEL 3: NODO CENTRAL - EL TIPO PENAL
+      const row3 = document.createElement('div');
+      row3.className = 'row';
+      row3.innerHTML = createCardHtml({ ...mapData.core, isCore: true }, 'core');
+      container.appendChild(row3);
+
+      // NIVEL 4: DESGLOSE DEL TIPO PENAL
+      const row4 = document.createElement('div');
+      row4.className = 'row';
+      mapData.level2.forEach((n, idx) => {
+        row4.innerHTML += createCardHtml(n, `level2[${idx}]`);
+      });
+      container.appendChild(row4);
     }
 
     render();
