@@ -3,22 +3,22 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa Conceptual Completo - Derecho Penal y Dogmática</title>
+  <title>Mapa Conceptual - Derecho Penal</title>
   <style>
     :root {
-      --bg-color: #f4f7fa;
+      --bg-color: #f8fafc;
       --card-bg: #ffffff;
-      --border-blue: #0070f3;
-      --border-dark: #1e293b;
-      --text-dark: #0f172a;
-      --line-color: #475569;
+      --border-blue: #0284c7;
+      --border-dark: #0f172a;
+      --text-dark: #1e293b;
+      --line-color: #64748b;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: system-ui, -apple-system, sans-serif;
     }
 
     body {
@@ -31,18 +31,16 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 20px 0;
+      padding: 40px 20px;
     }
 
-    /* LIENZO PRINCIPAL AMPLIADO PARA ACOMODAR TODA LA DOCTRINA */
     .map-viewport {
       position: relative;
-      width: 1400px;
-      height: 1150px;
+      width: 1350px;
+      height: 1050px;
       margin: auto;
     }
 
-    /* LIENZO SVG PARA LÍNEAS DE CONEXIÓN DINÁMICAS */
     #svgCanvas {
       position: absolute;
       top: 0;
@@ -58,14 +56,13 @@
       stroke-width: 2;
     }
 
-    /* TARJETAS DE NODOS ESTILIZADAS */
     .node {
       position: absolute;
       background: var(--card-bg);
       border: 2px solid var(--border-blue);
-      border-radius: 10px;
+      border-radius: 8px;
       padding: 12px 14px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       z-index: 2;
       display: flex;
       flex-direction: column;
@@ -76,7 +73,7 @@
 
     .node-main {
       border: 3px solid var(--border-dark);
-      background: #e2e8f0;
+      background: #f1f5f9;
     }
 
     .node h3 {
@@ -86,20 +83,14 @@
       margin-bottom: 4px;
     }
 
-    .node p, .node ul {
-      font-size: 0.80rem;
-      color: #1e293b;
+    .node p {
+      font-size: 0.82rem;
+      color: #334155;
       line-height: 1.35;
       text-align: left;
       width: 100%;
     }
 
-    .node ul {
-      list-style-type: disc;
-      padding-left: 15px;
-    }
-
-    /* PUNTOS DE CONEXIÓN VISUALES */
     .dot {
       position: absolute;
       width: 8px;
@@ -116,102 +107,101 @@
   <div class="map-viewport" id="viewport">
     <svg id="svgCanvas"></svg>
 
-    <!-- NODO CENTRAL -->
-    <div class="node node-main" id="n_root" style="top: 30px; left: 520px; width: 360px;">
+    <!-- RAIZ -->
+    <div class="node node-main" id="n_root" style="top: 20px; left: 495px; width: 360px;">
       <h3>Derecho Penal y Teoría del Delito</h3>
-      <p style="text-align: center;"><b>Sistema Normativo, Dogmática y Sanción</b></p>
+      <p style="text-align: center;"><b>Sistema Normativo, Dogmática y Sanción Penal</b></p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <!-- BLOQUE 1: LEY PENAL E IUS PUNIENDI -->
-    <div class="node" id="n1" style="top: 150px; left: 40px; width: 280px;">
+    <!-- NIVEL 1 -->
+    <div class="node" id="n1" style="top: 140px; left: 30px; width: 270px;">
       <p><b>Sistema normativo jurídico y formal</b></p>
-      <p>Regula la potestad punitiva del Estado (Ius Puniendi) en sus 3 fases: Emisión, Aplicación y Ejecución.</p>
+      <p>Potestad punitiva del Estado (Ius Puniendi): Emisión, Aplicación y Ejecución.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n2" style="top: 150px; left: 360px; width: 220px;">
+    <div class="node" id="n2" style="top: 140px; left: 340px; width: 210px;">
       <h3>Ley Penal</h3>
-      <p>Norma jurídica que define conductas delictivas y sus consecuencias.</p>
+      <p>Norma que define conductas delictivas y sanciones.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n3" style="top: 150px; left: 620px; width: 220px;">
+    <div class="node" id="n3" style="top: 140px; left: 590px; width: 200px;">
       <h3>Tipos de normas</h3>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n5" style="top: 150px; left: 880px; width: 200px;">
-      <p>- Complete<br>- Incompleta<br>- En blanco</p>
+    <div class="node" id="n5" style="top: 140px; left: 830px; width: 200px;">
+      <p>• Completa<br>• Incompleta<br>• En blanco</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n_jerarquia" style="top: 150px; left: 1110px; width: 250px;">
+    <div class="node" id="n_jerarquia" style="top: 140px; left: 1070px; width: 250px;">
       <h3>Jerarquía y Principios</h3>
-      <p>- Supeditación a la CPEUM y Tratados DDHH<br>- Legalidad (Lex praevia, scripta, stricta, certa)<br>- Lesividad y Bien Jurídico</p>
+      <p>• Subordinación CPEUM / DDHH<br>• Legalidad y Taxatividad<br>• Lesividad de Bienes Jurídicos</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n4" style="top: 290px; left: 360px; width: 220px;">
+    <div class="node" id="n4" style="top: 270px; left: 340px; width: 210px;">
       <h3>Estructura</h3>
-      <p>- Supuesto de hecho<br>- Consecuencia jurídica</p>
+      <p>• Supuesto de hecho<br>• Consecuencia jurídica</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <!-- BLOQUE 2: EL TIPO PENAL Y SUS ELEMENTOS -->
-    <div class="node" id="n6" style="top: 410px; left: 40px; width: 280px;">
-      <p><b>Descripción del supuesto de hecho y consecuencia</b></p>
-      <p>Garantía de estricta legalidad frente a la arbitrariedad.</p>
+    <!-- NIVEL 2 -->
+    <div class="node" id="n6" style="top: 390px; left: 30px; width: 270px;">
+      <p><b>Descripción del supuesto y consecuencia</b></p>
+      <p>Garantía de estricta legalidad frente al arbitrio estatal.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n7" style="top: 410px; left: 360px; width: 220px;">
+    <div class="node" id="n7" style="top: 390px; left: 340px; width: 210px;">
       <h3>El Tipo Penal</h3>
-      <p>Conducta-Típica plasmada en el catálogo de delitos.</p>
+      <p>Conducta-típica descrita en la ley penal.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n8" style="top: 410px; left: 620px; width: 240px;">
+    <div class="node" id="n8" style="top: 390px; left: 590px; width: 230px;">
       <h3>Elementos</h3>
-      <p><b>• Objetivos:</b> Acción/omisión, nexo causal, resultado.<br><b>• Subjetivos:</b> Dolo o Culpa.<br><b>• Normativos:</b> Valoraciones jurídicas/culturales.</p>
+      <p><b>• Objetivos:</b> Acción/omisión, nexo causal, resultado.<br><b>• Subjetivos:</b> Dolo o Culpa.<br><b>• Normativos:</b> Valoraciones jurídicas y culturales.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <!-- BLOQUE 3: ANTIJURIDICIDAD Y CULPABILIDAD -->
-    <div class="node" id="n_antijuridicidad" style="top: 410px; left: 900px; width: 220px;">
+    <div class="node" id="n_antijuridicidad" style="top: 390px; left: 860px; width: 220px;">
       <h3>Antijuridicidad</h3>
       <p>Desvalor de acción y resultado. Ausencia de causas de justificación.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n_culpabilidad" style="top: 410px; left: 1150px; width: 210px;">
+    <div class="node" id="n_culpabilidad" style="top: 390px; left: 1110px; width: 210px;">
       <h3>Culpabilidad</h3>
-      <p>Imputabilidad, conocimiento de ilicitud y juicio de reproche.</p>
+      <p>Imputabilidad, conciencia de ilicitud y juicio de reproche.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <!-- BLOQUE 4: CLASIFICACIÓN, FUNCIONES Y SANCIÓN PENAL -->
-    <div class="node" id="n9" style="top: 600px; left: 40px; width: 290px;">
+    <!-- NIVEL 3 -->
+    <div class="node" id="n9" style="top: 570px; left: 30px; width: 280px;">
       <p><b>Clasificación de los tipos</b></p>
-      <p>- <b>Estructura:</b> Básico, agravado, atenuado, especial.<br>- <b>Subjetivo:</b> Doloso y Culposo.<br>- <b>Bien Jurídico:</b> Daño o Peligro.</p>
+      <p>• <b>Estructura:</b> Básico, agravado, atenuado.<br>• <b>Subjetivo:</b> Doloso y Culposo.<br>• <b>Bien Jurídico:</b> Daño o Peligro.</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n10" style="top: 600px; left: 370px; width: 210px;">
+    <div class="node" id="n10" style="top: 570px; left: 350px; width: 200px;">
       <h3>Funciones</h3>
-      <p>- Seleccionadora<br>- De garantía<br>- Motivadora</p>
+      <p>• Seleccionadora<br>• De garantía<br>• Motivadora</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <div class="node" id="n11" style="top: 600px; left: 620px; width: 280px;">
+    <div class="node" id="n11" style="top: 570px; left: 590px; width: 290px;">
       <p><b>Punibilidad, Punición y Pena</b></p>
-      <p><b>• Punibilidad:</b> Merecimiento / Conminación legal abstracta (Legislativo).<br><b>• Punición:</b> Fijación judicial concreta en sentencia (Judicial).<br><b>• Pena:</b> Ejecución administrativa (Penitenciario).</p>
+      <p><b>• Punibilidad:</b> Amenaza legal abstracta (Legislativo).<br><b>• Punición:</b> Fijación judicial en sentencia (Judicial).<br><b>• Pena:</b> Ejecución penitenciaria (Ejecutivo).</p>
       <div class="dot dot-bottom"></div>
     </div>
 
-    <!-- BLOQUE 5: FUENTES DOCTRINALES DE REFERENCIA -->
-    <div class="node node-main" id="n_doctrina" style="top: 800px; left: 250px; width: 900px;">
-      <h3>Fuentes Doctrinales Integradas (Referencias APA)</h3>
+    <!-- DOCTRINA APA 7 -->
+    <div class="node node-main" id="n_doctrina" style="top: 760px; left: 225px; width: 900px;">
+      <h3>Referencias Bibliográficas (APA 7.ª ed.)</h3>
       <p style="margin-top: 6px;">
         • <b>Díaz Aranda, E. (2014).</b> <i>Lecciones de derecho penal (para el nuevo sistema de justicia en México)</i>. IIJ-UNAM / Straff.<br>
         • <b>Mir Puig, S. (2006).</b> <i>Derecho penal. Parte general</i> (8.ª ed.). Reppertor.<br>
@@ -222,7 +212,6 @@
   </div>
 
   <script>
-    // DEFICIÓN DE CONEXIONES COMPLETAS DEL MAPA
     const connections = [
       ['n_root', 'n1'],
       ['n_root', 'n2'],
