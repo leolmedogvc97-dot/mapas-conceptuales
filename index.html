@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Características de ley penal y tipos penales</title>
-    <!-- Carga de la librería Mermaid -->
+
+    <!-- Librería Mermaid.js -->
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ 
@@ -13,6 +14,10 @@
             flowchart: { curve: 'basis' }
         });
     </script>
+
+    <!-- Librería html2canvas para la descarga limpia en PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -31,31 +36,32 @@
         p.subtitle {
             color: #555;
             margin-top: 0;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             font-size: 0.95em;
             text-align: center;
         }
-        .btn-download {
+        #btn-download {
             background-color: #0056b3;
             color: #ffffff;
             border: none;
-            padding: 10px 20px;
-            font-size: 0.95em;
+            padding: 12px 24px;
+            font-size: 1em;
             font-weight: bold;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            transition: background-color 0.2s ease;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+            transition: all 0.2s ease;
         }
-        .btn-download:hover {
+        #btn-download:hover {
             background-color: #003d80;
+            transform: translateY(-1px);
         }
         .container {
             width: 100%;
             max-width: 1300px;
             background: #ffffff;
-            padding: 25px;
+            padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             overflow-x: auto;
@@ -71,11 +77,11 @@
     <h1>Características de ley penal y tipos penales</h1>
     <p class="subtitle">Síntesis Dogmática e Integración Doctrinal: Santiago Mir Puig & Enrique Díaz-Aranda</p>
 
-    <!-- Botón para descargar la imagen -->
-    <button class="btn-download" onclick="downloadPNG()">📥 Descargar Mapa como PNG</button>
+    <!-- BOTÓN DE DESCARGA VISIBLE Y DESTACADO -->
+    <button id="btn-download" onclick="descargarMapa()">📥 Descargar Mapa Conceptual (PNG)</button>
 
-    <div class="container" id="map-container">
-        <pre class="mermaid" id="mermaid-diagram">
+    <div class="container" id="captura-area">
+        <pre class="mermaid">
         graph TD
             ROOT["Características de ley penal y tipos penales"]
 
@@ -105,7 +111,7 @@
             
             EL -->|incluye| EL_OBJ["Objetivos<br/>• Acción / Omisión<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado material (cuando el tipo lo exija)"]
             EL -->|incluye| EL_SUBJ["Subjetivos<br/>• Dolo (Directo/Eventual)<br/>• Culpa o Imprudencia<br/>• Elementos subjetivos específicos (ánimo, fin, propósito)"]
-            EL -->|incluye| EL_NORM["Normativos<br/>• Valoraciones culturales<br/>• Conceptos estrictamente jurídicos"]
+            EL -->|incluye| EL_NORM["Normativos<br/>• Valoraciones culturales<br/>• Conceptos strictly jurídicos"]
 
             TP -->|cumple| TP_FUNC["Funciones del Tipo<br/>• Seleccionadora de conductas<br/>• De garantía ciudadana<br/>• Motivadora del comportamiento"]
             
@@ -121,43 +127,31 @@
         </pre>
     </div>
 
-    <!-- Script para exportar el SVG generado como imagen PNG -->
+    <!-- SCRIPT DE CONVERSIÓN A IMAGEN -->
     <script>
-        function downloadPNG() {
-            const svgElement = document.querySelector('.mermaid svg');
-            if (!svgElement) {
-                alert('El mapa aún se está cargando. Espera un segundo e intenta de nuevo.');
-                return;
-            }
+        function descargarMapa() {
+            const area = document.getElementById('captura-area');
+            const boton = document.getElementById('btn-download');
+            
+            boton.innerText = "⏳ Generando imagen...";
+            boton.disabled = true;
 
-            const svgData = new XMLSerializer().serializeToString(svgElement);
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const img = new Image();
-
-            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-            const url = URL.createObjectURL(svgBlob);
-
-            img.onload = function () {
-                const bbox = svgElement.getBBox();
-                canvas.width = bbox.width + 40;
-                canvas.height = bbox.height + 40;
-
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(img, 20, 20);
-
-                const pngUrl = canvas.toDataURL('image/png');
-                const downloadLink = document.createElement('a');
-                downloadLink.href = pngUrl;
-                downloadLink.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales.png';
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                document.body.removeChild(downloadLink);
-                URL.revokeObjectURL(url);
-            };
-
-            img.src = url;
+            html2canvas(area, {
+                scale: 2, // Aumenta la calidad y nitidez de la imagen resultante
+                backgroundColor: "#ffffff"
+            }).then(canvas => {
+                const enlace = document.createElement('a');
+                enlace.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales.png';
+                enlace.href = canvas.toDataURL('image/png');
+                enlace.click();
+                
+                boton.innerText = "📥 Descargar Mapa Conceptual (PNG)";
+                boton.disabled = false;
+            }).catch(err => {
+                alert('Ocurrió un error al generar la imagen. Intenta nuevamente.');
+                boton.innerText = "📥 Descargar Mapa Conceptual (PNG)";
+                boton.disabled = false;
+            });
         }
     </script>
 
