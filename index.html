@@ -1,244 +1,38 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa Conceptual - La Ley Penal</title>
-  <style>
-    :root {
-      --bg-color: #f4f7fa;
-      --card-bg: #ffffff;
-      --border-blue: #0070f3;
-      --text-dark: #0f172a;
-      --line-color: #718096;
-    }
+# Mapa Conceptual: Ley Penal, Tipos Penales, Punibilidad y Punición
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+```mermaid
+graph TD
+    %% Nodo Principal
+    DP[Derecho Penal y Teoría de la Sanción]
 
-    body {
-      width: 100vw;
-      height: 100vh;
-      overflow: auto;
-      background-color: var(--bg-color);
-      /* Fondo con patrón de puntos grises exacto */
-      background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
-      background-size: 24px 24px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+    %% 1. DERECHO PENAL Y LEY PENAL
+    DP --> LP[1. La Ley Penal y el Ius Puniendi]
+    LP --> LP1[Ius Puniendi: Facultad punitiva del Estado<br>Trípode: Emisión, Aplicación y Ejecución]
+    LP --> LP2[Principio de Legalidad:<br>Nullum crimen, nulla poena sine lege]
+    LP --> LP3[Límites al Poder Punitivo:<br>Exclusiva incriminación de conductas y protección de bienes jurídicos]
+    LP --> LP4[Jerarquía Normativa:<br>Subordinación a la Constitución y Tratados Internacionales]
 
-    /* LIENZO PRINCIPAL DEL MAPA CONCEPTUAL */
-    .map-viewport {
-      position: relative;
-      width: 1250px;
-      height: 780px;
-      margin: auto;
-    }
+    %% 2. EL TIPO PENAL Y SUS CARACTERÍSTICAS
+    DP --> TP[2. El Tipo Penal / Conducta-Típica]
+    TP --> TP1[Elementos Objetivos:<br>Voluntad, Acción/Omisión, Resultado material y Nexo Causal]
+    TP --> TP2[Elementos Normativos:<br>Valoraciones culturales y conceptos jurídicos de la norma]
+    TP --> TP3[Elementos Subjetivos:<br>Dolo, Culpa o Imprudencia e intenciones específicas]
+    TP --> TP4[Clasificación Dogmática:<br>Resultado vs. Mera Actividad, Instantáneo vs. Permanente, Doloso vs. Culposo]
 
-    /* LIENZO SVG PARA DIBUJAR LAS LÍNEAS DE CONEXIÓN DE BORDE A BORDE */
-    #svgCanvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
-    }
+    %% 3. ANTIJURIDICIDAD Y CULPABILIDAD
+    DP --> AC[3. Presupuestos Penales: Antijuridicidad y Culpabilidad]
+    AC --> AC1[Antijuridicidad:<br>Desvalor de la conducta y ausencia de causas de justificación]
+    AC --> AC2[Culpabilidad:<br>Imputabilidad, conocimiento de la antijuridicidad y juicio de reproche]
 
-    line {
-      stroke: var(--line-color);
-      stroke-width: 1.8;
-    }
+    %% 4. PUNIBILIDAD, PUNICIÓN Y EJECUCIÓN
+    DP --> PE[4. Fases de la Sanción Penal]
+    PE --> PE1[Punibilidad - Fase Legislativa:<br>Amenaza abstracta y general fijada en la norma penal con mínimos y máximos]
+    PE --> PE2[Punición - Fase Judicial:<br>Fijación concreta de la pena por el juez al dictar sentencia condenatoria]
+    PE --> PE3[Ejecución Penal - Fase Administrativa:<br>Cumplimiento de la sanción en el sistema penitenciario con fin de reinserción]
 
-    /* TARJETAS CON BORDES LIGERAMENTE REDONDEADOS Y SOMBRA */
-    .node {
-      position: absolute;
-      background: var(--card-bg);
-      border: 2px solid var(--border-blue);
-      border-radius: 10px; /* Esquinas suavizadas según la referencia */
-      padding: 12px 16px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    .node h3 {
-      font-size: 0.98rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 3px;
-    }
-
-    .node p {
-      font-size: 0.85rem;
-      color: #1e293b;
-      line-height: 1.35;
-    }
-
-    /* PUNTOS DE CONEXIÓN AZULES (ARRIBA Y ABAJO) */
-    .dot {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background-color: var(--border-blue);
-      border-radius: 50%;
-    }
-    .dot-top { top: -5px; left: calc(50% - 4px); }
-    .dot-bottom { bottom: -5px; left: calc(50% - 4px); }
-  </style>
-</head>
-<body>
-
-  <div class="map-viewport" id="viewport">
-    <!-- Capa SVG para las líneas -->
-    <svg id="svgCanvas"></svg>
-
-    <!-- NODO 1 -->
-    <div class="node" id="n1" style="top: 70px; left: 60px; width: 210px;">
-      <p><b>Sistema normativo jurídico y formal</b></p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 2 -->
-    <div class="node" id="n2" style="top: 60px; left: 450px; width: 180px;">
-      <h3>Ley Penal</h3>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 3 -->
-    <div class="node" id="n3" style="top: 70px; left: 740px; width: 200px;">
-      <h3>Tipos de normas</h3>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 4 -->
-    <div class="node" id="n4" style="top: 200px; left: 425px; width: 230px;">
-      <h3>Estructura</h3>
-      <p>-Supuesto de hecho<br>-Consecuencia jurídica</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 5 -->
-    <div class="node" id="n5" style="top: 240px; left: 880px; width: 180px;">
-      <p>-Completa<br>-Incompleta<br>-En blanco</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 6 -->
-    <div class="node" id="n6" style="top: 350px; left: 40px; width: 250px;">
-      <p><b>Descripción del supuesto de hecho y consecuencia</b><br>Principio de legalidad</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 7 -->
-    <div class="node" id="n7" style="top: 370px; left: 440px; width: 200px;">
-      <h3>El tipo Penal</h3>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 8 -->
-    <div class="node" id="n8" style="top: 340px; left: 720px; width: 190px;">
-      <h3>Elementos</h3>
-      <p>-Objetivos<br>-Subjetivos<br>-Normativos</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 9 -->
-    <div class="node" id="n9" style="top: 540px; left: 30px; width: 250px;">
-      <p><b>Clasificación de los tipos</b><br>-Estructura: Básico, agravado, atenuado, especial, etc.<br>-Tipo subjetivo: Doloso y Culposo<br>Daño/ Peligro</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 10 -->
-    <div class="node" id="n10" style="top: 560px; left: 425px; width: 230px;">
-      <h3>Funciones</h3>
-      <p>-Seleccionadora<br>-De garantía<br>-Motivadora</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NODO 11 -->
-    <div class="node" id="n11" style="top: 510px; left: 760px; width: 240px;">
-      <p><b>Punibilidad, punición y pena</b><br><br>-<b>Punibilidad:</b> Merecimiento de pena /Conminación legal<br>-<b>Punición:</b> Fijación del juez<br><b>Pena:</b> Ejecución administrativa</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-  </div>
-
-  <script>
-    // CONEXIONES DE ACUERDO AL MAPA CONCEPTUAL DE LA IMAGEN
-    const connections = [
-      ['n1', 'n2'],   // Sistema normativo <-> Ley Penal
-      ['n2', 'n3'],   // Ley Penal <-> Tipos de normas
-      ['n2', 'n4'],   // Ley Penal <-> Estructura
-      ['n3', 'n5'],   // Tipos de normas <-> Completa...
-      ['n4', 'n7'],   // Estructura <-> El tipo Penal
-      ['n6', 'n7'],   // Descripción... <-> El tipo Penal
-      ['n7', 'n8'],   // El tipo Penal <-> Elementos
-      ['n7', 'n10'],  // El tipo Penal <-> Funciones
-      ['n9', 'n10'],  // Clasificación... <-> Funciones
-      ['n10', 'n11']  // Funciones <-> Punibilidad...
-    ];
-
-    function getIntersectionPoint(rect, targetPoint) {
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = targetPoint.x - cx;
-      const dy = targetPoint.y - cy;
-
-      if (dx === 0 && dy === 0) return { x: cx, y: cy };
-
-      const scaleX = (rect.width / 2) / Math.abs(dx);
-      const scaleY = (rect.height / 2) / Math.abs(dy);
-      const scale = Math.min(scaleX, scaleY);
-
-      return {
-        x: cx + dx * scale,
-        y: cy + dy * scale
-      };
-    }
-
-    function drawLines() {
-      const svg = document.getElementById('svgCanvas');
-      const viewportRect = document.getElementById('viewport').getBoundingClientRect();
-      svg.innerHTML = '';
-
-      connections.forEach(([id1, id2]) => {
-        const el1 = document.getElementById(id1);
-        const el2 = document.getElementById(id2);
-
-        if (el1 && el2) {
-          const r1 = el1.getBoundingClientRect();
-          const r2 = el2.getBoundingClientRect();
-
-          const c1 = { x: r1.left + r1.width / 2, y: r1.top + r1.height / 2 };
-          const c2 = { x: r2.left + r2.width / 2, y: r2.top + r2.height / 2 };
-
-          const p1 = getIntersectionPoint(r1, c2);
-          const p2 = getIntersectionPoint(r2, c1);
-
-          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          line.setAttribute('x1', p1.x - viewportRect.left);
-          line.setAttribute('y1', p1.y - viewportRect.top);
-          line.setAttribute('x2', p2.x - viewportRect.left);
-          line.setAttribute('y2', p2.y - viewportRect.top);
-
-          svg.appendChild(line);
-        }
-      });
-    }
-
-    window.addEventListener('load', drawLines);
-    window.addEventListener('resize', drawLines);
-  </script>
-</body>
-</html>
+    %% DOCTRINA CONSULTADA
+    DP --> Ref[Doctrina Penal de Referencia]
+    Ref --> R1[F. Muñoz Conde & M. García Arán]
+    Ref --> R2[S. Mir Puig]
+    Ref --> R3[E. R. Zaffaroni, A. Alagia & A. Slokar]
+    Ref --> R4[E. Díaz Aranda]
