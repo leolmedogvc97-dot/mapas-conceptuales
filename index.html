@@ -15,9 +15,6 @@
         });
     </script>
 
-    <!-- Librería html2canvas para la descarga limpia en PNG -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -77,8 +74,7 @@
     <h1>Características de ley penal y tipos penales</h1>
     <p class="subtitle">Síntesis Dogmática e Integración Doctrinal: Santiago Mir Puig & Enrique Díaz-Aranda</p>
 
-    <!-- BOTÓN DE DESCARGA VISIBLE Y DESTACADO -->
-    <button id="btn-download" onclick="descargarMapa()">📥 Descargar Mapa Conceptual (PNG)</button>
+    <button id="btn-download" onclick="descargarMapaNativo()">📥 Descargar Mapa Conceptual (PNG)</button>
 
     <div class="container" id="captura-area">
         <pre class="mermaid">
@@ -111,7 +107,7 @@
             
             EL -->|incluye| EL_OBJ["Objetivos<br/>• Acción / Omisión<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado material (cuando el tipo lo exija)"]
             EL -->|incluye| EL_SUBJ["Subjetivos<br/>• Dolo (Directo/Eventual)<br/>• Culpa o Imprudencia<br/>• Elementos subjetivos específicos (ánimo, fin, propósito)"]
-            EL -->|incluye| EL_NORM["Normativos<br/>• Valoraciones culturales<br/>• Conceptos strictly jurídicos"]
+            EL -->|incluye| EL_NORM["Normativos<br/>• Valoraciones culturales<br/>• Conceptos estrictamente jurídicos"]
 
             TP -->|cumple| TP_FUNC["Funciones del Tipo<br/>• Seleccionadora de conductas<br/>• De garantía ciudadana<br/>• Motivadora del comportamiento"]
             
@@ -127,31 +123,54 @@
         </pre>
     </div>
 
-    <!-- SCRIPT DE CONVERSIÓN A IMAGEN -->
+    <!-- SCRIPT DE DESCARGA DIRECTA POR VECTORS -->
     <script>
-        function descargarMapa() {
-            const area = document.getElementById('captura-area');
-            const boton = document.getElementById('btn-download');
-            
-            boton.innerText = "⏳ Generando imagen...";
-            boton.disabled = true;
+        function descargarMapaNativo() {
+            const svgElement = document.querySelector('.mermaid svg');
+            if (!svgElement) {
+                alert('El mapa aún se está procesando en la página, espera 2 segundos e intenta de nuevo.');
+                return;
+            }
 
-            html2canvas(area, {
-                scale: 2, // Aumenta la calidad y nitidez de la imagen resultante
-                backgroundColor: "#ffffff"
-            }).then(canvas => {
-                const enlace = document.createElement('a');
-                enlace.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales.png';
-                enlace.href = canvas.toDataURL('image/png');
-                enlace.click();
-                
-                boton.innerText = "📥 Descargar Mapa Conceptual (PNG)";
-                boton.disabled = false;
-            }).catch(err => {
-                alert('Ocurrió un error al generar la imagen. Intenta nuevamente.');
-                boton.innerText = "📥 Descargar Mapa Conceptual (PNG)";
-                boton.disabled = false;
-            });
+            // Clonar y asegurar estilos del SVG
+            const svgClon = svgElement.cloneNode(true);
+            svgClon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+
+            const ancho = svgElement.style.maxWidth || svgElement.viewBox.baseVal.width || 1200;
+            const alto = svgElement.viewBox.baseVal.height || 800;
+
+            const xmlSerializer = new XMLSerializer();
+            const svgString = xmlSerializer.serializeToString(svgClon);
+
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+
+            // Escala para alta definición
+            const factorEscala = 2;
+            canvas.width = (ancho + 40) * factorEscala;
+            canvas.height = (alto + 40) * factorEscala;
+
+            const img = new Image();
+            const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = function() {
+                context.scale(factorEscala, factorEscala);
+                context.fillStyle = '#ffffff';
+                context.fillRect(0, 0, canvas.width, canvas.height);
+                context.drawImage(img, 20, 20);
+
+                URL.revokeObjectURL(url);
+
+                const link = document.createElement('a');
+                link.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales.png';
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            };
+
+            img.src = url;
         }
     </script>
 
