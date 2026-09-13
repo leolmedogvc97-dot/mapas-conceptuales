@@ -1,363 +1,55 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Mapa Conceptual - Derecho Penal Completo</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-  <style>
-    :root {
-      --bg-color: #f4f7fa;
-      --card-bg: #ffffff;
-      --border-blue: #0070f3;
-      --border-dark: #0f172a;
-      --text-dark: #0f172a;
-      --line-color: #64748b;
-    }
+# El Derecho Penal y la Teoría del Delito
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    }
+Este esquema integra la dogmática penal de Santiago Mir Puig (Teoría del Delito) con el marco legal y constitucional de México.
 
-    body {
-      width: 100vw;
-      min-height: 100vh;
-      overflow: auto;
-      background-color: var(--bg-color);
-      background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
-      background-size: 24px 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 0;
-    }
+```mermaid
+graph TD
+    %% Nodo Principal
+    ROOT["EL DERECHO PENAL Y EL DELITO"] --> B1["1. LA LEY PENAL<br/>(Marco Mexicano)"]
+    ROOT --> B2["2. EL TIPO PENAL<br/>(Teoría del Delito - Mir Puig)"]
 
-    .toolbar {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 20px;
-      z-index: 10;
-    }
+    %% BLOQUE 1: LA LEY PENAL
+    B1 --> B1_1["1.1. Marco Constitucional"]
+    B1_1 --> B1_1A["Principio de Legalidad<br/>(Art. 14 CPEUM)"]
+    B1_1 --> B1_1B["Derecho Penal del Hecho<br/>(Art. 18 CPEUM)"]
+    B1_1 --> B1_1C["Reinserción Social<br/>(Art. 18 CPEUM)"]
 
-    .btn {
-      padding: 10px 20px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      transition: background-color 0.2s, transform 0.1s;
-    }
+    B1 --> B1_2["1.2. Estructura Legislativa"]
+    B1_2 --> B1_2A["Sustantiva: Código Penal Federal y Estatales"]
+    B1_2 --> B1_2B["Adjetiva: Código Nacional de Procedimientos Penales"]
 
-    .btn-download { background-color: #0070f3; }
-    .btn-download:hover { background-color: #0051a8; }
+    B1 --> B1_3["1.3. Principios Dogmáticos"]
+    B1_3 --> B1_3A["Protección de Bienes Jurídicos / Lesividad"]
+    B1_3 --> B1_3B["Ultima Ratio y Carácter Fragmentario"]
 
-    .btn-edit { background-color: #0f172a; }
-    .btn-edit:hover { background-color: #334155; }
-    .btn-edit.active { background-color: #16a34a; }
+    %% BLOQUE 2: EL TIPO PENAL
+    B2 --> B2_1["2.1. Concepto y Presupuestos"]
+    B2_1 --> B2_1A["Conducta típica y antijurídica"]
+    B2_1 --> B2_1B["Acción u Omisión"]
+    B2_1 --> B2_1C["Exclusión de Acción:<br/>Fuerza mayor, reflejos, inconsciencia"]
 
-    .btn:active { transform: scale(0.97); }
+    B2 --> B2_2["2.2. Elementos del Tipo"]
+    B2_2 --> B2_2A["Objetivos: Conducta, nexo causal e Imputación Objetiva"]
+    B2_2 --> B2_2B["Normativos: Valoraciones ético-sociales o jurídicas"]
+    B2_2 --> B2_2C["Subjetivos: Dolo, Culpa / Imprudencia y ánimos específicos"]
 
-    .map-viewport {
-      position: relative;
-      width: 1380px;
-      height: 750px;
-      margin: auto;
-      background-color: var(--bg-color);
-      background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
-      background-size: 24px 24px;
-    }
+    B2 --> B2_3["2.3. Clases de Tipos y Conductas"]
+    B2_3 --> B2_3A["Resultado vs. Mera actividad"]
+    B2_3 --> B2_3B["Instantáneos vs. Permanentes"]
+    B2_3 --> B2_3C["Dolosos vs. Culposos / Lesión vs. Peligro"]
+    B2_3 --> B2_3D["Omisión Pura vs. Comisión por Omisión (Garante)"]
 
-    #svgCanvas {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 1;
-    }
+    %% BLOQUE 3: PUNIBILIDAD Y PUNICION
+    B2_3 --> B3["3. PUNIBILIDAD Y PUNICIÓN"]
 
-    line {
-      stroke: var(--line-color);
-      stroke-width: 2;
-    }
+    B3 --> B3_1["PUNIBILIDAD<br/>(Fase Legislativa)"]
+    B3_1 --> B3_1A["Marco abstracto fijado en la ley"]
+    B3_1 --> B3_1B["Establecimiento de Penas y Medidas de Seguridad"]
 
-    .node {
-      position: absolute;
-      background: var(--card-bg);
-      border: 2px solid var(--border-blue);
-      border-radius: 10px;
-      padding: 12px 14px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
-      z-index: 2;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      outline: none;
-    }
+    B3 --> B3_2["PUNICIÓN<br/>(Fase Judicial - CNPP)"]
+    B3_2 --> B3_2A["Imposición concreta por el Juez de Enjuiciamiento"]
+    B3_2 --> B3_2B["Graduación por Iter Criminis:<br/>Consumación vs. Tentativa"]
+    B3_2 --> B3_2C["Grado de Intervención:<br/>Autoría (Dominio del Hecho) y Participación"]
 
-    .node-main {
-      border: 3px solid var(--border-dark);
-      background: #e2e8f0;
-    }
-
-    .editing .node {
-      border-style: dashed;
-      cursor: text;
-    }
-
-    .node h3 {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--text-dark);
-      margin-bottom: 4px;
-    }
-
-    .node p {
-      font-size: 0.82rem;
-      color: #1e293b;
-      line-height: 1.35;
-      text-align: left;
-      width: 100%;
-    }
-
-    .dot {
-      position: absolute;
-      width: 8px;
-      height: 8px;
-      background-color: var(--border-blue);
-      border-radius: 50%;
-    }
-    .dot-bottom { bottom: -5px; left: calc(50% - 4px); }
-  </style>
-</head>
-<body>
-
-  <div class="toolbar">
-    <button class="btn btn-edit" id="btnEdit" onclick="toggleEditMode()">✏️ Activar Edición de Texto</button>
-    <button class="btn btn-download" onclick="downloadPNG()">📷 Descargar Imagen para Word</button>
-  </div>
-
-  <div class="map-viewport" id="viewport">
-    <svg id="svgCanvas"></svg>
-
-    <!-- RAIZ -->
-    <div class="node node-main" id="n_root" style="top: 20px; left: 510px; width: 360px;">
-      <h3>Derecho Penal y Teoría del Delito</h3>
-      <p style="text-align: center;"><b>Sistema Normativo, Dogmática y Sanción Penal</b></p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NIVEL 1 -->
-    <div class="node" id="n1" style="top: 140px; left: 20px; width: 260px;">
-      <p><b>Sistema normativo jurídico y formal</b></p>
-      <p>Potestad punitiva del Estado (Ius Puniendi): Emisión, Aplicación y Ejecución.</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n2" style="top: 140px; left: 310px; width: 210px;">
-      <h3>Ley Penal</h3>
-      <p>Norma que define conductas delictivas y sanciones.</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n3" style="top: 140px; left: 550px; width: 220px;">
-      <h3>Tipos de Normas Penales</h3>
-      <p>Clasificación técnica de los preceptos legales.</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n5" style="top: 140px; left: 800px; width: 190px;">
-      <p>• Completa<br>• Incompleta<br>• En blanco</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n_jerarquia" style="top: 140px; left: 1020px; width: 340px;">
-      <h3>Jerarquía y Principios</h3>
-      <p>• Subordinación a la Constitución y Tratados Internacionales (DDHH)<br>• Principio de Legalidad y Taxatividad (Nullum crimen, nulla poena sine lege)<br>• Lesividad y protección exclusiva de Bienes Jurídicos</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n4" style="top: 280px; left: 310px; width: 210px;">
-      <h3>Estructura</h3>
-      <p>• Supuesto de hecho<br>• Consecuencia jurídica</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NIVEL 2 -->
-    <div class="node" id="n6" style="top: 410px; left: 20px; width: 260px;">
-      <p><b>Descripción del supuesto y consecuencia</b></p>
-      <p>Garantía de estricta legalidad frente al arbitrio estatal.</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n7" style="top: 410px; left: 310px; width: 210px;">
-      <h3>El Tipo Penal</h3>
-      <p>Conducta-típica descrita en la ley penal.</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n8" style="top: 410px; left: 550px; width: 270px;">
-      <h3>Elementos del Tipo</h3>
-      <p><b>• Objetivos:</b> Acción/omisión, nexo causal, resultado material.<br><b>• Subjetivos:</b> Dolo, Culpa o Imprudencia e intenciones específicas.<br><b>• Normativos:</b> Valoraciones culturales y conceptos jurídicos.</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n_antijuridicidad" style="top: 410px; left: 850px; width: 240px;">
-      <h3>Antijuridicidad</h3>
-      <p>Desvalor de la conducta y resultado. Ausencia de causas de justificación (ej. legítima defensa).</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n_culpabilidad" style="top: 410px; left: 1120px; width: 240px;">
-      <h3>Culpabilidad</h3>
-      <p>Imputabilidad, conocimiento de la antijuridicidad y juicio de reproche personal.</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <!-- NIVEL 3 -->
-    <div class="node" id="n9" style="top: 590px; left: 20px; width: 270px;">
-      <p><b>Clasificación Dogmática</b></p>
-      <p>• Resultado vs. Mera Actividad<br>• Instantáneo vs. Permanente<br>• Doloso vs. Culposo / Daño vs. Peligro</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n10" style="top: 590px; left: 320px; width: 190px;">
-      <h3>Funciones</h3>
-      <p>• Seleccionadora<br>• De garantía<br>• Motivadora</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-
-    <div class="node" id="n11" style="top: 590px; left: 540px; width: 380px;">
-      <p><b>Punibilidad, Punición y Ejecución</b></p>
-      <p><b>• Punibilidad (Fase Legislativa):</b> Amenaza abstracta fijada en la norma con mínimos y máximos.<br><b>• Punición (Fase Judicial):</b> Fijación concreta de la pena por el juez al dictar sentencia.<br><b>• Ejecución Penal (Fase Administrativa):</b> Cumplimiento en el sistema penitenciario.</p>
-      <div class="dot dot-bottom"></div>
-    </div>
-  </div>
-
-  <script>
-    const connections = [
-      ['n_root', 'n1'],
-      ['n_root', 'n2'],
-      ['n_root', 'n_jerarquia'],
-      ['n1', 'n2'],
-      ['n2', 'n3'],
-      ['n2', 'n4'],
-      ['n3', 'n5'],
-      ['n4', 'n7'],
-      ['n6', 'n7'],
-      ['n7', 'n8'],
-      ['n7', 'n10'],
-      ['n7', 'n_antijuridicidad'],
-      ['n_antijuridicidad', 'n_culpabilidad'],
-      ['n9', 'n10'],
-      ['n10', 'n11']
-    ];
-
-    let isEditing = false;
-
-    function toggleEditMode() {
-      isEditing = !isEditing;
-      const btn = document.getElementById('btnEdit');
-      const nodes = document.querySelectorAll('.node');
-      const viewport = document.getElementById('viewport');
-
-      if (isEditing) {
-        btn.innerHTML = "✅ Guardar Cambios";
-        btn.classList.add('active');
-        viewport.classList.add('editing');
-        nodes.forEach(node => {
-          node.setAttribute('contenteditable', 'true');
-        });
-      } else {
-        btn.innerHTML = "✏️ Activar Edición de Texto";
-        btn.classList.remove('active');
-        viewport.classList.remove('editing');
-        nodes.forEach(node => {
-          node.removeAttribute('contenteditable');
-        });
-        drawLines();
-      }
-    }
-
-    function getIntersectionPoint(rect, targetPoint) {
-      const cx = rect.left + rect.width / 2;
-      const cy = rect.top + rect.height / 2;
-      const dx = targetPoint.x - cx;
-      const dy = targetPoint.y - cy;
-
-      if (dx === 0 && dy === 0) return { x: cx, y: cy };
-
-      const scaleX = (rect.width / 2) / Math.abs(dx);
-      const scaleY = (rect.height / 2) / Math.abs(dy);
-      const scale = Math.min(scaleX, scaleY);
-
-      return {
-        x: cx + dx * scale,
-        y: cy + dy * scale
-      };
-    }
-
-    function drawLines() {
-      const svg = document.getElementById('svgCanvas');
-      const viewportRect = document.getElementById('viewport').getBoundingClientRect();
-      svg.innerHTML = '';
-
-      connections.forEach(([id1, id2]) => {
-        const el1 = document.getElementById(id1);
-        const el2 = document.getElementById(id2);
-
-        if (el1 && el2) {
-          const r1 = el1.getBoundingClientRect();
-          const r2 = el2.getBoundingClientRect();
-
-          const c1 = { x: r1.left + r1.width / 2, y: r1.top + r1.height / 2 };
-          const c2 = { x: r2.left + r2.width / 2, y: r2.top + r2.height / 2 };
-
-          const p1 = getIntersectionPoint(r1, c2);
-          const p2 = getIntersectionPoint(r2, c1);
-
-          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-          line.setAttribute('x1', p1.x - viewportRect.left);
-          line.setAttribute('y1', p1.y - viewportRect.top);
-          line.setAttribute('x2', p2.x - viewportRect.left);
-          line.setAttribute('y2', p2.y - viewportRect.top);
-
-          svg.appendChild(line);
-        }
-      });
-    }
-
-    function downloadPNG() {
-      if (isEditing) toggleEditMode();
-      
-      const viewport = document.getElementById('viewport');
-      html2canvas(viewport, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: "#f4f7fa"
-      }).then(canvas => {
-        const a = document.createElement('a');
-        a.download = 'Mapa_Conceptual_Derecho_Penal_Completo.png';
-        a.href = canvas.toDataURL('image/png');
-        a.click();
-      });
-    }
-
-    document.querySelectorAll('.node').forEach(node => {
-      node.addEventListener('input', drawLines);
-    });
-
-    window.addEventListener('load', drawLines);
-    window.addEventListener('resize', drawLines);
-  </script>
-</body>
-</html>
+    B3_2 --> B4["4. FASE EJECUTIVA<br/>(Penitenciaria)"]
+    B4 --> B4_A["Cumplimiento orientado a la Reinserción Social"]
