@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Características de ley penal y tipos penales</title>
+    <title>Características de la Ley Penal y de los Tipos Penales - Unidad 2</title>
 
-    <!-- Librería Mermaid.js -->
+    <!-- Carga de la librería Mermaid.js -->
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ 
@@ -56,7 +56,7 @@
         }
         .container {
             width: 100%;
-            max-width: 1300px;
+            max-width: 1350px;
             background: #ffffff;
             padding: 30px;
             border-radius: 10px;
@@ -71,73 +71,85 @@
 </head>
 <body>
 
-    <h1>Características de ley penal y tipos penales</h1>
-    <p class="subtitle">Síntesis Dogmática e Integración Doctrinal: Santiago Mir Puig & Enrique Díaz-Aranda</p>
+    <h1>Características de la Ley Penal y de los Tipos Penales</h1>
+    <p class="subtitle">Programa Oficial Unidad 2 | Integración Doctrinal: Mir Puig & Díaz-Aranda</p>
 
-    <button id="btn-download" onclick="descargarMapaNativo()">📥 Descargar Mapa Conceptual (PNG)</button>
+    <!-- Botón con descarga nativa asegurada -->
+    <button id="btn-download" onclick="descargarPNGDirecto()">📥 Descargar Mapa Conceptual (PNG)</button>
 
     <div class="container" id="captura-area">
         <pre class="mermaid">
         graph TD
-            ROOT["Características de ley penal y tipos penales"]
+            %% NODO PRINCIPAL DE LA UNIDAD
+            ROOT["Características de la Ley Penal<br/>y de los Tipos Penales"]
 
-            ROOT -->|se ejerce mediante| B1["Potestad Punitiva del Estado<br/>(Ius Puniendi)<br/>Emisión, Aplicación y Ejecución"]
-            ROOT -->|se expresa en| B2["Ley Penal<br/>Norma que define conductas delictivas y sanciones"]
-            ROOT -->|se estructura en| B3["Proposiciones Jurídico-Penales<br/>(Mir Puig)"]
-            ROOT -->|se rige por| B4["Jerarquía y Principios Constitucionales<br/>(Díaz-Aranda / CPEUM)"]
+            %% SECCIÓN 1: LEY PENAL Y ESTRUCTURA
+            ROOT -->|define el marco de| B1["La Ley Penal<br/>Norma jurídica estatal que determina delitos y sanciones"]
+            B1 -->|se conforma de| B1_EST["Estructura de la Ley Penal"]
+            B1_EST -->|hipótesis legal| B1_SUP["Supuesto de Hecho<br/>(Conducta prohibida o mandada)"]
+            B1_EST -->|sanción adscrita| B1_CONS["Consecuencia Jurídica<br/>(Pena o Medida de Seguridad)"]
 
-            B3 -->|comprende| B3_1["Disposiciones Incompletas<br/>Requieren complementación normativo-sistemática"]
-            B3 -->|incluye| B3_2["Leyes Penales en Blanco<br/>Remiten a otras normas o autoridades para integrar el supuesto"]
-
-            B4 -->|exige| B4_1["• Subordinación a la Constitución y Tratados (DDHH)<br/>• Legalidad y Taxatividad (Nullum crimen, nulla poena sine lege)<br/>• Lesividad y protección exclusiva de Bienes Jurídicos"]
-
-            B2 -->|se compone de| E1["Estructura de la Norma<br/>(Mir Puig)"]
-            E1 -->|contiene| E1_A["Supuesto de Hecho"]
-            E1 -->|adscribe| E1_B["Consecuencia Jurídica"]
-            E1 -->|garantiza| E1_C["Garantía de Estricta Legalidad<br/>Límite al arbitrio estatal"]
-
-            E1 -->|da lugar al| TP["El Tipo Penal<br/>Descripción legal de la conducta prohibida o mandada"]
-
-            TP -->|se integra por| TP_EST["Elementos Estructurales del Tipo"]
-            TP_EST -->|comprende| TP_SUJ["Sujetos<br/>• Activo (ejecutor)<br/>• Pasivo (titular del bien)<br/>• Estado"]
-            TP_EST -->|recae sobre| TP_OBJ["Objetos<br/>• Material (ente físico/persona)<br/>• Jurídico (Bien Jurídico Tutelado)"]
-            TP_EST -->|desarrolla| TP_COND["Conducta Típica<br/>Acción u Omisión"]
-
-            TP_COND -->|se analiza mediante| EL["Elementos de la Conducta-Típica<br/>(Art. 405 CNPP / Díaz-Aranda)"]
+            %% SECCIÓN 2: EL TIPO PENAL Y SUS DOS DIMENSIONES
+            ROOT -->|se concreta en| TP["El Tipo Penal<br/>Descripción concreta de la conducta delictiva en la ley"]
             
-            EL -->|incluye| EL_OBJ["Objetivos<br/>• Acción / Omisión<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado material (cuando el tipo lo exija)"]
-            EL -->|incluye| EL_SUBJ["Subjetivos<br/>• Dolo (Directo/Eventual)<br/>• Culpa o Imprudencia<br/>• Elementos subjetivos específicos (ánimo, fin, propósito)"]
-            EL -->|incluye| EL_NORM["Normativos<br/>• Valoraciones culturales<br/>• Conceptos estrictamente jurídicos"]
+            TP -->|se concibe como| TP_DIM["Dimensiones Dogmáticas del Tipo"]
+            TP_DIM -->|perspectiva estricta| TP_INJ["Tipo de Injusto<br/>Características que fundamentan la materia de la prohibición y el desvalor"]
+            TP_DIM -->|perspectiva amplia| TP_AMP["Tipo en Sentido Amplio<br/>Conjunto de todos los presupuestos necesarios para la punibilidad"]
 
-            TP -->|cumple| TP_FUNC["Funciones del Tipo<br/>• Seleccionadora de conductas<br/>• De garantía ciudadana<br/>• Motivadora del comportamiento"]
+            %% SECCIÓN 3: FUNCIONES DEL TIPO PENAL
+            TP -->|desempeña| TP_FUNC["Funciones del Tipo Penal"]
+            TP_FUNC -->|función 1| F1["Seleccionadora<br/>Elige las conductas más graves que lesionan Bienes Jurídicos"]
+            TP_FUNC -->|función 2| F2["De Garantía<br/>Límite al arbitrio judicial (Nullum crimen sine lege)"]
+            TP_FUNC -->|función 3| F3["Motivadora<br/>Incita a los ciudadanos a abstenerse de cometer el delito"]
+
+            %% SECCIÓN 4: ELEMENTOS DEL TIPO PENAL (OBJETIVO / SUBJETIVO / NORMATIVO)
+            TP -->|se estructura en| EL["Elementos del Tipo Penal"]
             
-            TP -->|se clasifica en| TP_CLAS["Clasificación Dogmática<br/>• Resultado vs. Mera Actividad<br/>• Instantáneo vs. Permanente / Continuado<br/>• Doloso vs. Imprudente<br/>• Lesión vs. Peligro (Concreto/Abstracto)"]
+            EL -->|dimensión material| EL_OBJ["Tipo Objetivo<br/>• Acción / Omisión humana<br/>• Sujeto Activo, Pasivo y Estado<br/>• Objeto Material y Bien Jurídico<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado (cuando el tipo lo exija)"]
 
-            EL -->|presupone la| ANT["Antijuridicidad<br/>Desvalor de la conducta y resultado.<br/>Se excluye por Causas de Justificación (ej. legítima defensa)"]
-            ANT -->|permite el juicio de| CULP["Culpabilidad<br/>Juicio de reproche personal basado en Imputabilidad,<br/>conciencia de la antijuridicidad y exigibilidad de conducta"]
+            EL -->|dimensión psíquica| EL_SUBJ["Tipo Subjetivo<br/>Procesos de la voluntad del autor"]
+            
+            EL -->|dimensión valorativa| EL_NORM["Elementos Normativos<br/>Términos que requieren valoración cultural o concepto estrictamente jurídico"]
 
-            CULP -->|determina la| PE["Punibilidad, Punición y Ejecución"]
-            PE -->|Fase Legislativa| PE_1["Punibilidad: Amenaza abstracta en la norma (mínimos y máximos)"]
-            PE -->|Fase Judicial| PE_2["Punición: Concreción judicial de la pena en la sentencia (CNPP)"]
-            PE -->|Fase Administrativa| PE_3["Ejecución Penal: Cumplimiento orientado a la Reinserción Social (Art. 18 CPEUM)"]
+            %% DESGLOSE DEL TIPO SUBJETIVO: DOLO Y CULPA
+            EL_SUBJ -->|forma dolo| SUBJ_DOLO["El Dolo<br/>Conocimiento y voluntad de realizar el tipo objetivo"]
+            SUBJ_DOLO -->|modalidad 1| D1["Intención / Dolo Directo de 1er Grado<br/>El autor busca expresamente la realización del resultado"]
+            SUBJ_DOLO -->|modalidad 2| D2["Dolo Directo de 2do Grado / Consecuencias Necesarias"]
+            SUBJ_DOLO -->|modalidad 3| D3["Dolo Eventual<br/>El autor prevé el resultado como posible y lo acepta"]
+
+            EL_SUBJ -->|forma culpa| SUBJ_CULP["Delito Culposo / Imprudente<br/>Infracción al deber objetivo de cuidado"]
+            SUBJ_CULP -->|modalidad 1| C1["Culpa Consciente / Con Representación<br/>El autor prevé el resultado pero confía en que lo evitará"]
+            SUBJ_CULP -->|modalidad 2| C2["Culpa Inconsciente / Sin Representación<br/>El autor no prevé el resultado habiéndolo podido prever"]
+
+            EL_SUBJ -->|requiere a veces| SUBJ_ESP["Elementos Subjetivos Específicos<br/>Ánimo, fin, intención o propósito particular exigido normativamente"]
+
+            %% SECCIÓN 5: CLASIFICACIÓN DEL TIPO PENAL
+            TP -->|se clasifica en| TP_CLAS["Clasificación de los Tipos Penales<br/>• Por el resultado: Mera Actividad vs. Resultado<br/>• Por la temporalidad: Instantáneo, Permanente y Continuado<br/>• Por la afectación: Lesión vs. Peligro (Concreto/Abstracto)<br/>• Por los sujetos: Unisubjetivo vs. Plurisubjetivo / Común vs. Especial"]
+
+            %% SECCIÓN 6: TRIADA CONCEPTUAL (PUNIBILIDAD, PUNICIÓN Y PENA)
+            TP -->|determina la consecuencia| TRIADA["Fases de la Sanción Penal"]
+            
+            TRIADA -->|1. Fase Legislativa| PUN_1["Punibilidad<br/>Merecimiento abstracto de pena fijado en la ley con límites mínimos y máximos"]
+            TRIADA -->|2. Fase Judicial| PUN_2["Punición<br/>Fijación concreta e individualizada de la pena impuesta por el Juez en la sentencia"]
+            TRIADA -->|3. Fase Ejecutiva| PUN_3["Pena<br/>Ejecución y aplicación efectiva de la sanción orientada a la Reinserción Social"]
         </pre>
     </div>
 
-    <!-- SCRIPT DE DESCARGA DIRECTA POR VECTORS -->
+    <!-- Script con exportación directa SVG -> Canvas -> PNG -->
     <script>
-        function descargarMapaNativo() {
+        function descargarPNGDirecto() {
             const svgElement = document.querySelector('.mermaid svg');
             if (!svgElement) {
-                alert('El mapa aún se está procesando en la página, espera 2 segundos e intenta de nuevo.');
+                alert('El mapa se está procesando. Por favor espera 2 segundos e intenta de nuevo.');
                 return;
             }
 
-            // Clonar y asegurar estilos del SVG
             const svgClon = svgElement.cloneNode(true);
             svgClon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
 
-            const ancho = svgElement.style.maxWidth || svgElement.viewBox.baseVal.width || 1200;
-            const alto = svgElement.viewBox.baseVal.height || 800;
+            const bbox = svgElement.getBBox();
+            const ancho = bbox.width || 1300;
+            const alto = bbox.height || 900;
 
             const xmlSerializer = new XMLSerializer();
             const svgString = xmlSerializer.serializeToString(svgClon);
@@ -145,25 +157,24 @@
             const canvas = document.createElement('canvas');
             const context = canvas.getContext('2d');
 
-            // Escala para alta definición
-            const factorEscala = 2;
-            canvas.width = (ancho + 40) * factorEscala;
-            canvas.height = (alto + 40) * factorEscala;
+            const escala = 2; // Alta resolución PNG
+            canvas.width = (ancho + 60) * escala;
+            canvas.height = (alto + 60) * escala;
 
             const img = new Image();
             const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(svgBlob);
 
             img.onload = function() {
-                context.scale(factorEscala, factorEscala);
+                context.scale(escala, escala);
                 context.fillStyle = '#ffffff';
                 context.fillRect(0, 0, canvas.width, canvas.height);
-                context.drawImage(img, 20, 20);
+                context.drawImage(img, 30, 30);
 
                 URL.revokeObjectURL(url);
 
                 const link = document.createElement('a');
-                link.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales.png';
+                link.download = 'Características_Ley_Penal_y_Tipos_Penales_Unidad2.png';
                 link.href = canvas.toDataURL('image/png');
                 document.body.appendChild(link);
                 link.click();
