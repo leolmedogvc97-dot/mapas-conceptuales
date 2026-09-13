@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Características de la Ley Penal y de los Tipos Penales - Unidad 2</title>
 
-    <!-- Carga de Mermaid para dibujar el mapa -->
-    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.min.js"></script>
-    <!-- Carga de html2canvas para la descarga limpia en PNG -->
+    <!-- Carga de Mermaid para renderizar el diagrama -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- Librerías para generación directa de PDF sin errores de servidor -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         body {
@@ -49,8 +50,11 @@
             box-shadow: 0 4px 6px rgba(0,0,0,0.15);
             transition: all 0.2s ease;
         }
+        .btn-secondary {
+            background-color: #28a745;
+        }
         .btn:hover {
-            background-color: #003d80;
+            opacity: 0.9;
             transform: translateY(-1px);
         }
         .container {
@@ -66,6 +70,23 @@
             display: flex;
             justify-content: center;
         }
+
+        /* Ajustes específicos para impresión limpia */
+        @media print {
+            .btn-container, h1, .subtitle {
+                display: none !important;
+            }
+            body {
+                padding: 0;
+                background-color: #ffffff;
+            }
+            .container {
+                box-shadow: none;
+                padding: 0;
+                width: 100%;
+                max-width: 100%;
+            }
+        }
     </style>
 </head>
 <body>
@@ -73,12 +94,13 @@
     <h1>Características de la Ley Penal y de los Tipos Penales</h1>
     <p class="subtitle">Programa Oficial Unidad 2 | Integración Doctrinal: Mir Puig & Díaz-Aranda</p>
 
-    <!-- Botón único para descarga en PNG -->
+    <!-- Botones funcionales para PDF e Impresión -->
     <div class="btn-container">
-        <button class="btn" id="btn-png" onclick="descargarPNG()">📥 Descargar Imagen (PNG)</button>
+        <button class="btn" id="btn-pdf" onclick="descargarPDF()">📄 Descargar Mapa en PDF</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ Imprimir / Guardar como PDF</button>
     </div>
 
-    <!-- Área del mapa conceptual que se captura como imagen -->
+    <!-- Contenedor del Mapa Conceptual -->
     <div class="container" id="captura-area">
         <pre class="mermaid">
         graph TD
@@ -129,35 +151,40 @@
         </pre>
     </div>
 
-    <!-- Script de captura directa mediante Canvas local -->
+    <!-- Script para generar el archivo PDF de alta definición -->
     <script>
         mermaid.initialize({ startOnLoad: true, theme: 'default' });
 
-        function descargarPNG() {
+        function descargarPDF() {
+            const { jsPDF } = window.jspdf;
             const area = document.getElementById('captura-area');
-            const boton = document.getElementById('btn-png');
-            
-            boton.innerText = "⏳ Generando PNG...";
+            const boton = document.getElementById('btn-pdf');
+
+            boton.innerText = "⏳ Generando PDF...";
             boton.disabled = true;
 
-            // html2canvas toma la captura limpia sin restricciones del navegador
             html2canvas(area, {
-                scale: 2, // Garantiza nitidez y alta resolución
+                scale: 2,
                 backgroundColor: "#ffffff",
                 useCORS: true
             }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales_Unidad2.png';
-                link.href = canvas.toDataURL('image/png');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+                const imgData = canvas.toDataURL('image/png');
                 
-                boton.innerText = "📥 Descargar Imagen (PNG)";
+                // Definir PDF en orientación horizontal (landscape)
+                const pdf = new jsPDF({
+                    orientation: 'landscape',
+                    unit: 'px',
+                    format: [canvas.width, canvas.height]
+                });
+
+                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+                pdf.save('Mapa_Conceptual_Ley_Penal_y_Tipos_Penales_Unidad2.pdf');
+
+                boton.innerText = "📄 Descargar Mapa en PDF";
                 boton.disabled = false;
             }).catch(err => {
-                alert('Ocurrió un error al procesar la imagen. Inténtalo de nuevo.');
-                boton.innerText = "📥 Descargar Imagen (PNG)";
+                alert('No se pudo generar el PDF. Puedes usar la opción "Imprimir / Guardar como PDF".');
+                boton.innerText = "📄 Descargar Mapa en PDF";
                 boton.disabled = false;
             });
         }
