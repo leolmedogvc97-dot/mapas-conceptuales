@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Características de la Ley Penal y de los Tipos Penales - Unidad 2</title>
+
+    <!-- Carga de Mermaid para dibujar el mapa -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.min.js"></script>
+    <!-- Carga de html2canvas para la descarga limpia en PNG -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -42,8 +48,6 @@
             cursor: pointer;
             box-shadow: 0 4px 6px rgba(0,0,0,0.15);
             transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-block;
         }
         .btn:hover {
             background-color: #003d80;
@@ -57,12 +61,10 @@
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             overflow-x: auto;
-            text-align: center;
         }
-        .map-img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
+        .mermaid {
+            display: flex;
+            justify-content: center;
         }
     </style>
 </head>
@@ -71,19 +73,15 @@
     <h1>Características de la Ley Penal y de los Tipos Penales</h1>
     <p class="subtitle">Programa Oficial Unidad 2 | Integración Doctrinal: Mir Puig & Díaz-Aranda</p>
 
-    <!-- Botón con descarga directa de archivo PNG estático -->
+    <!-- Botón único para descarga en PNG -->
     <div class="btn-container">
-        <button class="btn" onclick="descargarPNGDirecto()">📥 Descargar Imagen (PNG)</button>
+        <button class="btn" id="btn-png" onclick="descargarPNG()">📥 Descargar Imagen (PNG)</button>
     </div>
 
-    <div class="container">
-        <!-- Renderizado de alta resolución directamente a imagen PNG -->
-        <img id="mapa-img" class="map-img" alt="Mapa Conceptual Unidad 2" />
-    </div>
-
-    <script>
-        // Definición del código de la Unidad 2
-        const mermaidCode = `graph TD
+    <!-- Área del mapa conceptual que se captura como imagen -->
+    <div class="container" id="captura-area">
+        <pre class="mermaid">
+        graph TD
             ROOT["Características de la Ley Penal<br/>y de los Tipos Penales"]
 
             ROOT -->|define el marco de| B1["La Ley Penal<br/>Norma jurídica estatal que determina delitos y sanciones"]
@@ -127,33 +125,41 @@
             
             TRIADA -->|1. Fase Legislativa| PUN_1["Punibilidad<br/>Merecimiento abstracto de pena fijado en la ley con límites mínimos y máximos"]
             TRIADA -->|2. Fase Judicial| PUN_2["Punición<br/>Fijación concreta e individualizada de la pena impuesta por el Juez en la sentencia"]
-            TRIADA -->|3. Fase Ejecutiva| PUN_3["Pena<br/>Ejecución y aplicación efectiva de la sanción orientada a la Reinserción Social"]`;
+            TRIADA -->|3. Fase Ejecutiva| PUN_3["Pena<br/>Ejecución y aplicación efectiva de la sanción orientada a la Reinserción Social"]
+        </pre>
+    </div>
 
-        // Generar URL directa de imagen PNG desde servidor de renderizado
-        function encodeMermaid(str) {
-            return btoa(unescape(encodeURIComponent(str)));
-        }
+    <!-- Script de captura directa mediante Canvas local -->
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'default' });
 
-        const pngUrl = 'https://kroki.io/mermaid/png/' + encodeMermaid(mermaidCode);
+        function descargarPNG() {
+            const area = document.getElementById('captura-area');
+            const boton = document.getElementById('btn-png');
+            
+            boton.innerText = "⏳ Generando PNG...";
+            boton.disabled = true;
 
-        // Asignar imagen a la pantalla
-        document.getElementById('mapa-img').src = pngUrl;
-
-        // Función de descarga que fuerza el archivo .png real
-        function descargarPNGDirecto() {
-            fetch(pngUrl)
-                .then(response => response.blob())
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales_Unidad2.png';
-                    document.body.appendChild(a);
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                })
-                .catch(() => alert('No se pudo descargar la imagen. Intenta de nuevo.'));
+            // html2canvas toma la captura limpia sin restricciones del navegador
+            html2canvas(area, {
+                scale: 2, // Garantiza nitidez y alta resolución
+                backgroundColor: "#ffffff",
+                useCORS: true
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales_Unidad2.png';
+                link.href = canvas.toDataURL('image/png');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                boton.innerText = "📥 Descargar Imagen (PNG)";
+                boton.disabled = false;
+            }).catch(err => {
+                alert('Ocurrió un error al procesar la imagen. Inténtalo de nuevo.');
+                boton.innerText = "📥 Descargar Imagen (PNG)";
+                boton.disabled = false;
+            });
         }
     </script>
 
