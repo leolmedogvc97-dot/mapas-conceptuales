@@ -3,235 +3,800 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Características de la Ley Penal y de los Tipos Penales - Unidad 2</title>
 
-    <!-- Librerías nativas para renderizado y exportación limpia -->
+    <!-- Mermaid -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f4f6;
             margin: 0;
             padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            text-align: center;
         }
+
         h1 {
             color: #1a252f;
-            margin-bottom: 5px;
-            text-align: center;
+            margin: 0 0 6px 0;
+            font-size: 28px;
         }
-        p.subtitle {
+
+        .subtitle {
             color: #555;
-            margin-top: 0;
-            margin-bottom: 20px;
-            font-size: 0.95em;
-            text-align: center;
+            margin: 0 0 20px 0;
+            font-size: 15px;
         }
+
         .btn-container {
             display: flex;
-            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
             margin-bottom: 25px;
         }
+
         .btn {
-            background-color: #0056b3;
-            color: #ffffff;
             border: none;
-            padding: 12px 24px;
-            font-size: 0.95em;
+            padding: 12px 22px;
+            font-size: 15px;
             font-weight: bold;
-            border-radius: 6px;
+            border-radius: 7px;
             cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-            transition: all 0.2s ease;
+            color: white;
+            transition: 0.2s;
         }
-        .btn-png {
-            background-color: #28a745;
-        }
+
         .btn:hover {
-            opacity: 0.9;
             transform: translateY(-1px);
+            opacity: 0.9;
         }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: wait;
+        }
+
+        .btn-png {
+            background: #198754;
+        }
+
+        .btn-svg {
+            background: #6f42c1;
+        }
+
+        .btn-pdf {
+            background: #0d6efd;
+        }
+
+        /* Área visible del mapa */
         .container {
             width: 100%;
-            max-width: 900px;
-            background: #ffffff;
-            padding: 30px;
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 35px;
             border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 18px rgba(0,0,0,0.10);
+            overflow-x: auto;
         }
-        .mermaid {
+
+        /* Mermaid */
+        #mapa {
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+        }
+
+        #mapa svg {
+            width: auto !important;
+            max-width: none !important;
+            height: auto !important;
         }
 
         @media print {
-            .btn-container, h1, .subtitle {
+
+            .btn-container,
+            h1,
+            .subtitle {
                 display: none !important;
             }
+
             body {
+                background: white;
                 padding: 0;
-                background-color: #ffffff;
             }
+
             .container {
                 box-shadow: none;
                 padding: 0;
-                width: 100%;
-                max-width: 100%;
+                max-width: none;
             }
         }
     </style>
 </head>
+
 <body>
 
     <h1>Características de la Ley Penal y de los Tipos Penales</h1>
-    <p class="subtitle">Programa Oficial Unidad 2 | Integración Doctrinal: Mir Puig & Díaz-Aranda</p>
 
-    <!-- Botones de descarga -->
+    <p class="subtitle">
+        Programa Oficial Unidad 2 | Integración Doctrinal: Mir Puig & Díaz-Aranda
+    </p>
+
     <div class="btn-container">
-        <button class="btn btn-png" id="btn-png" onclick="descargarPNG()">🖼️ Descargar Imagen (PNG)</button>
-        <button class="btn" id="btn-pdf" onclick="descargarPDF()">📄 Descargar Documento (PDF)</button>
+
+        <button class="btn btn-png" id="btn-png">
+            🖼️ Descargar PNG
+        </button>
+
+        <button class="btn btn-svg" id="btn-svg">
+            📐 Descargar SVG
+        </button>
+
+        <button class="btn btn-pdf" id="btn-pdf">
+            📄 Descargar PDF
+        </button>
+
     </div>
 
-    <!-- Contenedor del Mapa -->
-    <div class="container" id="captura-area">
-        <pre class="mermaid">
-        graph TD
-            ROOT["<b>Características de la Ley Penal<br/>y de los Tipos Penales</b>"]
 
-            subgraph LEY["1. LA LEY PENAL"]
-                direction TB
-                B1["<b>La Ley Penal</b><br/>Norma jurídica estatal que determina delitos y sanciones"]
-                B1_EST["<b>Estructura de la Norma</b>"]
-                B1_SUP["• <b>Supuesto de Hecho:</b> Conducta prohibida o mandada"]
-                B1_CONS["• <b>Consecuencia Jurídica:</b> Pena o Medida de Seguridad"]
-                B1 --> B1_EST
-                B1_EST --> B1_SUP
-                B1_EST --> B1_CONS
-            end
+    <!-- =====================================================
+         MAPA CONCEPTUAL
+         ===================================================== -->
 
-            subgraph TIPO["2. EL TIPO PENAL Y DIMENSIONES"]
-                direction TB
-                TP["<b>El Tipo Penal</b><br/>Descripción concreta de la conducta delictiva en la ley"]
-                TP_DIM["<b>Dimensiones Dogmáticas</b>"]
-                TP_INJ["• <b>Tipo de Injusto:</b> Materia de la prohibición y el desvalor"]
-                TP_AMP["• <b>Tipo en Sentido Amplio:</b> Presupuestos para la punibilidad"]
-                TP --> TP_DIM
-                TP_DIM --> TP_INJ
-                TP_DIM --> TP_AMP
-            end
+    <div class="container">
 
-            subgraph FUNCIONES["3. FUNCIONES DEL TIPO PENAL"]
-                direction TB
-                TP_FUNC["<b>Funciones Principales</b>"]
-                F1["1. <b>Seleccionadora:</b> Elige conductas graves sobre Bienes Jurídicos"]
-                F2["2. <b>De Garantía:</b> Límite al arbitrio judicial (Nullum crimen sine lege)"]
-                F3["3. <b>Motivadora:</b> Incita a abstenerse de cometer delitos"]
-                TP_FUNC --> F1
-                TP_FUNC --> F2
-                TP_FUNC --> F3
-            end
+        <div id="mapa">
 
-            subgraph ELEMENTOS["4. ELEMENTOS DEL TIPO PENAL"]
-                direction TB
-                EL["<b>Estructura de Elementos</b>"]
-                EL_OBJ["<b>A. Tipo Objetivo (Material)</b><br/>• Acción / Omisión humana<br/>• Sujeto Activo, Pasivo y Estado<br/>• Objeto Material y Bien Jurídico Tutelado<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado material (si lo exige el tipo)"]
-                EL_SUBJ["<b>B. Tipo Subjetivo (Psíquico)</b><br/>Procesos de la voluntad del autor"]
-                EL_NORM["<b>C. Elementos Normativos</b><br/>Valoración cultural o jurídico-formal"]
+            <pre class="mermaid">
 
-                SUBJ_DOLO["<b>El Dolo</b><br/>Conocimiento y voluntad de realizar el tipo objetivo"]
-                D1["• <b>Dolo Directo 1er Grado:</b> Busca el resultado de forma directa"]
-                D2["• <b>Dolo Directo 2do Grado:</b> Consecuencias necesarias"]
-                D3["• <b>Dolo Eventual:</b> Prevé el resultado posible y lo acepta"]
+flowchart TB
 
-                SUBJ_CULP["<b>Delito Culposo / Imprudente</b><br/>Infracción al deber objetivo de cuidado"]
-                C1["• <b>Culpa Consciente:</b> Prevé el resultado pero confía en evitarlo"]
-                C2["• <b>Culpa Inconsciente:</b> No prevé el resultado habiéndolo podido prever"]
+    ROOT["<b>CARACTERÍSTICAS DE LA LEY PENAL<br/>Y DE LOS TIPOS PENALES</b>"]
 
-                SUBJ_ESP["<b>Elementos Subjetivos Específicos</b><br/>Ánimo, fin o propósito particular exigido"]
+    %% =====================================================
+    %% 1. LEY PENAL
+    %% =====================================================
 
-                EL --> EL_OBJ
-                EL --> EL_SUBJ
-                EL --> EL_NORM
-                EL_SUBJ --> SUBJ_DOLO
-                SUBJ_DOLO --> D1
-                SUBJ_DOLO --> D2
-                SUBJ_DOLO --> D3
-                EL_SUBJ --> SUBJ_CULP
-                SUBJ_CULP --> C1
-                SUBJ_CULP --> C2
-                EL_SUBJ --> SUBJ_ESP
-            end
+    LEY["<b>1. LA LEY PENAL</b><br/>Norma jurídica estatal que determina delitos y sanciones"]
 
-            subgraph CLASIF["5. CLASIFICACIÓN DE LOS TIPOS"]
-                direction TB
-                TP_CLAS["<b>Clasificación General</b><br/>• <b>Por el resultado:</b> Mera Actividad vs. Resultado<br/>• <b>Por la temporalidad:</b> Instantáneo, Permanente y Continuado<br/>• <b>Por la afectación:</b> Lesión vs. Peligro (Concreto/Abstracto)<br/>• <b>Por los sujetos:</b> Unisubjetivo vs. Plurisubjetivo / Común vs. Especial"]
-            end
+    LEY_EST["<b>Estructura de la Ley Penal</b>"]
 
-            subgraph SANCIÓN["6. FASES DE LA SANCIÓN PENAL"]
-                direction TB
-                TRIADA["<b>Fases de la Sanción</b>"]
-                PUN_1["1. <b>Punibilidad (Legislativa):</b> Merecimiento abstracto de pena en la ley"]
-                PUN_2["2. <b>Punición (Judicial):</b> Fijación concreta de la pena por el Juez"]
-                PUN_3["3. <b>Pena (Ejecutiva):</b> Cumplimiento orientado a la Reinserción Social"]
-                TRIADA --> PUN_1
-                TRIADA --> PUN_2
-                TRIADA --> PUN_3
-            end
+    SUP["<b>Supuesto de Hecho</b><br/>Conducta prohibida o mandada"]
 
-            ROOT --> LEY
-            ROOT --> TIPO
-            ROOT --> FUNCIONES
-            ROOT --> ELEMENTOS
-            ROOT --> CLASIF
-            ROOT --> SANCIÓN
-        </pre>
+    CONS["<b>Consecuencia Jurídica</b><br/>Pena o medida de seguridad"]
+
+    ROOT -->|"se define como"| LEY
+    LEY -->|"se conforma de"| LEY_EST
+    LEY_EST --> SUP
+    LEY_EST --> CONS
+
+
+    %% =====================================================
+    %% 2. TIPO PENAL Y DIMENSIONES
+    %% =====================================================
+
+    TIPO["<b>2. EL TIPO PENAL</b><br/>Descripción concreta de la conducta delictiva en la ley"]
+
+    DIM["<b>Dimensiones Dogmáticas del Tipo</b>"]
+
+    INJ["<b>Tipo de Injusto</b><br/>Características que fundamentan la materia de la prohibición y el desvalor"]
+
+    AMP["<b>Tipo en Sentido Amplio</b><br/>Conjunto de todos los presupuestos para la punibilidad"]
+
+    ROOT -->|"se concreta en"| TIPO
+    TIPO -->|"se analiza mediante"| DIM
+    DIM --> INJ
+    DIM --> AMP
+
+
+    %% =====================================================
+    %% 3. FUNCIONES
+    %% =====================================================
+
+    FUNC["<b>3. FUNCIONES DEL TIPO PENAL</b>"]
+
+    F1["<b>Función Seleccionadora</b><br/>Elige las conductas prohibidas por el Estado"]
+
+    F2["<b>Función de Garantía</b><br/>Limita el arbitrio estatal<br/>Nullum crimen sine lege"]
+
+    F3["<b>Función Motivadora</b><br/>Orienta al ciudadano sobre las conductas prohibidas"]
+
+    TIPO -->|"desempeña"| FUNC
+
+    FUNC --> F1
+    FUNC --> F2
+    FUNC --> F3
+
+
+    %% =====================================================
+    %% 4. ELEMENTOS
+    %% =====================================================
+
+    ELEM["<b>4. ELEMENTOS DEL TIPO PENAL</b>"]
+
+    OBJ["<b>Tipo Objetivo</b><br/>Dimensión externa del hecho<br/><br/>• Acción / Omisión<br/>• Sujeto activo, pasivo y Estado<br/>• Objeto material y bien jurídico tutelado<br/>• Nexo causal e imputación objetiva<br/>• Resultado material cuando el tipo lo exige"]
+
+    SUB["<b>Tipo Subjetivo</b><br/>Dimensión interna de la voluntad del autor"]
+
+    NORM["<b>Elementos Normativos</b><br/>Términos que requieren valoración cultural o jurídica"]
+
+    TIPO -->|"se integra por"| ELEM
+
+    ELEM --> OBJ
+    ELEM --> SUB
+    ELEM --> NORM
+
+
+    %% =====================================================
+    %% DOLO
+    %% =====================================================
+
+    DOLO["<b>El Dolo</b><br/>Conocimiento y voluntad de realizar el tipo objetivo"]
+
+    INT["<b>Intención</b><br/>Forma más intensa del dolo directo"]
+
+    D1["<b>Dolo Directo</b><br/>El autor sabe o prevé como segura la realización del tipo"]
+
+    D2["<b>Consecuencias Necesarias</b><br/>El autor acepta consecuencias que sabe que derivarán necesariamente"]
+
+    DE["<b>Dolo Eventual</b><br/>Prevé como posible el resultado y se conforma con esa posibilidad"]
+
+    SUB -->|"forma dolosa"| DOLO
+
+    DOLO --> INT
+    DOLO --> D1
+    DOLO --> D2
+    DOLO --> DE
+
+
+    %% =====================================================
+    %% CULPA
+    %% =====================================================
+
+    CULP["<b>Delito Culposo / Imprudente</b><br/>Realización no querida del tipo por infracción al deber de cuidado"]
+
+    CC["<b>Culpa Consciente</b><br/>Prevé el resultado, pero confía en que no ocurrirá"]
+
+    CI["<b>Culpa Inconsciente</b><br/>No prevé el resultado, aunque pudo preverlo"]
+
+    SUB -->|"forma culposa"| CULP
+
+    CULP --> CC
+    CULP --> CI
+
+
+    %% =====================================================
+    %% ELEMENTOS SUBJETIVOS ESPECÍFICOS
+    %% =====================================================
+
+    ESP["<b>Elementos Subjetivos Específicos</b><br/>Ánimo, fin o propósito particular exigido por el tipo"]
+
+    SUB -->|"requiere a veces"| ESP
+
+
+    %% =====================================================
+    %% 5. CLASIFICACIÓN
+    %% =====================================================
+
+    CLAS["<b>5. CLASIFICACIÓN DE LOS TIPOS PENALES</b>"]
+
+    CLAS_CONT["<b>Por su estructura y elementos</b><br/>• Tipo fundamental o básico<br/>• Modificaciones, calificativas, agravantes o atenuantes<br/>• Especiales<br/>• Subordinados o complementados<br/>• Compuestos<br/>• Autónomos<br/>• En blanco<br/>• Abiertos<br/>• Cerrados"]
+
+    CLAS_AF["<b>Por afectación al bien jurídico</b><br/>• De daño o lesión<br/>• De puesta en peligro<br/>• Peligro concreto / abstracto"]
+
+    CLAS_TIME["<b>Por temporalidad</b><br/>• Instantáneo<br/>• Permanente<br/>• Continuado"]
+
+    TIPO -->|"se clasifica en"| CLAS
+
+    CLAS --> CLAS_CONT
+    CLAS --> CLAS_AF
+    CLAS --> CLAS_TIME
+
+
+    %% =====================================================
+    %% 6. SANCIÓN PENAL
+    %% =====================================================
+
+    SAN["<b>6. PUNIBILIDAD, PUNICIÓN Y PENA</b>"]
+
+    PUN["<b>Punibilidad</b><br/>Merecimiento y conminación legal de la pena"]
+
+    PUNC["<b>Punición</b><br/>Fijación concreta de la pena por el juez"]
+
+    PENA["<b>Pena</b><br/>Privación o restricción de bienes jurídicos del autor<br/>Se ejecuta en fase administrativa"]
+
+    TIPO -->|"determina la"| SAN
+
+    SAN --> PUN
+    SAN --> PUNC
+    SAN --> PENA
+
+
+    %% =====================================================
+    %% ESTILOS
+    %% =====================================================
+
+    classDef root fill:#e8e0ff,stroke:#6f42c1,stroke-width:3px,color:#111;
+    classDef principal fill:#eee7ff,stroke:#7b61a8,stroke-width:2px,color:#111;
+    classDef secundario fill:#f7f3ff,stroke:#9b8ac4,stroke-width:1.5px,color:#111;
+    classDef detalle fill:#ffffff,stroke:#b8a9d6,stroke-width:1px,color:#111;
+
+    class ROOT root;
+
+    class LEY,TIPO,FUNC,ELEM,CLAS,SAN principal;
+
+    class LEY_EST,DIM,INJ,AMP,OBJ,SUB,NORM,DOLO,CULP,ESP,CLAS_CONT,CLAS_AF,CLAS_TIME,PUN,PUNC,PENA secundario;
+
+    class SUP,CONS,F1,F2,F3,INT,D1,D2,DE,CC,CI detalle;
+
+            </pre>
+
+        </div>
+
     </div>
 
-    <!-- Scripts de renderizado y descarga -->
+
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
+
     <script>
-        mermaid.initialize({ startOnLoad: true, theme: 'default' });
 
-        function descargarPNG() {
-            const area = document.getElementById('captura-area');
-            const boton = document.getElementById('btn-png');
-            boton.innerText = "⏳ Generando PNG...";
-            boton.disabled = true;
+        mermaid.initialize({
+            startOnLoad: false,
+            theme: "default",
+            securityLevel: "loose",
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: "basis",
+                nodeSpacing: 35,
+                rankSpacing: 55
+            }
+        });
 
-            html2canvas(area, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = 'Mapa_Conceptual_Unidad2.png';
-                link.href = canvas.toDataURL('image/png');
+
+        /* =====================================================
+           RENDERIZAR MERMAID
+           ===================================================== */
+
+        async function iniciarMapa() {
+
+            const elemento = document.querySelector(".mermaid");
+
+            const codigo = elemento.textContent;
+
+            try {
+
+                const { svg } = await mermaid.render(
+                    "mapa_unidad_2",
+                    codigo
+                );
+
+                document.getElementById("mapa").innerHTML = svg;
+
+                console.log("Mapa renderizado correctamente.");
+
+            } catch (error) {
+
+                console.error("Error al renderizar Mermaid:", error);
+
+                document.getElementById("mapa").innerHTML =
+                    "<p style='color:red;'>Error al generar el mapa.</p>";
+            }
+        }
+
+
+        /* =====================================================
+           OBTENER SVG
+           ===================================================== */
+
+        function obtenerSVG() {
+
+            const svg = document.querySelector("#mapa svg");
+
+            if (!svg) {
+                throw new Error("El mapa todavía no está renderizado.");
+            }
+
+            const clon = svg.cloneNode(true);
+
+            const rect = svg.getBoundingClientRect();
+
+            let width = parseFloat(svg.getAttribute("width"));
+            let height = parseFloat(svg.getAttribute("height"));
+
+            if (!width || !height) {
+
+                width = rect.width;
+                height = rect.height;
+            }
+
+            clon.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+            clon.setAttribute("xmlns:xlink", "http://www.w3.org/1999/xlink");
+
+            clon.setAttribute("width", width);
+            clon.setAttribute("height", height);
+
+            return {
+                svg: clon,
+                width: width,
+                height: height
+            };
+        }
+
+
+        /* =====================================================
+           DESCARGAR SVG
+           ===================================================== */
+
+        function descargarSVG() {
+
+            try {
+
+                const resultado = obtenerSVG();
+
+                const serializer = new XMLSerializer();
+
+                const source = serializer.serializeToString(
+                    resultado.svg
+                );
+
+                const blob = new Blob(
+                    [source],
+                    {
+                        type: "image/svg+xml;charset=utf-8"
+                    }
+                );
+
+                const url = URL.createObjectURL(blob);
+
+                const link = document.createElement("a");
+
+                link.href = url;
+                link.download = "Mapa_Conceptual_Unidad2.svg";
+
+                document.body.appendChild(link);
+
                 link.click();
-                boton.innerText = "🖼️ Descargar Imagen (PNG)";
-                boton.disabled = false;
-            });
+
+                document.body.removeChild(link);
+
+                URL.revokeObjectURL(url);
+
+            } catch (error) {
+
+                alert("No se pudo descargar el SVG.");
+                console.error(error);
+
+            }
         }
 
-        function descargarPDF() {
-            const { jsPDF } = window.jspdf;
-            const area = document.getElementById('captura-area');
-            const boton = document.getElementById('btn-pdf');
-            boton.innerText = "⏳ Generando PDF...";
-            boton.disabled = true;
 
-            html2canvas(area, { scale: 2, backgroundColor: "#ffffff" }).then(canvas => {
-                const imgData = canvas.toDataURL('image/png');
-                const pdf = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'px',
-                    format: [canvas.width, canvas.height]
-                });
-                pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
-                pdf.save('Mapa_Conceptual_Unidad2.pdf');
-                boton.innerText = "📄 Descargar Documento (PDF)";
+        /* =====================================================
+           DESCARGAR PNG
+           ===================================================== */
+
+        async function descargarPNG() {
+
+            const boton = document.getElementById("btn-png");
+
+            try {
+
+                boton.disabled = true;
+                boton.textContent = "⏳ Generando PNG...";
+
+                const resultado = obtenerSVG();
+
+                const serializer = new XMLSerializer();
+
+                let source = serializer.serializeToString(
+                    resultado.svg
+                );
+
+                /*
+                 * Aumentamos considerablemente la resolución.
+                 * Esto evita que el mapa salga pixelado.
+                 */
+
+                const escala = 4;
+
+                const ancho = resultado.width * escala;
+                const alto = resultado.height * escala;
+
+                const blob = new Blob(
+                    [source],
+                    {
+                        type: "image/svg+xml;charset=utf-8"
+                    }
+                );
+
+                const url = URL.createObjectURL(blob);
+
+                const imagen = new Image();
+
+                imagen.onload = function () {
+
+                    const canvas = document.createElement("canvas");
+
+                    canvas.width = ancho;
+                    canvas.height = alto;
+
+                    const ctx = canvas.getContext("2d");
+
+                    ctx.fillStyle = "#ffffff";
+                    ctx.fillRect(0, 0, ancho, alto);
+
+                    ctx.drawImage(
+                        imagen,
+                        0,
+                        0,
+                        ancho,
+                        alto
+                    );
+
+                    URL.revokeObjectURL(url);
+
+                    canvas.toBlob(function(blobPNG) {
+
+                        const enlace = document.createElement("a");
+
+                        enlace.href =
+                            URL.createObjectURL(blobPNG);
+
+                        enlace.download =
+                            "Mapa_Conceptual_Unidad2.png";
+
+                        document.body.appendChild(enlace);
+
+                        enlace.click();
+
+                        document.body.removeChild(enlace);
+
+                        boton.textContent =
+                            "🖼️ Descargar PNG";
+
+                        boton.disabled = false;
+
+                    }, "image/png");
+
+                };
+
+                imagen.onerror = function () {
+
+                    URL.revokeObjectURL(url);
+
+                    throw new Error(
+                        "No fue posible convertir el SVG a PNG."
+                    );
+
+                };
+
+                imagen.src = url;
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "No se pudo generar el PNG. " +
+                    "Abre la consola del navegador para revisar el error."
+                );
+
+                boton.textContent =
+                    "🖼️ Descargar PNG";
+
                 boton.disabled = false;
-            });
+            }
         }
+
+
+        /* =====================================================
+           DESCARGAR PDF
+           ===================================================== */
+
+        async function descargarPDF() {
+
+            const boton = document.getElementById("btn-pdf");
+
+            try {
+
+                boton.disabled = true;
+                boton.textContent = "⏳ Generando PDF...";
+
+                const resultado = obtenerSVG();
+
+                const serializer = new XMLSerializer();
+
+                const source =
+                    serializer.serializeToString(resultado.svg);
+
+                const blob = new Blob(
+                    [source],
+                    {
+                        type: "image/svg+xml;charset=utf-8"
+                    }
+                );
+
+                const url = URL.createObjectURL(blob);
+
+                const imagen = new Image();
+
+                imagen.onload = function () {
+
+                    const escala = 3;
+
+                    const canvas =
+                        document.createElement("canvas");
+
+                    canvas.width =
+                        resultado.width * escala;
+
+                    canvas.height =
+                        resultado.height * escala;
+
+                    const ctx =
+                        canvas.getContext("2d");
+
+                    ctx.fillStyle = "#ffffff";
+
+                    ctx.fillRect(
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    );
+
+                    ctx.drawImage(
+                        imagen,
+                        0,
+                        0,
+                        canvas.width,
+                        canvas.height
+                    );
+
+                    URL.revokeObjectURL(url);
+
+                    const imgData =
+                        canvas.toDataURL("image/png");
+
+                    const { jsPDF } = window.jspdf;
+
+                    /*
+                     * A4 vertical
+                     */
+
+                    const pdf =
+                        new jsPDF({
+                            orientation: "portrait",
+                            unit: "mm",
+                            format: "a4"
+                        });
+
+                    const anchoPagina = 210;
+                    const altoPagina = 297;
+
+                    const margen = 8;
+
+                    const anchoDisponible =
+                        anchoPagina - margen * 2;
+
+                    const altoDisponible =
+                        altoPagina - margen * 2;
+
+                    const proporcion =
+                        canvas.width / canvas.height;
+
+                    let ancho =
+                        anchoDisponible;
+
+                    let alto =
+                        ancho / proporcion;
+
+                    if (alto > altoDisponible) {
+
+                        alto = altoDisponible;
+
+                        ancho =
+                            alto * proporcion;
+                    }
+
+                    const x =
+                        (anchoPagina - ancho) / 2;
+
+                    const y =
+                        (altoPagina - alto) / 2;
+
+                    pdf.addImage(
+                        imgData,
+                        "PNG",
+                        x,
+                        y,
+                        ancho,
+                        alto
+                    );
+
+                    pdf.save(
+                        "Mapa_Conceptual_Unidad2.pdf"
+                    );
+
+                    boton.textContent =
+                        "📄 Descargar PDF";
+
+                    boton.disabled = false;
+
+                };
+
+                imagen.onerror = function () {
+
+                    URL.revokeObjectURL(url);
+
+                    throw new Error(
+                        "No fue posible generar el PDF."
+                    );
+                };
+
+                imagen.src = url;
+
+            } catch (error) {
+
+                console.error(error);
+
+                alert(
+                    "No se pudo generar el PDF."
+                );
+
+                boton.textContent =
+                    "📄 Descargar PDF";
+
+                boton.disabled = false;
+            }
+        }
+
+
+        /* =====================================================
+           BOTONES
+           ===================================================== */
+
+        document
+            .getElementById("btn-png")
+            .addEventListener(
+                "click",
+                descargarPNG
+            );
+
+        document
+            .getElementById("btn-svg")
+            .addEventListener(
+                "click",
+                descargarSVG
+            );
+
+        document
+            .getElementById("btn-pdf")
+            .addEventListener(
+                "click",
+                descargarPDF
+            );
+
+
+        /* =====================================================
+           INICIAR
+           ===================================================== */
+
+        iniciarMapa();
+
     </script>
 
 </body>
