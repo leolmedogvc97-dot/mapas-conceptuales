@@ -1,55 +1,141 @@
-# El Derecho Penal y la Teoría del Delito
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Características de ley penal y tipos penales</title>
+    <!-- Importación de Mermaid.js para GitHub Pages -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ 
+            startOnLoad: true, 
+            theme: 'default',
+            flowchart: { curve: 'basis' }
+        });
+    </script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        h1 {
+            color: #1a252f;
+            margin-bottom: 5px;
+            text-align: center;
+        }
+        p.subtitle {
+            color: #555;
+            margin-top: 0;
+            margin-bottom: 25px;
+            font-size: 0.95em;
+            text-align: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 1300px;
+            background: #ffffff;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow-x: auto;
+        }
+        .references {
+            margin-top: 30px;
+            width: 100%;
+            max-width: 1300px;
+            background: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 5px solid #0056b3;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .references h3 {
+            margin-top: 0;
+            color: #0056b3;
+        }
+        .references ul {
+            padding-left: 20px;
+            color: #333;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
 
-Este esquema integra la dogmática penal de Santiago Mir Puig (Teoría del Delito) con el marco legal y constitucional de México.
+    <h1>Características de ley penal y tipos penales</h1>
+    <p class="subtitle">Síntesis Dogmática e Integración Doctrinal: Santiago Mir Puig & Enrique Díaz-Aranda</p>
 
-```mermaid
-graph TD
-    %% Nodo Principal
-    ROOT["EL DERECHO PENAL Y EL DELITO"] --> B1["1. LA LEY PENAL<br/>(Marco Mexicano)"]
-    ROOT --> B2["2. EL TIPO PENAL<br/>(Teoría del Delito - Mir Puig)"]
+    <div class="container">
+        <pre class="mermaid">
+        graph TD
+            %% NODO CENTRAL
+            ROOT["Características de ley penal y tipos penales"]
 
-    %% BLOQUE 1: LA LEY PENAL
-    B1 --> B1_1["1.1. Marco Constitucional"]
-    B1_1 --> B1_1A["Principio de Legalidad<br/>(Art. 14 CPEUM)"]
-    B1_1 --> B1_1B["Derecho Penal del Hecho<br/>(Art. 18 CPEUM)"]
-    B1_1 --> B1_1C["Reinserción Social<br/>(Art. 18 CPEUM)"]
+            %% NIVEL SUPERIOR: FUNDAMENTOS NORMÁTICOS
+            ROOT -->|se ejerce mediante| B1["Potestad Punitiva del Estado<br/>(Ius Puniendi)<br/>Emisión, Aplicación y Ejecución"]
+            ROOT -->|se expresa en| B2["Ley Penal<br/>Norma que define conductas delictivas y sanciones"]
+            ROOT -->|se estructura en| B3["Proposiciones Jurídico-Penales<br/>(Mir Puig)"]
+            ROOT -->|se rige por| B4["Jerarquía y Principios Constitucionales<br/>(Díaz-Aranda / CPEUM)"]
 
-    B1 --> B1_2["1.2. Estructura Legislativa"]
-    B1_2 --> B1_2A["Sustantiva: Código Penal Federal y Estatales"]
-    B1_2 --> B1_2B["Adjetiva: Código Nacional de Procedimientos Penales"]
+            %% DESGLOSE NORMAS
+            B3 -->|comprende| B3_1["Disposiciones Incompletas<br/>Requieren complementación normativo-sistemática"]
+            B3 -->|incluye| B3_2["Leyes Penales en Blanco<br/>Remiten a otras normas o autoridades para integrar el supuesto"]
 
-    B1 --> B1_3["1.3. Principios Dogmáticos"]
-    B1_3 --> B1_3A["Protección de Bienes Jurídicos / Lesividad"]
-    B1_3 --> B1_3B["Ultima Ratio y Carácter Fragmentario"]
+            %% PRINCIPIOS
+            B4 -->|exige| B4_1["• Subordinación a la Constitución y Tratados (DDHH)<br/>• Legalidad y Taxatividad (Nullum crimen, nulla poena sine lege)<br/>• Lesividad y protección exclusiva de Bienes Jurídicos"]
 
-    %% BLOQUE 2: EL TIPO PENAL
-    B2 --> B2_1["2.1. Concepto y Presupuestos"]
-    B2_1 --> B2_1A["Conducta típica y antijurídica"]
-    B2_1 --> B2_1B["Acción u Omisión"]
-    B2_1 --> B2_1C["Exclusión de Acción:<br/>Fuerza mayor, reflejos, inconsciencia"]
+            %% ESTRUCTURA DE LA LEY
+            B2 -->|se compone de| E1["Estructura de la Norma<br/>(Mir Puig)"]
+            E1 -->|contiene| E1_A["Supuesto de Hecho"]
+            E1 -->|adscribe| E1_B["Consecuencia Jurídica"]
+            E1 -->|garantiza| E1_C["Garantía de Estricta Legalidad<br/>Límite al arbitrio estatal"]
 
-    B2 --> B2_2["2.2. Elementos del Tipo"]
-    B2_2 --> B2_2A["Objetivos: Conducta, nexo causal e Imputación Objetiva"]
-    B2_2 --> B2_2B["Normativos: Valoraciones ético-sociales o jurídicas"]
-    B2_2 --> B2_2C["Subjetivos: Dolo, Culpa / Imprudencia y ánimos específicos"]
+            %% TIPO PENAL
+            E1 -->|da lugar al| TP["El Tipo Penal<br/>Descripción legal de la conducta prohibida o mandada"]
 
-    B2 --> B2_3["2.3. Clases de Tipos y Conductas"]
-    B2_3 --> B2_3A["Resultado vs. Mera actividad"]
-    B2_3 --> B2_3B["Instantáneos vs. Permanentes"]
-    B2_3 --> B2_3C["Dolosos vs. Culposos / Lesión vs. Peligro"]
-    B2_3 --> B2_3D["Omisión Pura vs. Comisión por Omisión (Garante)"]
+            %% ELEMENTOS ESTRUCTURALES DEL TIPO (MIR PUIG)
+            TP -->|se integra por| TP_EST["Elementos Estructurales del Tipo"]
+            TP_EST -->|comprende| TP_SUJ["Sujetos<br/>• Activo (ejecutor)<br/>• Pasivo (titular del bien)<br/>• Estado"]
+            TP_EST -->|recae sobre| TP_OBJ["Objetos<br/>• Material (ente físico/persona)<br/>• Jurídico (Bien Jurídico Tutelado)"]
+            TP_EST -->|desarrolla| TP_COND["Conducta Típica<br/>Acción u Omisión"]
 
-    %% BLOQUE 3: PUNIBILIDAD Y PUNICION
-    B2_3 --> B3["3. PUNIBILIDAD Y PUNICIÓN"]
+            %% ELEMENTOS DEL TIPO Y ANÁLISIS DEL DELITO (DÍAZ-ARANDA)
+            TP_COND -->|se analiza mediante| EL["Elementos de la Conducta-Típica<br/>(Art. 405 CNPP / Díaz-Aranda)"]
+            
+            EL -->|incluye| EL_OBJ["Objetivos<br/>• Acción / Omisión<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado material (cuando el tipo lo exija)"]
+            EL -->|incluye| EL_SUBJ["Subjetivos<br/>• Dolo (Directo/Eventual)<br/>• Culpa o Imprudencia<br/>• Elementos subjetivos específicos (ánimo, fin, propósito)"]
+            EL -->|incluye| EL_NORM["Normativos<br/>• Valoraciones culturales<br/>• Conceptos estrictamente jurídicos"]
 
-    B3 --> B3_1["PUNIBILIDAD<br/>(Fase Legislativa)"]
-    B3_1 --> B3_1A["Marco abstracto fijado en la ley"]
-    B3_1 --> B3_1B["Establecimiento de Penas y Medidas de Seguridad"]
+            %% FUNCIONES Y CLASIFICACIÓN
+            TP -->|cumple| TP_FUNC["Funciones del Tipo<br/>• Seleccionadora de conductas<br/>• De garantía ciudadana<br/>• Motivadora del comportamiento"]
+            
+            TP -->|se clasifica en| TP_CLAS["Clasificación Dogmática<br/>• Resultado vs. Mera Actividad<br/>• Instantáneo vs. Permanente / Continuado<br/>• Doloso vs. Imprudente<br/>• Lesión vs. Peligro (Concreto/Abstracto)"]
 
-    B3 --> B3_2["PUNICIÓN<br/>(Fase Judicial - CNPP)"]
-    B3_2 --> B3_2A["Imposición concreta por el Juez de Enjuiciamiento"]
-    B3_2 --> B3_2B["Graduación por Iter Criminis:<br/>Consumación vs. Tentativa"]
-    B3_2 --> B3_2C["Grado de Intervención:<br/>Autoría (Dominio del Hecho) y Participación"]
+            %% SECUENCIA DOGMÁTICA DE LA TEORÍA DEL DELITO
+            EL -->|presupone la| ANT["Antijuridicidad<br/>Desvalor de la conducta y resultado.<br/>Se excluye por Causas de Justificación (ej. legítima defensa)"]
+            ANT -->|permite el juicio de| CULP["Culpabilidad<br/>Juicio de reproche personal basado en Imputabilidad,<br/>conciencia de la antijuridicidad y exigibilidad de conducta"]
 
-    B3_2 --> B4["4. FASE EJECUTIVA<br/>(Penitenciaria)"]
-    B4 --> B4_A["Cumplimiento orientado a la Reinserción Social"]
+            %% SANCIÓN PENAL Y FASES
+            CULP -->|determina la| PE["Punibilidad, Punición y Ejecución"]
+            PE -->|Fase Legislativa| PE_1["Punibilidad: Amenaza abstracta en la norma (mínimos y máximos)"]
+            PE -->|Fase Judicial| PE_2["Punición: Concreción judicial de la pena en la sentencia (CNPP)"]
+            PE -->|Fase Administrativa| PE_3["Ejecución Penal: Cumplimiento orientado a la Reinserción Social (Art. 18 CPEUM)"]
+        </pre>
+    </div>
+
+    <!-- SECCIÓN DE REFERENCIAS BIBLIOGRÁFICAS EXPLICITAS -->
+    <div class="references">
+        <h3>Referencias Bibliográficas</h3>
+        <ul>
+            <li><strong>Díaz-Aranda, Enrique.</strong> <em>Derecho Penal. Parte General y Teoría del Delito.</em> Editorial Porrúa / UNAM, México. (Análisis sistemático de los elementos del tipo normativo, objetivo y subjetivo según el CNPP).</li>
+            <li><strong>Mir Puig, Santiago.</strong> <em>Derecho Penal. Parte General.</em> Reppertor, Barcelona. (Lecciones 5 a 15: Concepciones de la ley penal, funciones del tipo, teoría del injusto y estructura de la norma).</li>
+        </ul>
+    </div>
+
+</body>
+</html>
