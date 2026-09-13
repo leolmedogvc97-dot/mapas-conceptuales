@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Características de ley penal y tipos penales</title>
-    <!-- Carga la librería Mermaid para dibujar el gráfico -->
+    <!-- Carga de la librería Mermaid -->
     <script type="module">
         import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
         mermaid.initialize({ 
@@ -31,9 +31,25 @@
         p.subtitle {
             color: #555;
             margin-top: 0;
-            margin-bottom: 25px;
+            margin-bottom: 15px;
             font-size: 0.95em;
             text-align: center;
+        }
+        .btn-download {
+            background-color: #0056b3;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 0.95em;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: background-color 0.2s ease;
+        }
+        .btn-download:hover {
+            background-color: #003d80;
         }
         .container {
             width: 100%;
@@ -44,24 +60,9 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             overflow-x: auto;
         }
-        .references {
-            margin-top: 30px;
-            width: 100%;
-            max-width: 1300px;
-            background: #ffffff;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 5px solid #0056b3;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-        .references h3 {
-            margin-top: 0;
-            color: #0056b3;
-        }
-        .references ul {
-            padding-left: 20px;
-            color: #333;
-            font-size: 0.9em;
+        .mermaid {
+            display: flex;
+            justify-content: center;
         }
     </style>
 </head>
@@ -70,8 +71,11 @@
     <h1>Características de ley penal y tipos penales</h1>
     <p class="subtitle">Síntesis Dogmática e Integración Doctrinal: Santiago Mir Puig & Enrique Díaz-Aranda</p>
 
-    <div class="container">
-        <pre class="mermaid">
+    <!-- Botón para descargar la imagen -->
+    <button class="btn-download" onclick="downloadPNG()">📥 Descargar Mapa como PNG</button>
+
+    <div class="container" id="map-container">
+        <pre class="mermaid" id="mermaid-diagram">
         graph TD
             ROOT["Características de ley penal y tipos penales"]
 
@@ -117,13 +121,45 @@
         </pre>
     </div>
 
-    <div class="references">
-        <h3>Referencias Bibliográficas</h3>
-        <ul>
-            <li><strong>Díaz-Aranda, Enrique.</strong> <em>Derecho Penal. Parte General y Teoría del Delito.</em> Editorial Porrúa / UNAM, México. (Análisis sistemático de los elementos del tipo normativo, objetivo y subjetivo según el CNPP).</li>
-            <li><strong>Mir Puig, Santiago.</strong> <em>Derecho Penal. Parte General.</em> Reppertor, Barcelona. (Lecciones 5 a 15: Concepciones de la ley penal, funciones del tipo, teoría del injusto y estructura de la norma).</li>
-        </ul>
-    </div>
+    <!-- Script para exportar el SVG generado como imagen PNG -->
+    <script>
+        function downloadPNG() {
+            const svgElement = document.querySelector('.mermaid svg');
+            if (!svgElement) {
+                alert('El mapa aún se está cargando. Espera un segundo e intenta de nuevo.');
+                return;
+            }
+
+            const svgData = new XMLSerializer().serializeToString(svgElement);
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const img = new Image();
+
+            const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = function () {
+                const bbox = svgElement.getBBox();
+                canvas.width = bbox.width + 40;
+                canvas.height = bbox.height + 40;
+
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 20, 20);
+
+                const pngUrl = canvas.toDataURL('image/png');
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pngUrl;
+                downloadLink.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales.png';
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+                URL.revokeObjectURL(url);
+            };
+
+            img.src = url;
+        }
+    </script>
 
 </body>
 </html>
