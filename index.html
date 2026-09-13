@@ -8,7 +8,7 @@
     :root {
       --bg-color: #f8fafc;
       --card-bg: #ffffff;
-      --border-blue: #2563eb;
+      --border-blue: #3b82f6;
       --text-dark: #0f172a;
       --text-muted: #64748b;
     }
@@ -20,16 +20,22 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
-    body {
+    /* Permite desplazamiento completo en caso de que el lienzo sea muy grande */
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: auto !important;
       background-color: var(--bg-color);
+    }
+
+    body {
       background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
       background-size: 20px 20px;
       color: var(--text-dark);
       display: flex;
       flex-direction: column;
       align-items: center;
-      min-height: 100vh;
-      padding: 40px 20px;
+      padding: 30px 20px 100px 20px; /* Extra padding inferior para ver todo abajo */
     }
 
     .toolbar {
@@ -42,12 +48,12 @@
       justify-content: space-between;
       align-items: center;
       border-radius: 10px;
-      margin-bottom: 30px;
+      margin-bottom: 25px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
 
     .toolbar h1 {
-      font-size: 1.15rem;
+      font-size: 1.1rem;
       font-weight: 700;
     }
 
@@ -66,32 +72,31 @@
     }
 
     .btn-reset { background: #ef4444; color: white; }
-    .btn-reset:hover { background: #dc2626; }
-
     .btn-secondary { background: #475569; color: white; }
-    .btn-secondary:hover { background: #334155; }
 
     .map-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 32px;
+      gap: 28px;
       width: max-content;
+      margin: 0 auto;
     }
 
     .row {
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 16px;
       width: 100%;
+      flex-wrap: nowrap; /* Mantiene la fila organizada */
     }
 
     .node-card {
       background: #ffffff;
       border: 2px solid var(--border-blue);
       border-radius: 14px;
-      width: 310px;
-      padding: 16px;
+      width: 270px; /* Tamaño ajustado para que quepan las 4 tarjetas abajo */
+      padding: 14px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.04);
       display: flex;
       flex-direction: column;
@@ -99,35 +104,35 @@
     }
 
     .title-input {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #0f172a;
       border: none;
       outline: none;
       width: 100%;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       background: transparent;
     }
 
     .desc-input {
-      font-size: 0.88rem;
+      font-size: 0.83rem;
       color: #334155;
       border: none;
       outline: none;
       width: 100%;
       resize: vertical;
-      min-height: 55px;
+      min-height: 50px;
       line-height: 1.4;
       background: transparent;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .comments-section {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 12px;
+      padding: 8px;
+      margin-bottom: 8px;
     }
 
     .comments-header {
@@ -188,11 +193,11 @@
       justify-content: space-between;
       align-items: center;
       margin-top: auto;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
     }
 
     .upload-btn-label {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: #2563eb;
       font-weight: 600;
       cursor: pointer;
@@ -200,20 +205,12 @@
 
     .upload-btn-label input { display: none; }
 
-    .btn-delete-card {
-      background: none;
-      border: none;
-      color: #ef4444;
-      font-size: 0.78rem;
-      cursor: pointer;
-    }
-
     .image-preview-container {
       position: relative;
       margin-bottom: 8px;
       border-radius: 6px;
       overflow: hidden;
-      max-height: 100px;
+      max-height: 90px;
       display: flex;
       justify-content: center;
       background: #f1f5f9;
@@ -245,7 +242,7 @@
   <div class="toolbar">
     <h1>⚖️ Mapa Conceptual: La Ley Penal</h1>
     <div class="btn-group">
-      <button class="btn btn-reset" onclick="resetToPenalMap()">🔄 Limpiar y Restablecer</button>
+      <button class="btn btn-reset" onclick="resetMap()">🔄 Restablecer Todo</button>
       <button class="btn btn-secondary" onclick="exportJSON()">💾 Exportar JSON</button>
     </div>
   </div>
@@ -253,8 +250,8 @@
   <div id="mapContainer" class="map-container"></div>
 
   <script>
-    // DATOS EXACTOS REESTRUCTURADOS
-    const defaultPenalData = {
+    // DATOS DE DERECHO PENAL COMPLETOS
+    const penalData = {
       row1: [
         { id: "root", title: "Ley Penal", description: "Sistema normativo jurídico y formal", comments: [] }
       ],
@@ -263,43 +260,32 @@
         { id: "tip_norm", title: "Tipos de normas", description: "• Completa\n• Incompleta\n• En blanco", comments: [] }
       ],
       row3: [
-        { id: "tipo_penal", title: "El tipo Penal", description: "Descripción del supuesto de hecho y consecuencia legal\nPrincipio de legalidad", comments: [] }
+        { id: "tipo_penal", title: "El tipo Penal", description: "Descripción del supuesto de hecho y consecuencia legal.", comments: [] }
       ],
       row4: [
         { id: "elem", title: "Elementos", description: "• Objetivos\n• Subjetivos\n• Normativos", comments: [] },
         { id: "func", title: "Funciones", description: "• Seleccionadora\n• De garantía\n• Motivadora", comments: [] },
         { id: "clas", title: "Clasificación de los tipos", description: "• Estructura: Básico, agravado, atenuado, especial\n• Tipo subjetivo: Doloso y Culposo\n• Daño / Peligro", comments: [] },
-        { id: "puni", title: "Punibilidad, punición y pena", description: "• Punibilidad: Merecimiento de pena / Conminación legal\n• Punición: Fijación del juez\n• Pena: Ejecución administrativa", comments: [] }
+        { id: "puni", title: "Punibilidad, punición y pena", description: "• Punibilidad: Merecimiento legal\n• Punición: Fijación del juez\n• Pena: Ejecución administrativa", comments: [] }
       ]
     };
 
     let mapData;
 
     function initData() {
-      // BORRADO FORZADO DE MEMORIA EN NAVEGADOR PARA CORREGIR LA VISTA
-      localStorage.removeItem('penal_map_strict');
-      localStorage.removeItem('timeline_stages');
+      // Limpia todo para asegurar que cargue completo sin cache recortado
       localStorage.clear();
-      
-      // CARGAR ESTRUCTURA ACTUALIZADA
-      mapData = JSON.parse(JSON.stringify(defaultPenalData));
-      saveState();
+      mapData = JSON.parse(JSON.stringify(penalData));
     }
 
-    function resetToPenalMap() {
+    function resetMap() {
       localStorage.clear();
-      mapData = JSON.parse(JSON.stringify(defaultPenalData));
-      saveState();
+      mapData = JSON.parse(JSON.stringify(penalData));
       render();
-    }
-
-    function saveState() {
-      localStorage.setItem('penal_map_v2_clean', JSON.stringify(mapData));
     }
 
     function updateCard(rowKey, index, field, value) {
       mapData[rowKey][index][field] = value;
-      saveState();
     }
 
     function handleImage(event, rowKey, index) {
@@ -308,7 +294,6 @@
         const reader = new FileReader();
         reader.onload = function(e) {
           mapData[rowKey][index].imageUrl = e.target.result;
-          saveState();
           render();
         };
         reader.readAsDataURL(file);
@@ -317,7 +302,6 @@
 
     function removeImage(rowKey, index) {
       mapData[rowKey][index].imageUrl = '';
-      saveState();
       render();
     }
 
@@ -327,20 +311,12 @@
       if (text) {
         if (!mapData[rowKey][index].comments) mapData[rowKey][index].comments = [];
         mapData[rowKey][index].comments.push(text);
-        saveState();
         render();
       }
     }
 
     function removeComment(rowKey, nodeIdx, commentIdx) {
       mapData[rowKey][nodeIdx].comments.splice(commentIdx, 1);
-      saveState();
-      render();
-    }
-
-    function deleteCard(rowKey, index) {
-      mapData[rowKey].splice(index, 1);
-      saveState();
       render();
     }
 
@@ -378,20 +354,19 @@
           ` : ''}
 
           <div class="comments-section">
-            <div class="comments-header">💭 COMENTARIOS (${comments.length})</div>
+            <div class="comments-header">💬 COMENTARIOS (${comments.length})</div>
             ${commentsHtml}
             <div class="comment-form">
-              <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Comentario..." onkeypress="if(event.key==='Enter') addComment('${rowKey}', ${index}, '${inputCommentId}')" />
+              <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Escribir..." onkeypress="if(event.key==='Enter') addComment('${rowKey}', ${index}, '${inputCommentId}')" />
               <button class="btn-add-comment" onclick="addComment('${rowKey}', ${index}, '${inputCommentId}')">+</button>
             </div>
           </div>
 
           <div class="card-footer">
             <label class="upload-btn-label">
-              🖼️ ${node.imageUrl ? 'Cambiar' : 'Imagen'}
+              🖼️ ${node.imageUrl ? 'Cambiar' : 'Agregar imagen'}
               <input type="file" accept="image/*" onchange="handleImage(event, '${rowKey}', ${index})">
             </label>
-            ${rowKey !== 'row1' ? `<button class="btn-delete-card" onclick="deleteCard('${rowKey}', ${index})">Eliminar</button>` : ''}
           </div>
         </div>
       `;
