@@ -6,6 +6,7 @@
     <title>Editor Visual Interactivo - Ley Penal y Tipos Penales</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -28,9 +29,10 @@
         .node-card {
             position: absolute;
             cursor: move;
-            transition: border 0.15s ease, box-shadow 0.15s ease;
+            transition: box-shadow 0.15s ease, border 0.15s ease;
             touch-action: none;
             user-select: text;
+            box-sizing: border-box;
         }
 
         .node-card.selected {
@@ -67,46 +69,71 @@
             stroke-width: 3.5px !important;
         }
 
+        /* Resizer panel lateral */
+        #panel-resizer {
+            width: 6px;
+            cursor: col-resize;
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 50;
+        }
+        #panel-resizer:hover {
+            background-color: #3b82f6;
+        }
+
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="w-screen h-screen flex flex-col font-sans">
 
-    <!-- BARRA SUPERIOR -->
-    <header class="h-14 bg-slate-900 text-white flex items-center justify-between px-4 z-40 border-b border-slate-700 shadow-md">
-        <div class="flex items-center space-x-2">
-            <span class="font-bold text-base text-blue-400">Editor Penal U2</span>
-            <span class="text-slate-500">|</span>
+    <!-- BARRA SUPERIOR FIJA DE DOS FILAS / MULTI-FILA ADAPTATIVA -->
+    <header class="bg-slate-900 text-white flex flex-wrap items-center justify-between px-4 py-2 z-40 border-b border-slate-700 shadow-md gap-y-2">
+        <div class="flex flex-wrap items-center gap-2">
+            <span class="font-bold text-base text-blue-400 mr-2">Editor Penal U2</span>
+            <span class="text-slate-600 hidden sm:inline">|</span>
             <button onclick="agregarNodo()" class="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">➕ Nuevo Concepto</button>
             <button onclick="activarModoConexion()" id="btn-connect" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">🔗 Nueva Conexión</button>
             <button onclick="eliminarSeleccionado()" class="bg-rose-600 hover:bg-rose-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">🗑️ Eliminar</button>
-        </div>
-
-        <div class="flex items-center space-x-2">
+            <span class="text-slate-600">|</span>
             <button onclick="deshacer()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↶ Deshacer</button>
             <button onclick="rehacer()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↷ Rehacer</button>
-            <span class="text-slate-500">|</span>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2">
             <button onclick="cambiarZoom(-0.1)" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs font-bold">➖</button>
             <span id="zoom-indicator" class="text-xs font-mono w-12 text-center">100%</span>
             <button onclick="cambiarZoom(0.1)" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs font-bold">➕</button>
             <button onclick="resetZoom()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↔ Restablecer</button>
-        </div>
-
-        <div class="flex items-center space-x-2">
+            <span class="text-slate-600">|</span>
             <button onclick="guardarJSON()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded text-xs font-semibold">💾 Guardar</button>
             <label class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer">
                 📂 Cargar <input type="file" id="file-input" onchange="cargarJSON(event)" class="hidden">
             </label>
-            <span class="text-slate-500">|</span>
-            <button onclick="exportarPNG()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded text-xs font-semibold">🖼️ PNG</button>
-            <button onclick="exportarSVG()" class="bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded text-xs font-semibold">📐 SVG</button>
-            <button onclick="exportarPDF()" class="bg-teal-600 hover:bg-teal-500 px-3 py-1.5 rounded text-xs font-semibold">📄 PDF</button>
+            <span class="text-slate-600">|</span>
+
+            <!-- BOTONES DE EXPORTACIÓN SIEMPRE VISIBLES -->
+            <button onclick="exportarPNG()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded text-xs font-semibold shadow">🖼️ PNG</button>
+            <button onclick="exportarSVG()" class="bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded text-xs font-semibold shadow">📐 SVG</button>
+            
+            <div class="flex items-center gap-1 bg-teal-700 rounded px-1.5 py-0.5">
+                <button onclick="exportarPDF()" class="hover:bg-teal-600 px-2 py-1 rounded text-xs font-semibold">📄 PDF</button>
+                <select id="pdf-format" class="bg-teal-800 text-white text-[11px] rounded px-1 py-0.5 outline-none border border-teal-600">
+                    <option value="a4-v">A4 Vert.</option>
+                    <option value="a4-h">A4 Horiz.</option>
+                    <option value="auto">Ajustar</option>
+                </select>
+            </div>
         </div>
     </header>
 
-    <div class="flex-1 flex relative overflow-hidden">
-        <main id="workspace" class="flex-1 relative overflow-hidden w-full h-full">
+    <!-- AREA PRINCIPAL (LIENZO + PANEL FLOTANTE PLEGABLE) -->
+    <div class="flex-1 flex relative overflow-hidden w-full h-full">
+        
+        <!-- LIENZO INDEPENDIENTE -->
+        <main id="workspace" class="flex-1 absolute inset-0 overflow-hidden w-full h-full">
             <div id="canvas-container" class="absolute top-0 left-0 w-[10000px] h-[10000px] origin-top-left">
                 <svg id="svg-layer" class="connections-layer">
                     <defs>
@@ -122,16 +149,53 @@
             </div>
         </main>
 
-        <aside id="inspector-panel" class="w-80 bg-white border-l border-slate-200 shadow-xl flex flex-col z-30">
-            <div class="p-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
-                <h3 class="font-bold text-slate-800 text-sm">Panel de Estilos</h3>
-                <span id="target-type" class="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded font-mono">Ninguno</span>
+        <!-- BOTÓN REAPERTURA DEL PANEL (CUANDO ESTÁ OCULTO) -->
+        <button id="btn-show-panel" onclick="togglePanel(true)" class="hidden absolute top-4 right-0 bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-2 rounded-l-md shadow-2xl z-30 font-semibold text-xs flex items-center gap-1 border border-r-0 border-slate-600">
+            ▶ Mostrar panel
+        </button>
+
+        <!-- PANEL DE ESTILOS FLOTANTE Y REDIMENSIONABLE -->
+        <aside id="inspector-panel" class="absolute right-0 top-0 bottom-0 w-80 bg-white border-l border-slate-300 shadow-2xl flex flex-col z-30 transition-transform duration-200 ease-in-out">
+            <div id="panel-resizer"></div>
+            
+            <div class="p-3 border-b border-slate-200 bg-slate-100 flex justify-between items-center select-none">
+                <div class="flex items-center gap-2">
+                    <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Panel de Estilos</h3>
+                    <span id="target-type" class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-mono">Ninguno</span>
+                </div>
+                <button onclick="togglePanel(false)" class="text-xs text-slate-600 hover:text-rose-600 font-semibold px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 transition">
+                    ◀ Ocultar panel
+                </button>
             </div>
             
             <div id="inspector-content" class="p-4 space-y-4 overflow-y-auto flex-1 no-scrollbar text-xs">
-                <p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea para modificar su formato en este panel, o haz clic en cualquier texto del cuadro para escribir directamente.</p>
+                <p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea para modificar su formato en este panel, o haz doble clic en cualquier cuadro para editarlo.</p>
             </div>
         </aside>
+    </div>
+
+    <!-- MODAL DE EDICIÓN CON DOBLE CLIC -->
+    <div id="modal-edit" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
+            <div class="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
+                <h3 class="font-bold text-sm">Editar Contenido del Nodo</h3>
+                <button onclick="cerrarModalEdit()" class="text-slate-400 hover:text-white font-bold text-lg">&times;</button>
+            </div>
+            <div class="p-4 space-y-3 text-xs">
+                <div>
+                    <label class="font-semibold block mb-1 text-slate-700">Título</label>
+                    <input type="text" id="modal-title" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label class="font-semibold block mb-1 text-slate-700">Contenido / Texto (admite saltos de línea)</label>
+                    <textarea id="modal-text" rows="6" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
+                </div>
+            </div>
+            <div class="bg-slate-100 px-4 py-2.5 flex justify-end gap-2 border-t">
+                <button onclick="cerrarModalEdit()" class="px-3 py-1.5 rounded bg-slate-300 hover:bg-slate-400 text-slate-800 font-semibold">Cancelar</button>
+                <button onclick="guardarModalEdit()" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-semibold">Guardar Cambios</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -139,41 +203,42 @@
             zoom: 1,
             pan: { x: 50, y: 50 },
             nodes: [
-                { id: "root", title: "CARACTERÍSTICAS DE LA LEY PENAL Y TIPOS PENALES", text: "Programa Oficial Unidad 2 | Mir Puig & Díaz-Aranda", x: 250, y: 40, bg: "#1e293b", color: "#ffffff", border: "#0f172a", fontSize: 16, width: 480 },
-                { id: "ley", title: "1. La Ley Penal", text: "Norma jurídica estatal que determina delitos y sanciones", x: 60, y: 160, bg: "#eff6ff", color: "#1e40af", border: "#3b82f6", fontSize: 13, width: 260 },
-                { id: "ley_est", title: "Estructura de la Norma", text: "• Supuesto de Hecho: Conducta prohibida/mandada\n• Consecuencia Jurídica: Pena/Medida de seguridad", x: 60, y: 280, bg: "#ffffff", color: "#1e293b", border: "#94a3b8", fontSize: 12, width: 260 },
-                { id: "tipo", title: "2. El Tipo Penal", text: "Descripción concreta de la conducta delictiva en la ley", x: 440, y: 160, bg: "#eff6ff", color: "#1e40af", border: "#3b82f6", fontSize: 13, width: 260 },
-                { id: "dim", title: "Dimensiones Dogmáticas", text: "• Tipo de Injusto: Materia de la prohibición y desvalor\n• Tipo Amplio: Presupuestos para la punibilidad", x: 440, y: 280, bg: "#ffffff", color: "#1e293b", border: "#94a3b8", fontSize: 12, width: 260 },
-                { id: "func", title: "3. Funciones del Tipo Penal", text: "1. Seleccionadora: Protege Bienes Jurídicos graves\n2. De Garantía: Nullum crimen sine lege\n3. Motivadora: Incita a abstenerse de delinquir", x: 440, y: 420, bg: "#fefce8", color: "#854d0e", border: "#eab308", fontSize: 12, width: 270 },
-                { id: "elem", title: "4. Elementos del Tipo Penal", text: "Estructura tripartita del Injusto Penal", x: 440, y: 560, bg: "#f3e8ff", color: "#6b21a8", border: "#a855f7", fontSize: 13, width: 260 },
-                { id: "obj", title: "A. Tipo Objetivo (Material)", text: "• Acción / Omisión humana\n• Sujeto Activo, Pasivo y Estado\n• Objeto Material y Bien Jurídico Tutelado\n• Nexo Causal e Imputación Objetiva\n• Resultado material (si se exige)", x: 120, y: 680, bg: "#ffffff", color: "#1e293b", border: "#c084fc", fontSize: 11, width: 250 },
-                { id: "subj", title: "B. Tipo Subjetivo (Psíquico)", text: "Procesos internos y voluntad del autor", x: 440, y: 680, bg: "#faf5ff", color: "#581c87", border: "#c084fc", fontSize: 12, width: 250 },
-                { id: "norm", title: "C. Elementos Normativos", text: "Términos que requieren valoración cultural o jurídico-formal", x: 740, y: 680, bg: "#ffffff", color: "#1e293b", border: "#c084fc", fontSize: 11, width: 240 },
-                { id: "dolo", title: "El Dolo", text: "Conocimiento y voluntad de realizar el tipo objetivo\n• Dolo 1er Grado: Intención directa\n• Dolo 2do Grado: Consecuencias necesarias\n• Dolo Eventual: Acepta el resultado posible", x: 340, y: 830, bg: "#ffffff", color: "#1e293b", border: "#d8b4fe", fontSize: 11, width: 240 },
-                { id: "culpa", title: "Delito Culposo / Imprudente", text: "Infracción al deber objetivo de cuidado\n• Culpa Consciente: Confía en evitarlo\n• Culpa Inconsciente: No prevé pudiendo prever", x: 610, y: 830, bg: "#ffffff", color: "#1e293b", border: "#d8b4fe", fontSize: 11, width: 240 },
-                { id: "clas", title: "5. Clasificación de los Tipos", text: "• Por el resultado: Mera Actividad vs. Resultado\n• Temporalidad: Instantáneo, Permanente y Continuado\n• Afectación: Lesión vs. Peligro (Concreto/Abstracto)\n• Sujetos: Unisubjetivo vs. Plurisubjetivo", x: 60, y: 1010, bg: "#ecfdf5", color: "#065f46", border: "#10b981", fontSize: 11, width: 310 },
-                { id: "sanc", title: "6. Fases de la Sanción Penal", text: "1. Punibilidad (Legislativa): Amenaza abstracta\n2. Punición (Judicial): Fijación por el Juez\n3. Pena (Ejecutiva): Reinserción Social", x: 440, y: 1010, bg: "#fff7ed", color: "#9a3412", border: "#f97316", fontSize: 11, width: 290 }
+                { id: "root", title: "CARACTERÍSTICAS DE LA LEY PENAL Y TIPOS PENALES", text: "Programa Oficial Unidad 2 | Mir Puig & Díaz-Aranda", x: 250, y: 40, bg: "#1e293b", color: "#ffffff", border: "#0f172a", fontSize: 15, fontWeight: "bold", textAlign: "center", width: 480, height: 80, borderRadius: 8 },
+                { id: "ley", title: "1. La Ley Penal", text: "Norma jurídica estatal que determina delitos y sanciones", x: 60, y: 160, bg: "#eff6ff", color: "#1e40af", border: "#3b82f6", fontSize: 13, fontWeight: "bold", textAlign: "left", width: 260, height: 90, borderRadius: 6 },
+                { id: "ley_est", title: "Estructura de la Norma", text: "• Supuesto de Hecho: Conducta prohibida/mandada\n• Consecuencia Jurídica: Pena/Medida de seguridad", x: 60, y: 280, bg: "#ffffff", color: "#1e293b", border: "#94a3b8", fontSize: 12, fontWeight: "normal", textAlign: "left", width: 260, height: 110, borderRadius: 6 },
+                { id: "tipo", title: "2. El Tipo Penal", text: "Descripción concreta de la conducta delictiva en la ley", x: 440, y: 160, bg: "#eff6ff", color: "#1e40af", border: "#3b82f6", fontSize: 13, fontWeight: "bold", textAlign: "left", width: 260, height: 90, borderRadius: 6 },
+                { id: "dim", title: "Dimensiones Dogmáticas", text: "• Tipo de Injusto: Materia de la prohibición y desvalor\n• Tipo Amplio: Presupuestos para la punibilidad", x: 440, y: 280, bg: "#ffffff", color: "#1e293b", border: "#94a3b8", fontSize: 12, fontWeight: "normal", textAlign: "left", width: 260, height: 110, borderRadius: 6 },
+                { id: "func", title: "3. Funciones del Tipo Penal", text: "1. Seleccionadora: Protege Bienes Jurídicos graves\n2. De Garantía: Nullum crimen sine lege\n3. Motivadora: Incita a abstenerse de delinquir", x: 440, y: 420, bg: "#fefce8", color: "#854d0e", border: "#eab308", fontSize: 12, fontWeight: "normal", textAlign: "left", width: 270, height: 115, borderRadius: 6 },
+                { id: "elem", title: "4. Elementos del Tipo Penal", text: "Estructura tripartita del Injusto Penal", x: 440, y: 560, bg: "#f3e8ff", color: "#6b21a8", border: "#a855f7", fontSize: 13, fontWeight: "bold", textAlign: "center", width: 260, height: 80, borderRadius: 6 },
+                { id: "obj", title: "A. Tipo Objetivo (Material)", text: "• Acción / Omisión humana\n• Sujeto Activo, Pasivo y Estado\n• Objeto Material y Bien Jurídico Tutelado\n• Nexo Causal e Imputación Objetiva\n• Resultado material (si se exige)", x: 120, y: 680, bg: "#ffffff", color: "#1e293b", border: "#c084fc", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 250, height: 140, borderRadius: 6 },
+                { id: "subj", title: "B. Tipo Subjetivo (Psíquico)", text: "Procesos internos y voluntad del autor", x: 440, y: 680, bg: "#faf5ff", color: "#581c87", border: "#c084fc", fontSize: 12, fontWeight: "normal", textAlign: "left", width: 250, height: 80, borderRadius: 6 },
+                { id: "norm", title: "C. Elementos Normativos", text: "Términos que requieren valoración cultural o jurídico-formal", x: 740, y: 680, bg: "#ffffff", color: "#1e293b", border: "#c084fc", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 240, height: 90, borderRadius: 6 },
+                { id: "dolo", title: "El Dolo", text: "Conocimiento y voluntad de realizar el tipo objetivo\n• Dolo 1er Grado: Intención directa\n• Dolo 2do Grado: Consecuencias necesarias\n• Dolo Eventual: Acepta el resultado posible", x: 340, y: 830, bg: "#ffffff", color: "#1e293b", border: "#d8b4fe", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 240, height: 130, borderRadius: 6 },
+                { id: "culpa", title: "Delito Culposo / Imprudente", text: "Infracción al deber objetivo de cuidado\n• Culpa Consciente: Confía en evitarlo\n• Culpa Inconsciente: No prevé pudiendo prever", x: 610, y: 830, bg: "#ffffff", color: "#1e293b", border: "#d8b4fe", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 240, height: 120, borderRadius: 6 },
+                { id: "clas", title: "5. Clasificación de los Tipos", text: "• Por el resultado: Mera Actividad vs. Resultado\n• Temporalidad: Instantáneo, Permanente y Continuado\n• Afectación: Lesión vs. Peligro (Concreto/Abstracto)\n• Sujetos: Unisubjetivo vs. Plurisubjetivo", x: 60, y: 1010, bg: "#ecfdf5", color: "#065f46", border: "#10b981", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 310, height: 130, borderRadius: 6 },
+                { id: "sanc", title: "6. Fases de la Sanción Penal", text: "1. Punibilidad (Legislativa): Amenaza abstracta\n2. Punición (Judicial): Fijación por el Juez\n3. Pena (Ejecutiva): Reinserción Social", x: 440, y: 1010, bg: "#fff7ed", color: "#9a3412", border: "#f97316", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 290, height: 110, borderRadius: 6 }
             ],
             connections: [
-                { id: "c1", from: "root", to: "ley", label: "define marco de", color: "#64748b", width: 2, dashed: false },
-                { id: "c2", from: "ley", to: "ley_est", label: "se conforma de", color: "#94a3b8", width: 1.5, dashed: false },
-                { id: "c3", from: "root", to: "tipo", label: "se concreta en", color: "#64748b", width: 2, dashed: false },
-                { id: "c4", from: "tipo", to: "dim", label: "se analiza mediante", color: "#94a3b8", width: 1.5, dashed: false },
-                { id: "c5", from: "tipo", to: "func", label: "desempeña", color: "#64748b", width: 1.5, dashed: false },
-                { id: "c6", from: "tipo", to: "elem", label: "se estructura en", color: "#64748b", width: 2, dashed: false },
-                { id: "c7", from: "elem", to: "obj", label: "dimensión material", color: "#a855f7", width: 1.5, dashed: false },
-                { id: "c8", from: "elem", to: "subj", label: "dimensión psíquica", color: "#a855f7", width: 1.5, dashed: false },
-                { id: "c9", from: "elem", to: "norm", label: "valoración", color: "#a855f7", width: 1.5, dashed: false },
-                { id: "c10", from: "subj", to: "dolo", label: "modalidad", color: "#c084fc", width: 1.5, dashed: false },
-                { id: "c11", from: "subj", to: "culpa", label: "modalidad", color: "#c084fc", width: 1.5, dashed: false },
-                { id: "c12", from: "tipo", to: "clas", label: "se clasifica en", color: "#10b981", width: 1.5, dashed: false },
-                { id: "c13", from: "tipo", to: "sanc", label: "determina", color: "#f97316", width: 1.5, dashed: false }
+                { id: "c1", from: "root", to: "ley", label: "define marco de", color: "#64748b", width: 2, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c2", from: "ley", to: "ley_est", label: "se conforma de", color: "#94a3b8", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c3", from: "root", to: "tipo", label: "se concreta en", color: "#64748b", width: 2, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c4", from: "tipo", to: "dim", label: "se analiza mediante", color: "#94a3b8", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c5", from: "tipo", to: "func", label: "desempeña", color: "#64748b", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c6", from: "tipo", to: "elem", label: "se estructura en", color: "#64748b", width: 2, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c7", from: "elem", to: "obj", label: "dimensión material", color: "#a855f7", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c8", from: "elem", to: "subj", label: "dimensión psíquica", color: "#a855f7", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c9", from: "elem", to: "norm", label: "valoración", color: "#a855f7", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c10", from: "subj", to: "dolo", label: "modalidad", color: "#c084fc", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c11", from: "subj", to: "culpa", label: "modalidad", color: "#c084fc", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c12", from: "tipo", to: "clas", label: "se clasifica en", color: "#10b981", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
+                { id: "c13", from: "tipo", to: "sanc", label: "determina", color: "#f97316", width: 1.5, dashed: false, arrow: true, curvature: 0.5 }
             ]
         };
 
         let selectedNodeId = null;
         let selectedConnectionId = null;
         let connectingSourceId = null;
+        let nodeToEditModal = null;
         let historyStack = [];
         let redoStack = [];
 
@@ -182,6 +247,7 @@
             render();
             setupPanZoom();
             setupKeyboardShortcuts();
+            setupPanelResizer();
         };
 
         function guardarHistorial() {
@@ -211,6 +277,46 @@
             }
         }
 
+        /* MOSTRAR / OCULTAR PANEL */
+        function togglePanel(show) {
+            const panel = document.getElementById("inspector-panel");
+            const btnShow = document.getElementById("btn-show-panel");
+            if (show) {
+                panel.classList.remove("translate-x-full");
+                btnShow.classList.add("hidden");
+            } else {
+                panel.classList.add("translate-x-full");
+                btnShow.classList.remove("hidden");
+            }
+        }
+
+        /* REDIMENSIONAR PANEL LATERAL */
+        function setupPanelResizer() {
+            const panel = document.getElementById("inspector-panel");
+            const resizer = document.getElementById("panel-resizer");
+            let isResizing = false;
+
+            resizer.addEventListener("mousedown", (e) => {
+                isResizing = true;
+                document.body.style.cursor = "col-resize";
+            });
+
+            window.addEventListener("mousemove", (e) => {
+                if (!isResizing) return;
+                const newWidth = window.innerWidth - e.clientX;
+                if (newWidth >= 240 && newWidth <= 550) {
+                    panel.style.width = `${newWidth}px`;
+                }
+            });
+
+            window.addEventListener("mouseup", () => {
+                if (isResizing) {
+                    isResizing = false;
+                    document.body.style.cursor = "default";
+                }
+            });
+        }
+
         function render() {
             const container = document.getElementById("nodes-container");
             const svgLayer = document.getElementById("svg-layer");
@@ -220,25 +326,29 @@
             svgLayer.innerHTML = "";
             svgLayer.appendChild(defs);
 
-            // Renderizar Nodos con Edición Directa Inline
+            // Renderizar Nodos
             appState.nodes.forEach(node => {
                 const div = document.createElement("div");
-                div.className = `node-card p-3 rounded-lg shadow-md border ${selectedNodeId === node.id ? 'selected' : ''}`;
+                div.className = `node-card p-3 shadow-md border ${selectedNodeId === node.id ? 'selected' : ''}`;
                 div.id = `node-${node.id}`;
                 div.style.left = `${node.x}px`;
                 div.style.top = `${node.y}px`;
                 div.style.width = `${node.width || 220}px`;
+                if (node.height) div.style.minHeight = `${node.height}px`;
                 div.style.backgroundColor = node.bg;
                 div.style.borderColor = node.border;
                 div.style.color = node.color;
-                div.style.fontSize = `${node.fontSize}px`;
+                div.style.fontSize = `${node.fontSize || 12}px`;
+                div.style.fontWeight = node.fontWeight || "normal";
+                div.style.textAlign = node.textAlign || "left";
+                div.style.borderRadius = `${node.borderRadius !== undefined ? node.borderRadius : 6}px`;
 
                 div.innerHTML = `
                     <div contenteditable="true" class="editable-text font-bold border-b border-black/10 pb-1 mb-1" data-field="title">${node.title}</div>
                     <div contenteditable="true" class="editable-text whitespace-pre-wrap opacity-90" data-field="text">${node.text}</div>
                 `;
 
-                // Guardar cambios al editar el texto directamente dentro del cuadro
+                // Eventos de edición directos e interacciones
                 const editables = div.querySelectorAll(".editable-text");
                 editables.forEach(elem => {
                     elem.addEventListener("input", (e) => {
@@ -246,12 +356,13 @@
                         node[field] = e.target.innerText;
                         renderInspector();
                     });
-                    elem.addEventListener("blur", () => {
-                        guardarHistorial();
-                    });
-                    elem.addEventListener("mousedown", (e) => {
-                        e.stopPropagation(); // Evitar arrastre mientras editas texto
-                    });
+                    elem.addEventListener("blur", () => guardarHistorial());
+                    elem.addEventListener("mousedown", (e) => e.stopPropagation());
+                });
+
+                div.addEventListener("dblclick", (e) => {
+                    e.stopPropagation();
+                    abrirModalEdit(node.id);
                 });
 
                 div.addEventListener("mousedown", (e) => iniciarArrastreNodo(e, node.id));
@@ -279,14 +390,19 @@
                 
                 const dx = pos.x2 - pos.x1;
                 const dy = pos.y2 - pos.y1;
-                const d = `M ${pos.x1} ${pos.y1} C ${pos.x1 + dx/2} ${pos.y1}, ${pos.x2 - dx/2} ${pos.y2}, ${pos.x2} ${pos.y2}`;
+                const curv = conn.curvature !== undefined ? conn.curvature : 0.5;
+                const d = `M ${pos.x1} ${pos.y1} C ${pos.x1 + dx * curv} ${pos.y1}, ${pos.x2 - dx * curv} ${pos.y2}, ${pos.x2} ${pos.y2}`;
                 
                 path.setAttribute("d", d);
                 path.setAttribute("stroke", selectedConnectionId === conn.id ? "#3b82f6" : conn.color);
-                path.setAttribute("stroke-width", selectedConnectionId === conn.id ? conn.width + 1.5 : conn.width);
+                path.setAttribute("stroke-width", selectedConnectionId === conn.id ? (conn.width + 1.5) : conn.width);
                 path.setAttribute("fill", "none");
                 if (conn.dashed) path.setAttribute("stroke-dasharray", "4,4");
-                path.setAttribute("marker-end", selectedConnectionId === conn.id ? "url(#arrow-selected)" : "url(#arrow)");
+                
+                if (conn.arrow !== false) {
+                    path.setAttribute("marker-end", selectedConnectionId === conn.id ? "url(#arrow-selected)" : "url(#arrow)");
+                }
+
                 if (selectedConnectionId === conn.id) path.classList.add("line-selected");
 
                 path.addEventListener("click", (e) => {
@@ -320,9 +436,9 @@
 
         function calcularPuntosConexion(n1, n2) {
             const w1 = n1.width || 220;
-            const h1 = document.getElementById(`node-${n1.id}`)?.offsetHeight || 80;
+            const h1 = document.getElementById(`node-${n1.id}`)?.offsetHeight || n1.height || 80;
             const w2 = n2.width || 220;
-            const h2 = document.getElementById(`node-${n2.id}`)?.offsetHeight || 80;
+            const h2 = document.getElementById(`node-${n2.id}`)?.offsetHeight || n2.height || 80;
 
             const c1 = { x: n1.x + w1 / 2, y: n1.y + h1 / 2 };
             const c2 = { x: n2.x + w2 / 2, y: n2.y + h2 / 2 };
@@ -431,6 +547,7 @@
             render();
         }
 
+        /* INSPECTOR MODIFICADO SEGÚN REQUERIMIENTOS EXPRESOS */
         function renderInspector() {
             const panel = document.getElementById("inspector-content");
             const targetType = document.getElementById("target-type");
@@ -441,35 +558,62 @@
                 panel.innerHTML = `
                     <div>
                         <label class="font-semibold block mb-1">Título</label>
-                        <input type="text" value="${node.title}" oninput="actualizarNodoProp('title', this.value)" class="w-full border rounded p-1.5">
+                        <input type="text" value="${node.title}" oninput="actualizarNodoProp('title', this.value)" class="w-full border rounded p-1.5 focus:ring-1 focus:ring-blue-500 outline-none">
                     </div>
                     <div>
                         <label class="font-semibold block mb-1">Contenido / Texto</label>
-                        <textarea rows="4" oninput="actualizarNodoProp('text', this.value)" class="w-full border rounded p-1.5">${node.text}</textarea>
+                        <textarea rows="3" oninput="actualizarNodoProp('text', this.value)" class="w-full border rounded p-1.5 focus:ring-1 focus:ring-blue-500 outline-none">${node.text}</textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="font-semibold block mb-1">Fondo</label>
-                            <input type="color" value="${rgbaToHex(node.bg)}" onchange="actualizarNodoProp('bg', this.value)" class="w-full h-8 rounded cursor-pointer">
+                            <input type="color" value="${rgbaToHex(node.bg)}" onchange="actualizarNodoProp('bg', this.value)" class="w-full h-8 rounded cursor-pointer border">
                         </div>
                         <div>
                             <label class="font-semibold block mb-1">Borde</label>
-                            <input type="color" value="${rgbaToHex(node.border)}" onchange="actualizarNodoProp('border', this.value)" class="w-full h-8 rounded cursor-pointer">
+                            <input type="color" value="${rgbaToHex(node.border)}" onchange="actualizarNodoProp('border', this.value)" class="w-full h-8 rounded cursor-pointer border">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
-                            <label class="font-semibold block mb-1">Color Texto</label>
-                            <input type="color" value="${rgbaToHex(node.color)}" onchange="actualizarNodoProp('color', this.value)" class="w-full h-8 rounded cursor-pointer">
+                            <label class="font-semibold block mb-1">Color de Texto</label>
+                            <input type="color" value="${rgbaToHex(node.color)}" onchange="actualizarNodoProp('color', this.value)" class="w-full h-8 rounded cursor-pointer border">
                         </div>
                         <div>
-                            <label class="font-semibold block mb-1">Tam. Letra (px)</label>
-                            <input type="number" value="${node.fontSize}" onchange="actualizarNodoProp('fontSize', parseInt(this.value))" class="w-full border rounded p-1.5">
+                            <label class="font-semibold block mb-1">Tamaño de Letra</label>
+                            <input type="number" value="${node.fontSize || 12}" onchange="actualizarNodoProp('fontSize', parseInt(this.value))" class="w-full border rounded p-1.5">
                         </div>
                     </div>
-                    <div>
-                        <label class="font-semibold block mb-1">Ancho (px)</label>
-                        <input type="number" value="${node.width || 220}" onchange="actualizarNodoProp('width', parseInt(this.value))" class="w-full border rounded p-1.5">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold block mb-1">Negrita</label>
+                            <select onchange="actualizarNodoProp('fontWeight', this.value)" class="w-full border rounded p-1.5">
+                                <option value="normal" ${node.fontWeight === 'normal' ? 'selected' : ''}>Normal</option>
+                                <option value="bold" ${node.fontWeight === 'bold' ? 'selected' : ''}>Negrita</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold block mb-1">Alineación</label>
+                            <select onchange="actualizarNodoProp('textAlign', this.value)" class="w-full border rounded p-1.5">
+                                <option value="left" ${node.textAlign === 'left' ? 'selected' : ''}>Izquierda</option>
+                                <option value="center" ${node.textAlign === 'center' ? 'selected' : ''}>Centro</option>
+                                <option value="right" ${node.textAlign === 'right' ? 'selected' : ''}>Derecha</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="font-semibold block mb-1">Ancho (px)</label>
+                            <input type="number" value="${node.width || 220}" onchange="actualizarNodoProp('width', parseInt(this.value))" class="w-full border rounded p-1.5">
+                        </div>
+                        <div>
+                            <label class="font-semibold block mb-1">Alto (px)</label>
+                            <input type="number" value="${node.height || 80}" onchange="actualizarNodoProp('height', parseInt(this.value))" class="w-full border rounded p-1.5">
+                        </div>
+                        <div>
+                            <label class="font-semibold block mb-1">Radio Esq.</label>
+                            <input type="number" value="${node.borderRadius !== undefined ? node.borderRadius : 6}" onchange="actualizarNodoProp('borderRadius', parseInt(this.value))" class="w-full border rounded p-1.5">
+                        </div>
                     </div>
                 `;
             } else if (selectedConnectionId) {
@@ -477,25 +621,43 @@
                 targetType.textContent = "Conexión";
                 panel.innerHTML = `
                     <div>
-                        <label class="font-semibold block mb-1">Palabra de Enlace</label>
+                        <label class="font-semibold block mb-1">Texto de Enlace</label>
                         <input type="text" value="${conn.label || ''}" oninput="actualizarConnProp('label', this.value)" class="w-full border rounded p-1.5">
                     </div>
                     <div>
-                        <label class="font-semibold block mb-1">Color de Línea</label>
-                        <input type="color" value="${rgbaToHex(conn.color)}" onchange="actualizarConnProp('color', this.value)" class="w-full h-8 rounded cursor-pointer">
+                        <label class="font-semibold block mb-1">Color</label>
+                        <input type="color" value="${rgbaToHex(conn.color)}" onchange="actualizarConnProp('color', this.value)" class="w-full h-8 rounded cursor-pointer border">
                     </div>
-                    <div>
-                        <label class="font-semibold block mb-1">Grosor (px)</label>
-                        <input type="number" value="${conn.width}" onchange="actualizarConnProp('width', parseFloat(this.value))" class="w-full border rounded p-1.5">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="font-semibold block mb-1">Grosor (px)</label>
+                            <input type="number" step="0.5" value="${conn.width}" onchange="actualizarConnProp('width', parseFloat(this.value))" class="w-full border rounded p-1.5">
+                        </div>
+                        <div>
+                            <label class="font-semibold block mb-1">Curvatura</label>
+                            <input type="number" step="0.1" min="0" max="1" value="${conn.curvature !== undefined ? conn.curvature : 0.5}" onchange="actualizarConnProp('curvature', parseFloat(this.value))" class="w-full border rounded p-1.5">
+                        </div>
                     </div>
-                    <div class="flex items-center space-x-2 pt-2">
-                        <input type="checkbox" id="dash-check" ${conn.dashed ? 'checked' : ''} onchange="actualizarConnProp('dashed', this.checked)">
-                        <label for="dash-check" class="font-semibold">Línea Punteada</label>
+                    <div class="grid grid-cols-2 gap-2 pt-2">
+                        <div>
+                            <label class="font-semibold block mb-1">Tipo de Línea</label>
+                            <select onchange="actualizarConnProp('dashed', this.value === 'true')" class="w-full border rounded p-1.5">
+                                <option value="false" ${!conn.dashed ? 'selected' : ''}>Sólida</option>
+                                <option value="true" ${conn.dashed ? 'selected' : ''}>Punteada</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-semibold block mb-1">Flecha</label>
+                            <select onchange="actualizarConnProp('arrow', this.value === 'true')" class="w-full border rounded p-1.5">
+                                <option value="true" ${conn.arrow !== false ? 'selected' : ''}>Sí</option>
+                                <option value="false" ${conn.arrow === false ? 'selected' : ''}>No</option>
+                            </select>
+                        </div>
                     </div>
                 `;
             } else {
                 targetType.textContent = "Ninguno";
-                panel.innerHTML = `<p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea para modificar su formato en este panel, o haz clic en cualquier texto del cuadro para escribir directamente.</p>`;
+                panel.innerHTML = `<p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea para modificar su formato en este panel, o haz doble clic en cualquier cuadro para editarlo.</p>`;
             }
         }
 
@@ -516,22 +678,52 @@
         }
 
         function rgbaToHex(colorStr) {
-            if (colorStr.startsWith('#')) return colorStr;
+            if (colorStr && colorStr.startsWith('#')) return colorStr;
             return "#3b82f6";
+        }
+
+        function abrirModalEdit(id) {
+            nodeToEditModal = id;
+            const node = appState.nodes.find(n => n.id === id);
+            if (!node) return;
+            document.getElementById("modal-title").value = node.title;
+            document.getElementById("modal-text").value = node.text;
+            document.getElementById("modal-edit").classList.remove("hidden");
+        }
+
+        function cerrarModalEdit() {
+            document.getElementById("modal-edit").classList.add("hidden");
+            nodeToEditModal = null;
+        }
+
+        function guardarModalEdit() {
+            if (!nodeToEditModal) return;
+            const node = appState.nodes.find(n => n.id === nodeToEditModal);
+            if (node) {
+                node.title = document.getElementById("modal-title").value;
+                node.text = document.getElementById("modal-text").value;
+                guardarHistorial();
+                render();
+            }
+            cerrarModalEdit();
         }
 
         function agregarNodo() {
             const newNode = {
                 id: "node_" + Date.now(),
                 title: "Nuevo Concepto",
-                text: "Haz clic para editar este texto",
+                text: "Haz doble clic o usa el panel para editar",
                 x: 300 - appState.pan.x,
                 y: 200 - appState.pan.y,
                 bg: "#ffffff",
                 color: "#1e293b",
                 border: "#3b82f6",
                 fontSize: 12,
-                width: 220
+                fontWeight: "normal",
+                textAlign: "left",
+                width: 220,
+                height: 80,
+                borderRadius: 6
             };
 
             appState.nodes.push(newNode);
@@ -554,10 +746,12 @@
                     id: "conn_" + Date.now(),
                     from: connectingSourceId,
                     to: targetId,
-                    label: "se relaciona con",
+                    label: "relación",
                     color: "#64748b",
                     width: 1.5,
-                    dashed: false
+                    dashed: false,
+                    arrow: true,
+                    curvature: 0.5
                 });
                 guardarHistorial();
             }
@@ -616,23 +810,76 @@
             fileReader.readAsText(event.target.files[0]);
         }
 
+        /* OBTENER LÍMITES DEL MAPA PARA EXPORTACIONES LIMPIAS */
+        function obtenerBoundingBoxMapa() {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            appState.nodes.forEach(node => {
+                const w = node.width || 220;
+                const h = document.getElementById(`node-${node.id}`)?.offsetHeight || node.height || 80;
+                if (node.x < minX) minX = node.x;
+                if (node.y < minY) minY = node.y;
+                if (node.x + w > maxX) maxX = node.x + w;
+                if (node.y + h > maxY) maxY = node.y + h;
+            });
+            return {
+                x: minX - 40,
+                y: minY - 40,
+                width: (maxX - minX) + 80,
+                height: (maxY - minY) + 80
+            };
+        }
+
+        /* EXPORTACIÓN PNG 4X HD SIN INTERFAZ */
+        function exportarPNG() {
+            const bbox = obtenerBoundingBoxMapa();
+            const container = document.getElementById("canvas-container");
+            const prevTransform = container.style.transform;
+            
+            // Temporalmente resetear transformacion para clon exacto
+            container.style.transform = "none";
+
+            html2canvas(container, {
+                x: bbox.x,
+                y: bbox.y,
+                width: bbox.width,
+                height: bbox.height,
+                scale: 4, // Alta resolución 4X
+                backgroundColor: "#ffffff",
+                logging: false
+            }).then(canvas => {
+                container.style.transform = prevTransform;
+                const a = document.createElement("a");
+                a.href = canvas.toDataURL("image/png");
+                a.download = "Mapa_Conceptual_Penal_U2_HD.png";
+                a.click();
+            });
+        }
+
+        /* EXPORTACIÓN SVG PURE SIN INTERFAZ */
         function exportarSVG() {
+            const bbox = obtenerBoundingBoxMapa();
             const svgLayer = document.getElementById("svg-layer").cloneNode(true);
             const container = document.getElementById("nodes-container").cloneNode(true);
-            
+
+            // Ajustar visuales clonados
+            container.querySelectorAll('.node-card').forEach(card => card.classList.remove('selected'));
+
             const wrapper = document.createElement("svg");
             wrapper.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-            wrapper.setAttribute("width", "3000");
-            wrapper.setAttribute("height", "2500");
+            wrapper.setAttribute("width", bbox.width);
+            wrapper.setAttribute("height", bbox.height);
+            wrapper.setAttribute("viewBox", `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
             wrapper.style.backgroundColor = "#ffffff";
 
             const foreignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-            foreignObject.setAttribute("width", "100%");
-            foreignObject.setAttribute("height", "100%");
+            foreignObject.setAttribute("x", "0");
+            foreignObject.setAttribute("y", "0");
+            foreignObject.setAttribute("width", "10000");
+            foreignObject.setAttribute("height", "10000");
             
             const style = document.createElement("style");
             style.textContent = `
-                .node-card { position: absolute; font-family: sans-serif; padding: 12px; border-radius: 8px; border: 1px solid; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+                .node-card { position: absolute; font-family: sans-serif; padding: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); box-sizing: border-box; }
                 .font-bold { font-weight: bold; }
                 .whitespace-pre-wrap { white-space: pre-wrap; }
             `;
@@ -647,90 +894,52 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "Mapa_Conceptual_Unidad2.svg";
+            a.download = "Mapa_Conceptual_Penal_U2.svg";
             a.click();
         }
 
-        function exportarPNG() {
-            const svgLayer = document.getElementById("svg-layer").cloneNode(true);
-            const container = document.getElementById("nodes-container").cloneNode(true);
-            
-            const canvas = document.createElement("canvas");
-            canvas.width = 3200;
-            canvas.height = 2400;
-            const ctx = canvas.getContext("2d");
-
-            const img = new Image();
-            const svgString = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="3200" height="2400">
-                    <rect width="100%" height="100%" fill="#ffffff"/>
-                    <foreignObject width="100%" height="100%">
-                        <div xmlns="http://www.w3.org/1999/xhtml">
-                            <style>
-                                .node-card { position: absolute; font-family: sans-serif; padding: 12px; border-radius: 8px; border: 1px solid; }
-                                .font-bold { font-weight: bold; }
-                                .whitespace-pre-wrap { white-space: pre-wrap; }
-                            </style>
-                            ${container.innerHTML}
-                        </div>
-                    </foreignObject>
-                    ${svgLayer.innerHTML}
-                </svg>
-            `;
-
-            const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-            const url = URL.createObjectURL(svgBlob);
-
-            img.onload = () => {
-                ctx.drawImage(img, 0, 0);
-                const pngUrl = canvas.toDataURL("image/png");
-                const a = document.createElement("a");
-                a.href = pngUrl;
-                a.download = "Mapa_Conceptual_Unidad2_HD.png";
-                a.click();
-                URL.revokeObjectURL(url);
-            };
-            img.src = url;
-        }
-
+        /* EXPORTACIÓN PDF CONFIGURABLE SIN INTERFAZ */
         function exportarPDF() {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-            
-            const canvas = document.createElement("canvas");
-            canvas.width = 2400;
-            canvas.height = 3200;
-            const ctx = canvas.getContext("2d");
-            const img = new Image();
+            const formatOption = document.getElementById("pdf-format").value;
+            const bbox = obtenerBoundingBoxMapa();
+            const container = document.getElementById("canvas-container");
+            const prevTransform = container.style.transform;
 
-            const svgString = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="2400" height="3200">
-                    <rect width="100%" height="100%" fill="#ffffff"/>
-                    <foreignObject width="100%" height="100%">
-                        <div xmlns="http://www.w3.org/1999/xhtml">
-                            <style>
-                                .node-card { position: absolute; font-family: sans-serif; padding: 10px; border-radius: 6px; border: 1px solid; }
-                                .font-bold { font-weight: bold; }
-                                .whitespace-pre-wrap { white-space: pre-wrap; }
-                            </style>
-                            ${document.getElementById("nodes-container").innerHTML}
-                        </div>
-                    </foreignObject>
-                    ${document.getElementById("svg-layer").innerHTML}
-                </svg>
-            `;
+            container.style.transform = "none";
 
-            const blob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-
-            img.onload = () => {
-                ctx.drawImage(img, 0, 0);
+            html2canvas(container, {
+                x: bbox.x,
+                y: bbox.y,
+                width: bbox.width,
+                height: bbox.height,
+                scale: 3,
+                backgroundColor: "#ffffff",
+                logging: false
+            }).then(canvas => {
+                container.style.transform = prevTransform;
                 const imgData = canvas.toDataURL("image/png");
-                pdf.addImage(imgData, 'PNG', 0, 0, 210, 297);
-                pdf.save("Mapa_Conceptual_Unidad2.pdf");
-                URL.revokeObjectURL(url);
-            };
-            img.src = url;
+                
+                const { jsPDF } = window.jspdf;
+                let pdf;
+
+                if (formatOption === "a4-v") {
+                    pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+                    pdf.addImage(imgData, 'PNG', 5, 5, 200, (bbox.height * 200) / bbox.width);
+                } else if (formatOption === "a4-h") {
+                    pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+                    pdf.addImage(imgData, 'PNG', 5, 5, 287, (bbox.height * 287) / bbox.width);
+                } else {
+                    // Ajustar exactamente al contenido
+                    pdf = new jsPDF({
+                        orientation: bbox.width > bbox.height ? 'landscape' : 'portrait',
+                        unit: 'px',
+                        format: [bbox.width, bbox.height]
+                    });
+                    pdf.addImage(imgData, 'PNG', 0, 0, bbox.width, bbox.height);
+                }
+
+                pdf.save("Mapa_Conceptual_Penal_U2.pdf");
+            });
         }
     </script>
 </body>
