@@ -20,200 +20,149 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
     }
 
-    /* Permite desplazamiento completo en caso de que el lienzo sea muy grande */
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: auto !important;
-      background-color: var(--bg-color);
-    }
-
     body {
-      background-image: radial-gradient(#cbd5e1 1.5px, transparent 1.5px);
-      background-size: 20px 20px;
+      background-color: var(--bg-color);
       color: var(--text-dark);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      padding: 30px 20px 100px 20px; /* Extra padding inferior para ver todo abajo */
+      height: 100vh;
+      overflow: hidden;
     }
 
+    /* BARRA SUPERIOR */
     .toolbar {
-      width: 100%;
-      max-width: 1200px;
       background: #0f172a;
       color: white;
       padding: 12px 24px;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-radius: 10px;
-      margin-bottom: 25px;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      z-index: 100;
     }
 
     .toolbar h1 {
-      font-size: 1.1rem;
+      font-size: 1.25rem;
       font-weight: 700;
     }
 
     .btn-group {
       display: flex;
-      gap: 8px;
+      gap: 12px;
     }
 
     .btn {
-      padding: 8px 14px;
+      padding: 8px 16px;
       border-radius: 8px;
       border: none;
       font-weight: 600;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
     }
 
-    .btn-reset { background: #ef4444; color: white; }
-    .btn-secondary { background: #475569; color: white; }
+    .btn-add {
+      background: #2563eb;
+      color: white;
+    }
+    .btn-add:hover { background: #1d4ed8; }
 
-    .map-container {
+    /* ÁREA DE TRABAJO CON PATRÓN DE PUNTOS */
+    .viewport {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
+      background-size: 24px 24px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px;
+    }
+
+    /* CONTENEDOR DE MAPA JERÁRQUICO (ÁRBOL) */
+    .tree-container {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
-      width: max-content;
-      margin: 0 auto;
+      gap: 36px;
+      min-width: max-content;
+      padding-bottom: 60px;
     }
 
-    .row {
+    .tree-row {
       display: flex;
       justify-content: center;
-      gap: 16px;
+      gap: 24px;
       width: 100%;
-      flex-wrap: nowrap; /* Mantiene la fila organizada */
     }
 
-    .node-card {
+    /* TARJETA EXACTA */
+    .stage-card {
       background: #ffffff;
-      border: 2px solid var(--border-blue);
+      border: 2px solid #3b82f6;
       border-radius: 14px;
-      width: 270px; /* Tamaño ajustado para que quepan las 4 tarjetas abajo */
-      padding: 14px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+      width: 290px;
+      padding: 18px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      position: relative;
       display: flex;
       flex-direction: column;
-      position: relative;
     }
 
+    /* TÍTULO Y DESCRIPCIÓN EDITABLES */
     .title-input {
-      font-size: 1rem;
+      font-size: 1.1rem;
       font-weight: 700;
       color: #0f172a;
-      border: none;
+      border: 1px transparent dashed;
+      border-radius: 4px;
       outline: none;
       width: 100%;
-      margin-bottom: 6px;
-      background: transparent;
+      margin-bottom: 8px;
+      padding: 2px 4px;
+    }
+
+    .title-input:hover, .title-input:focus {
+      border-color: #cbd5e1;
+      background: #f8fafc;
     }
 
     .desc-input {
-      font-size: 0.83rem;
-      color: #334155;
-      border: none;
+      font-size: 0.88rem;
+      color: #475569;
+      border: 1px transparent dashed;
+      border-radius: 4px;
       outline: none;
       width: 100%;
       resize: vertical;
-      min-height: 50px;
+      min-height: 52px;
       line-height: 1.4;
-      background: transparent;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      padding: 2px 4px;
+      white-space: pre-wrap;
     }
 
-    .comments-section {
+    .desc-input:hover, .desc-input:focus {
+      border-color: #cbd5e1;
       background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 8px;
-      margin-bottom: 8px;
     }
 
-    .comments-header {
-      font-size: 0.68rem;
-      font-weight: 700;
-      color: #64748b;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-    }
-
-    .comment-bubble {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 0.78rem;
-      color: #334155;
-      margin-bottom: 4px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .btn-del-comment {
-      background: none;
-      border: none;
-      color: #ef4444;
-      cursor: pointer;
-    }
-
-    .comment-form {
-      display: flex;
-      gap: 6px;
-    }
-
-    .comment-input {
-      flex: 1;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 4px 8px;
-      font-size: 0.78rem;
-      outline: none;
-    }
-
-    .btn-add-comment {
-      background: var(--border-blue);
-      color: white;
-      border: none;
-      border-radius: 6px;
-      width: 26px;
-      height: 26px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto;
-      font-size: 0.75rem;
-    }
-
-    .upload-btn-label {
-      font-size: 0.75rem;
-      color: #2563eb;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .upload-btn-label input { display: none; }
-
+    /* IMAGEN DE LA ETAPA */
     .image-preview-container {
       position: relative;
-      margin-bottom: 8px;
-      border-radius: 6px;
+      margin-bottom: 12px;
+      border-radius: 8px;
       overflow: hidden;
-      max-height: 90px;
+      max-height: 140px;
       display: flex;
       justify-content: center;
       background: #f1f5f9;
+      border: 1px solid #e2e8f0;
     }
 
     .image-preview-container img {
@@ -224,68 +173,168 @@
 
     .btn-delete-img {
       position: absolute;
-      top: 2px;
-      right: 2px;
-      background: rgba(0,0,0,0.6);
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.7);
       color: white;
       border: none;
       border-radius: 50%;
-      width: 16px;
-      height: 16px;
+      width: 22px;
+      height: 22px;
       cursor: pointer;
-      font-size: 8px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* RECUADRO DE COMENTARIOS */
+    .comments-section {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px;
+      margin-top: auto;
+    }
+
+    .comments-header {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: #64748b;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .comment-bubble {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      color: #334155;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 6px;
+      word-break: break-word;
+    }
+
+    .btn-del-comment {
+      background: none;
+      border: none;
+      color: #ef4444;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+
+    .comment-form {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .comment-input {
+      flex: 1;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 0.8rem;
+      outline: none;
+    }
+
+    .comment-input:focus {
+      border-color: #3b82f6;
+    }
+
+    .btn-add-comment {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0 10px;
+      font-size: 0.85rem;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* FOOTER DE LA TARJETA */
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .upload-btn-label {
+      font-size: 0.78rem;
+      color: #2563eb;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .upload-btn-label input { display: none; }
+
+    .btn-delete-node {
+      background: none;
+      border: none;
+      color: #ef4444;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
+  <!-- ENCABEZADO Y CONTROLES -->
   <div class="toolbar">
     <h1>⚖️ Mapa Conceptual: La Ley Penal</h1>
     <div class="btn-group">
-      <button class="btn btn-reset" onclick="resetMap()">🔄 Restablecer Todo</button>
-      <button class="btn btn-secondary" onclick="exportJSON()">💾 Exportar JSON</button>
+      <button class="btn btn-add" onclick="addNodeToLastRow()">
+        ➕ Agregar Nodo Abajo
+      </button>
     </div>
   </div>
 
-  <div id="mapContainer" class="map-container"></div>
+  <!-- ÁREA DE TRABAJO -->
+  <div class="viewport">
+    <div id="treeContainer" class="tree-container"></div>
+  </div>
 
   <script>
-    // DATOS DE DERECHO PENAL COMPLETOS
-    const penalData = {
+    // DATOS ESTRUCTURADOS EN FILAS PARA EL MAPA CONCEPTUAL
+    let treeData = {
       row1: [
-        { id: "root", title: "Ley Penal", description: "Sistema normativo jurídico y formal", comments: [] }
+        { id: '1', title: 'Ley Penal', description: 'Sistema normativo jurídico y formal', imageUrl: '', comments: [] }
       ],
       row2: [
-        { id: "est", title: "Estructura", description: "• Supuesto de hecho\n• Consecuencia jurídica", comments: [] },
-        { id: "tip_norm", title: "Tipos de normas", description: "• Completa\n• Incompleta\n• En blanco", comments: [] }
+        { id: '2', title: 'Estructura', description: '• Supuesto de hecho\n• Consecuencia jurídica', imageUrl: '', comments: [] },
+        { id: '3', title: 'Tipos de normas', description: '• Completa\n• Incompleta\n• En blanco', imageUrl: '', comments: [] }
       ],
       row3: [
-        { id: "tipo_penal", title: "El tipo Penal", description: "Descripción del supuesto de hecho y consecuencia legal.", comments: [] }
+        { id: '4', title: 'El tipo Penal', description: 'Descripción legal de la conducta prohibida y su consecuencia.', imageUrl: '', comments: [] }
       ],
       row4: [
-        { id: "elem", title: "Elementos", description: "• Objetivos\n• Subjetivos\n• Normativos", comments: [] },
-        { id: "func", title: "Funciones", description: "• Seleccionadora\n• De garantía\n• Motivadora", comments: [] },
-        { id: "clas", title: "Clasificación de los tipos", description: "• Estructura: Básico, agravado, atenuado, especial\n• Tipo subjetivo: Doloso y Culposo\n• Daño / Peligro", comments: [] },
-        { id: "puni", title: "Punibilidad, punición y pena", description: "• Punibilidad: Merecimiento legal\n• Punición: Fijación del juez\n• Pena: Ejecución administrativa", comments: [] }
+        { id: '5', title: 'Elementos', description: '• Objetivos\n• Subjetivos\n• Normativos', imageUrl: '', comments: [] },
+        { id: '6', title: 'Funciones', description: '• Seleccionadora\n• De garantía\n• Motivadora', imageUrl: '', comments: [] },
+        { id: '7', title: 'Clasificación de los tipos', description: '• Estructura: Básico, agravado, atenuado, especial\n• Subjetivo: Doloso y Culposo\n• Daño / Peligro', imageUrl: '', comments: [] },
+        { id: '8', title: 'Punibilidad, punición y pena', description: '• Punibilidad: Merecimiento legal\n• Punición: Fijación del juez\n• Pena: Ejecución administrativa', imageUrl: '', comments: [] }
       ]
     };
 
-    let mapData;
-
-    function initData() {
-      // Limpia todo para asegurar que cargue completo sin cache recortado
-      localStorage.clear();
-      mapData = JSON.parse(JSON.stringify(penalData));
-    }
-
-    function resetMap() {
-      localStorage.clear();
-      mapData = JSON.parse(JSON.stringify(penalData));
-      render();
-    }
-
-    function updateCard(rowKey, index, field, value) {
-      mapData[rowKey][index][field] = value;
+    function updateField(rowKey, index, field, value) {
+      treeData[rowKey][index][field] = value;
     }
 
     function handleImage(event, rowKey, index) {
@@ -293,7 +342,7 @@
       if (file) {
         const reader = new FileReader();
         reader.onload = function(e) {
-          mapData[rowKey][index].imageUrl = e.target.result;
+          treeData[rowKey][index].imageUrl = e.target.result;
           render();
         };
         reader.readAsDataURL(file);
@@ -301,7 +350,7 @@
     }
 
     function removeImage(rowKey, index) {
-      mapData[rowKey][index].imageUrl = '';
+      treeData[rowKey][index].imageUrl = '';
       render();
     }
 
@@ -309,86 +358,89 @@
       const input = document.getElementById(inputId);
       const text = input.value.trim();
       if (text) {
-        if (!mapData[rowKey][index].comments) mapData[rowKey][index].comments = [];
-        mapData[rowKey][index].comments.push(text);
+        treeData[rowKey][index].comments.push(text);
         render();
       }
     }
 
     function removeComment(rowKey, nodeIdx, commentIdx) {
-      mapData[rowKey][nodeIdx].comments.splice(commentIdx, 1);
+      treeData[rowKey][nodeIdx].comments.splice(commentIdx, 1);
       render();
     }
 
-    function exportJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(mapData, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute("href", dataStr);
-      downloadAnchor.setAttribute("download", "mapa_conceptual_ley_penal.json");
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+    function removeNode(rowKey, index) {
+      treeData[rowKey].splice(index, 1);
+      render();
     }
 
-    function renderNode(node, rowKey, index) {
-      const inputCommentId = `input-c-${rowKey}-${index}`;
-      const comments = node.comments || [];
-
-      const commentsHtml = comments.map((c, cIdx) => `
-        <div class="comment-bubble">
-          <span>${c}</span>
-          <button class="btn-del-comment" onclick="removeComment('${rowKey}', ${index}, ${cIdx})">✕</button>
-        </div>
-      `).join('');
-
-      return `
-        <div class="node-card">
-          <input type="text" class="title-input" value="${node.title}" onchange="updateCard('${rowKey}', ${index}, 'title', this.value)" placeholder="Título" />
-          <textarea class="desc-input" onchange="updateCard('${rowKey}', ${index}, 'description', this.value)" placeholder="Descripción...">${node.description}</textarea>
-
-          ${node.imageUrl ? `
-            <div class="image-preview-container">
-              <img src="${node.imageUrl}" alt="Imagen" />
-              <button class="btn-delete-img" onclick="removeImage('${rowKey}', ${index})">✕</button>
-            </div>
-          ` : ''}
-
-          <div class="comments-section">
-            <div class="comments-header">💬 COMENTARIOS (${comments.length})</div>
-            ${commentsHtml}
-            <div class="comment-form">
-              <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Escribir..." onkeypress="if(event.key==='Enter') addComment('${rowKey}', ${index}, '${inputCommentId}')" />
-              <button class="btn-add-comment" onclick="addComment('${rowKey}', ${index}, '${inputCommentId}')">+</button>
-            </div>
-          </div>
-
-          <div class="card-footer">
-            <label class="upload-btn-label">
-              🖼️ ${node.imageUrl ? 'Cambiar' : 'Agregar imagen'}
-              <input type="file" accept="image/*" onchange="handleImage(event, '${rowKey}', ${index})">
-            </label>
-          </div>
-        </div>
-      `;
+    function addNodeToLastRow() {
+      treeData.row4.push({
+        id: Date.now().toString(),
+        title: 'Nuevo Elemento',
+        description: 'Descripción...',
+        imageUrl: '',
+        comments: []
+      });
+      render();
     }
 
     function render() {
-      const container = document.getElementById('mapContainer');
+      const container = document.getElementById('treeContainer');
       container.innerHTML = '';
 
-      ['row1', 'row2', 'row3', 'row4'].forEach(rowKey => {
-        if (mapData[rowKey] && mapData[rowKey].length > 0) {
+      Object.keys(treeData).forEach(rowKey => {
+        if (treeData[rowKey].length > 0) {
           const rowDiv = document.createElement('div');
-          rowDiv.className = 'row';
-          mapData[rowKey].forEach((node, idx) => {
-            rowDiv.innerHTML += renderNode(node, rowKey, idx);
+          rowDiv.className = 'tree-row';
+
+          treeData[rowKey].forEach((node, idx) => {
+            const inputCommentId = `input-c-${rowKey}-${idx}`;
+
+            const commentsHtml = node.comments.map((c, cIdx) => `
+              <div class="comment-bubble">
+                <span>${c}</span>
+                <button class="btn-del-comment" onclick="removeComment('${rowKey}', ${idx}, ${cIdx})">✕</button>
+              </div>
+            `).join('');
+
+            const cardNode = document.createElement('div');
+            cardNode.className = 'stage-card';
+            cardNode.innerHTML = `
+              <input type="text" class="title-input" value="${node.title}" oninput="updateField('${rowKey}', ${idx}, 'title', this.value)" placeholder="Título" />
+              <textarea class="desc-input" oninput="updateField('${rowKey}', ${idx}, 'description', this.value)" placeholder="Descripción...">${node.description}</textarea>
+
+              ${node.imageUrl ? `
+                <div class="image-preview-container">
+                  <img src="${node.imageUrl}" alt="Imagen de nodo" />
+                  <button class="btn-delete-img" onclick="removeImage('${rowKey}', ${idx})">✕</button>
+                </div>
+              ` : ''}
+
+              <div class="comments-section">
+                <div class="comments-header">💬 Comentarios (${node.comments.length})</div>
+                ${commentsHtml}
+                <div class="comment-form">
+                  <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Escribir..." onkeypress="if(event.key==='Enter') addComment('${rowKey}', ${idx}, '${inputCommentId}')" />
+                  <button class="btn-add-comment" onclick="addComment('${rowKey}', ${idx}, '${inputCommentId}')">+</button>
+                </div>
+              </div>
+
+              <div class="card-footer">
+                <label class="upload-btn-label">
+                  🖼️ ${node.imageUrl ? 'Cambiar imagen' : 'Agregar imagen'}
+                  <input type="file" accept="image/*" onchange="handleImage(event, '${rowKey}', ${idx})">
+                </label>
+                ${rowKey !== 'row1' ? `<button class="btn-delete-node" onclick="removeNode('${rowKey}', ${idx})">Eliminar</button>` : ''}
+              </div>
+            `;
+            rowDiv.appendChild(cardNode);
           });
+
           container.appendChild(rowDiv);
         }
       });
     }
 
-    initData();
     render();
   </script>
 </body>
