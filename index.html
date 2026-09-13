@@ -6,442 +6,221 @@
   <title>Mapa Conceptual - La Ley Penal</title>
   <style>
     :root {
-      --bg-color: #f8fafc;
+      --bg-color: #f4f7fa;
       --card-bg: #ffffff;
-      --border-blue: #3b82f6;
+      --border-blue: #2563eb;
       --text-dark: #0f172a;
-      --text-muted: #64748b;
+      --line-color: #94a3b8;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     body {
-      background-color: var(--bg-color);
-      color: var(--text-dark);
-      display: flex;
-      flex-direction: column;
+      width: 100vw;
       height: 100vh;
-      overflow: hidden;
-    }
-
-    /* BARRA SUPERIOR */
-    .toolbar {
-      background: #0f172a;
-      color: white;
-      padding: 12px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 100;
-    }
-
-    .toolbar h1 {
-      font-size: 1.25rem;
-      font-weight: 700;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 12px;
-    }
-
-    .btn {
-      padding: 8px 16px;
-      border-radius: 8px;
-      border: none;
-      font-weight: 600;
-      font-size: 0.9rem;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: all 0.2s ease;
-    }
-
-    .btn-add {
-      background: #2563eb;
-      color: white;
-    }
-    .btn-add:hover { background: #1d4ed8; }
-
-    /* ÁREA DE TRABAJO CON PATRÓN DE PUNTOS */
-    .viewport {
-      flex: 1;
       overflow: auto;
-      position: relative;
-      background-color: #f8fafc;
+      background-color: var(--bg-color);
       background-image: radial-gradient(#cbd5e1 2px, transparent 2px);
       background-size: 24px 24px;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
-      padding: 40px;
-    }
-
-    /* CONTENEDOR DE MAPA JERÁRQUICO (ÁRBOL) */
-    .tree-container {
-      display: flex;
-      flex-direction: column;
       align-items: center;
-      gap: 36px;
-      min-width: max-content;
-      padding-bottom: 60px;
     }
 
-    .tree-row {
-      display: flex;
-      justify-content: center;
-      gap: 24px;
-      width: 100%;
-    }
-
-    /* TARJETA EXACTA */
-    .stage-card {
-      background: #ffffff;
-      border: 2px solid #3b82f6;
-      border-radius: 14px;
-      width: 290px;
-      padding: 18px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+    /* CONTENEDOR PRINCIPAL CON TAMAÑO FIJO PARA EL DIAGRAMA */
+    .diagram-viewport {
       position: relative;
-      display: flex;
-      flex-direction: column;
+      width: 1200px;
+      height: 750px;
+      margin: auto;
     }
 
-    /* TÍTULO Y DESCRIPCIÓN EDITABLES */
-    .title-input {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: #0f172a;
-      border: 1px transparent dashed;
-      border-radius: 4px;
-      outline: none;
-      width: 100%;
-      margin-bottom: 8px;
-      padding: 2px 4px;
-    }
-
-    .title-input:hover, .title-input:focus {
-      border-color: #cbd5e1;
-      background: #f8fafc;
-    }
-
-    .desc-input {
-      font-size: 0.88rem;
-      color: #475569;
-      border: 1px transparent dashed;
-      border-radius: 4px;
-      outline: none;
-      width: 100%;
-      resize: vertical;
-      min-height: 52px;
-      line-height: 1.4;
-      margin-bottom: 12px;
-      padding: 2px 4px;
-      white-space: pre-wrap;
-    }
-
-    .desc-input:hover, .desc-input:focus {
-      border-color: #cbd5e1;
-      background: #f8fafc;
-    }
-
-    /* IMAGEN DE LA ETAPA */
-    .image-preview-container {
-      position: relative;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      overflow: hidden;
-      max-height: 140px;
-      display: flex;
-      justify-content: center;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-    }
-
-    .image-preview-container img {
+    /* LIENZO SVG PARA DIBUJAR LAS LÍNEAS DE CONEXIÓN */
+    #svgCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      pointer-events: none;
+      z-index: 1;
     }
 
-    .btn-delete-img {
+    line {
+      stroke: var(--line-color);
+      stroke-width: 2;
+    }
+
+    /* ESTILO DE LOS NODOS / TARJETAS */
+    .node {
       position: absolute;
-      top: 6px;
-      right: 6px;
-      background: rgba(0, 0, 0, 0.7);
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 22px;
-      height: 22px;
-      cursor: pointer;
-      font-size: 11px;
+      background: var(--card-bg);
+      border: 2px solid var(--border-blue);
+      border-radius: 12px;
+      padding: 14px 18px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+      z-index: 2;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      text-align: center;
     }
 
-    /* RECUADRO DE COMENTARIOS */
-    .comments-section {
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 10px;
-      margin-top: auto;
-    }
-
-    .comments-header {
-      font-size: 0.72rem;
+    .node h3 {
+      font-size: 1rem;
       font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
+      color: var(--text-dark);
+      margin-bottom: 4px;
     }
 
-    .comment-bubble {
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 0.8rem;
-      color: #334155;
-      margin-bottom: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: 6px;
-      word-break: break-word;
-    }
-
-    .btn-del-comment {
-      background: none;
-      border: none;
-      color: #ef4444;
-      cursor: pointer;
-      font-size: 0.8rem;
-      font-weight: bold;
-    }
-
-    .comment-form {
-      display: flex;
-      gap: 6px;
-      margin-top: 6px;
-    }
-
-    .comment-input {
-      flex: 1;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 6px 8px;
-      font-size: 0.8rem;
-      outline: none;
-    }
-
-    .comment-input:focus {
-      border-color: #3b82f6;
-    }
-
-    .btn-add-comment {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0 10px;
+    .node p {
       font-size: 0.85rem;
-      font-weight: bold;
-      cursor: pointer;
+      color: #334155;
+      line-height: 1.35;
+      white-space: pre-line;
     }
 
-    /* FOOTER DE LA TARJETA */
-    .card-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 12px;
-      padding-top: 10px;
-      border-top: 1px dashed #e2e8f0;
+    /* PUNTOS DE CONEXIÓN (AZULES AL CENTRO ARRIBA/ABAJO) */
+    .dot {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      background-color: var(--border-blue);
+      border-radius: 50%;
     }
-
-    .upload-btn-label {
-      font-size: 0.78rem;
-      color: #2563eb;
-      font-weight: 600;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-
-    .upload-btn-label input { display: none; }
-
-    .btn-delete-node {
-      background: none;
-      border: none;
-      color: #ef4444;
-      font-size: 0.78rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
+    .dot-top { top: -5px; left: calc(50% - 4px); }
+    .dot-bottom { bottom: -5px; left: calc(50% - 4px); }
   </style>
 </head>
 <body>
 
-  <!-- ENCABEZADO Y CONTROLES -->
-  <div class="toolbar">
-    <h1>⚖️ Mapa Conceptual: La Ley Penal</h1>
-    <div class="btn-group">
-      <button class="btn btn-add" onclick="addNodeToLastRow()">
-        ➕ Agregar Nodo Abajo
-      </button>
+  <div class="diagram-viewport" id="viewport">
+    <!-- SVG donde se trazan las líneas automáticamente -->
+    <svg id="svgCanvas"></svg>
+
+    <!-- 1. SISTEMA NORMATIVO JURÍDICO Y FORMAL -->
+    <div class="node" id="n1" style="top: 80px; left: 60px; width: 200px;">
+      <p><b>Sistema normativo jurídico y formal</b></p>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 2. LEY PENAL -->
+    <div class="node" id="n2" style="top: 70px; left: 450px; width: 180px;">
+      <h3>Ley Penal</h3>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 3. TIPOS DE NORMAS -->
+    <div class="node" id="n3" style="top: 80px; left: 740px; width: 190px;">
+      <h3>Tipos de normas</h3>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 4. ESTRUCTURA -->
+    <div class="node" id="n4" style="top: 210px; left: 430px; width: 220px;">
+      <h3>Estructura</h3>
+      <p>-Supuesto de hecho<br>-Consecuencia jurídica</p>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 5. COMPLETA, INCOMPLETA, EN BLANCO -->
+    <div class="node" id="n5" style="top: 250px; left: 880px; width: 170px;">
+      <p>-Completa<br>-Incompleta<br>-En blanco</p>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 6. DESCRIPCIÓN DEL SUPUESTO... -->
+    <div class="node" id="n6" style="top: 360px; left: 40px; width: 240px;">
+      <p><b>Descripción del supuesto de hecho y consecuencia</b><br>Principio de legalidad</p>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 7. EL TIPO PENAL -->
+    <div class="node" id="n7" style="top: 380px; left: 440px; width: 200px;">
+      <h3>El tipo Penal</h3>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 8. ELEMENTOS -->
+    <div class="node" id="n8" style="top: 350px; left: 710px; width: 180px;">
+      <h3>Elementos</h3>
+      <p>-Objetivos<br>-Subjetivos<br>-Normativos</p>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 9. CLASIFICACIÓN DE LOS TIPOS -->
+    <div class="node" id="n9" style="top: 550px; left: 40px; width: 220px;">
+      <p><b>Clasificación de los tipos</b><br>-Estructura: Básico, agravado, atenuado, especial, etc.<br>-Tipo subjetivo: Doloso y Culposo<br>Daño/ Peligro</p>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 10. FUNCIONES -->
+    <div class="node" id="n10" style="top: 560px; left: 430px; width: 220px;">
+      <h3>Funciones</h3>
+      <p>-Seleccionadora<br>-De garantía<br>-Motivadora</p>
+      <div class="dot dot-bottom"></div>
+    </div>
+
+    <!-- 11. PUNIBILIDAD... -->
+    <div class="node" id="n11" style="top: 520px; left: 750px; width: 220px;">
+      <p><b>Punibilidad, punición y pena</b><br><br>-<b>Punibilidad:</b> Merecimiento de pena /Conminación legal<br>-<b>Punición:</b> Fijación del juez<br><b>Pena:</b> Ejecución administrativa</p>
     </div>
   </div>
 
-  <!-- ÁREA DE TRABAJO -->
-  <div class="viewport">
-    <div id="treeContainer" class="tree-container"></div>
-  </div>
-
   <script>
-    // DATOS ESTRUCTURADOS EN FILAS PARA EL MAPA CONCEPTUAL
-    let treeData = {
-      row1: [
-        { id: '1', title: 'Ley Penal', description: 'Sistema normativo jurídico y formal', imageUrl: '', comments: [] }
-      ],
-      row2: [
-        { id: '2', title: 'Estructura', description: '• Supuesto de hecho\n• Consecuencia jurídica', imageUrl: '', comments: [] },
-        { id: '3', title: 'Tipos de normas', description: '• Completa\n• Incompleta\n• En blanco', imageUrl: '', comments: [] }
-      ],
-      row3: [
-        { id: '4', title: 'El tipo Penal', description: 'Descripción legal de la conducta prohibida y su consecuencia.', imageUrl: '', comments: [] }
-      ],
-      row4: [
-        { id: '5', title: 'Elementos', description: '• Objetivos\n• Subjetivos\n• Normativos', imageUrl: '', comments: [] },
-        { id: '6', title: 'Funciones', description: '• Seleccionadora\n• De garantía\n• Motivadora', imageUrl: '', comments: [] },
-        { id: '7', title: 'Clasificación de los tipos', description: '• Estructura: Básico, agravado, atenuado, especial\n• Subjetivo: Doloso y Culposo\n• Daño / Peligro', imageUrl: '', comments: [] },
-        { id: '8', title: 'Punibilidad, punición y pena', description: '• Punibilidad: Merecimiento legal\n• Punición: Fijación del juez\n• Pena: Ejecución administrativa', imageUrl: '', comments: [] }
-      ]
-    };
+    // DEFINE LAS CONEXIONES ENTRE NODOS DE ACUERDO A TU IMAGEN
+    const connections = [
+      ['n1', 'n2'],   // Sistema normativo <-> Ley Penal
+      ['n2', 'n3'],   // Ley Penal <-> Tipos de normas
+      ['n2', 'n4'],   // Ley Penal <-> Estructura
+      ['n3', 'n5'],   // Tipos de normas <-> Completa...
+      ['n4', 'n7'],   // Estructura <-> El tipo Penal
+      ['n6', 'n7'],   // Descripción... <-> El tipo Penal
+      ['n7', 'n8'],   // El tipo Penal <-> Elementos
+      ['n7', 'n10'],  // El tipo Penal <-> Funciones
+      ['n9', 'n10'],  // Clasificación... <-> Funciones
+      ['n10', 'n11']  // Funciones <-> Punibilidad...
+    ];
 
-    function updateField(rowKey, index, field, value) {
-      treeData[rowKey][index][field] = value;
-    }
+    function drawLines() {
+      const svg = document.getElementById('svgCanvas');
+      const viewportRect = document.getElementById('viewport').getBoundingClientRect();
+      svg.innerHTML = '';
 
-    function handleImage(event, rowKey, index) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          treeData[rowKey][index].imageUrl = e.target.result;
-          render();
-        };
-        reader.readAsDataURL(file);
-      }
-    }
+      connections.forEach(([id1, id2]) => {
+        const el1 = document.getElementById(id1);
+        const el2 = document.getElementById(id2);
 
-    function removeImage(rowKey, index) {
-      treeData[rowKey][index].imageUrl = '';
-      render();
-    }
+        if (el1 && el2) {
+          const r1 = el1.getBoundingClientRect();
+          const r2 = el2.getBoundingClientRect();
 
-    function addComment(rowKey, index, inputId) {
-      const input = document.getElementById(inputId);
-      const text = input.value.trim();
-      if (text) {
-        treeData[rowKey][index].comments.push(text);
-        render();
-      }
-    }
+          // Calcula el centro exacto de cada tarjeta
+          const x1 = (r1.left + r1.right) / 2 - viewportRect.left;
+          const y1 = (r1.top + r1.bottom) / 2 - viewportRect.top;
+          const x2 = (r2.left + r2.right) / 2 - viewportRect.left;
+          const y2 = (r2.top + r2.bottom) / 2 - viewportRect.top;
 
-    function removeComment(rowKey, nodeIdx, commentIdx) {
-      treeData[rowKey][nodeIdx].comments.splice(commentIdx, 1);
-      render();
-    }
+          const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+          line.setAttribute('x1', x1);
+          line.setAttribute('y1', y1);
+          line.setAttribute('x2', x2);
+          line.setAttribute('y2', y2);
 
-    function removeNode(rowKey, index) {
-      treeData[rowKey].splice(index, 1);
-      render();
-    }
-
-    function addNodeToLastRow() {
-      treeData.row4.push({
-        id: Date.now().toString(),
-        title: 'Nuevo Elemento',
-        description: 'Descripción...',
-        imageUrl: '',
-        comments: []
-      });
-      render();
-    }
-
-    function render() {
-      const container = document.getElementById('treeContainer');
-      container.innerHTML = '';
-
-      Object.keys(treeData).forEach(rowKey => {
-        if (treeData[rowKey].length > 0) {
-          const rowDiv = document.createElement('div');
-          rowDiv.className = 'tree-row';
-
-          treeData[rowKey].forEach((node, idx) => {
-            const inputCommentId = `input-c-${rowKey}-${idx}`;
-
-            const commentsHtml = node.comments.map((c, cIdx) => `
-              <div class="comment-bubble">
-                <span>${c}</span>
-                <button class="btn-del-comment" onclick="removeComment('${rowKey}', ${idx}, ${cIdx})">✕</button>
-              </div>
-            `).join('');
-
-            const cardNode = document.createElement('div');
-            cardNode.className = 'stage-card';
-            cardNode.innerHTML = `
-              <input type="text" class="title-input" value="${node.title}" oninput="updateField('${rowKey}', ${idx}, 'title', this.value)" placeholder="Título" />
-              <textarea class="desc-input" oninput="updateField('${rowKey}', ${idx}, 'description', this.value)" placeholder="Descripción...">${node.description}</textarea>
-
-              ${node.imageUrl ? `
-                <div class="image-preview-container">
-                  <img src="${node.imageUrl}" alt="Imagen de nodo" />
-                  <button class="btn-delete-img" onclick="removeImage('${rowKey}', ${idx})">✕</button>
-                </div>
-              ` : ''}
-
-              <div class="comments-section">
-                <div class="comments-header">💬 Comentarios (${node.comments.length})</div>
-                ${commentsHtml}
-                <div class="comment-form">
-                  <input type="text" id="${inputCommentId}" class="comment-input" placeholder="Escribir..." onkeypress="if(event.key==='Enter') addComment('${rowKey}', ${idx}, '${inputCommentId}')" />
-                  <button class="btn-add-comment" onclick="addComment('${rowKey}', ${idx}, '${inputCommentId}')">+</button>
-                </div>
-              </div>
-
-              <div class="card-footer">
-                <label class="upload-btn-label">
-                  🖼️ ${node.imageUrl ? 'Cambiar imagen' : 'Agregar imagen'}
-                  <input type="file" accept="image/*" onchange="handleImage(event, '${rowKey}', ${idx})">
-                </label>
-                ${rowKey !== 'row1' ? `<button class="btn-delete-node" onclick="removeNode('${rowKey}', ${idx})">Eliminar</button>` : ''}
-              </div>
-            `;
-            rowDiv.appendChild(cardNode);
-          });
-
-          container.appendChild(rowDiv);
+          svg.appendChild(line);
         }
       });
     }
 
-    render();
+    // Dibujar al cargar y al redimensionar la ventana
+    window.addEventListener('load', drawLines);
+    window.addEventListener('resize', drawLines);
   </script>
 </body>
 </html>
