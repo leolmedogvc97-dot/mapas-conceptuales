@@ -74,8 +74,8 @@
     <h1>Características de la Ley Penal y de los Tipos Penales</h1>
     <p class="subtitle">Programa Oficial Unidad 2 | Integración Doctrinal: Mir Puig & Díaz-Aranda</p>
 
-    <!-- Botón con descarga nativa asegurada -->
-    <button id="btn-download" onclick="descargarPNGDirecto()">📥 Descargar Mapa Conceptual (PNG)</button>
+    <!-- Botón con descarga vectorial SVG de alta compatibilidad -->
+    <button id="btn-download" onclick="descargarSVG()">📥 Descargar Mapa Conceptual (SVG / Imagen)</button>
 
     <div class="container" id="captura-area">
         <pre class="mermaid">
@@ -135,53 +135,41 @@
         </pre>
     </div>
 
-    <!-- Script con exportación directa SVG -> Canvas -> PNG -->
+    <!-- Script de descarga en formato vectorial estandarizado SVG -->
     <script>
-        function descargarPNGDirecto() {
+        function descargarSVG() {
             const svgElement = document.querySelector('.mermaid svg');
             if (!svgElement) {
-                alert('El mapa se está procesando. Por favor espera 2 segundos e intenta de nuevo.');
+                alert('El mapa se está cargando en pantalla. Espera 2 segundos e intenta de nuevo.');
                 return;
             }
 
+            // Clonar la estructura del SVG
             const svgClon = svgElement.cloneNode(true);
             svgClon.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            
+            // Añadir fondo blanco explícito para evitar transparencias
+            const rectFondo = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+            rectFondo.setAttribute('width', '100%');
+            rectFondo.setAttribute('height', '100%');
+            rectFondo.setAttribute('fill', '#ffffff');
+            svgClon.insertBefore(rectFondo, svgClon.firstChild);
 
-            const bbox = svgElement.getBBox();
-            const ancho = bbox.width || 1300;
-            const alto = bbox.height || 900;
-
+            // Serializar el gráfico vectorizado
             const xmlSerializer = new XMLSerializer();
-            const svgString = xmlSerializer.serializeToString(svgClon);
+            let svgString = xmlSerializer.serializeToString(svgClon);
 
-            const canvas = document.createElement('canvas');
-            const context = canvas.getContext('2d');
-
-            const escala = 2; // Alta resolución PNG
-            canvas.width = (ancho + 60) * escala;
-            canvas.height = (alto + 60) * escala;
-
-            const img = new Image();
+            // Crear el Blob de archivo de descarga limpia
             const svgBlob = new Blob([svgString], { type: 'image/svg+xml;charset=utf-8' });
             const url = URL.createObjectURL(svgBlob);
 
-            img.onload = function() {
-                context.scale(escala, escala);
-                context.fillStyle = '#ffffff';
-                context.fillRect(0, 0, canvas.width, canvas.height);
-                context.drawImage(img, 30, 30);
-
-                URL.revokeObjectURL(url);
-
-                const link = document.createElement('a');
-                link.download = 'Características_Ley_Penal_y_Tipos_Penales_Unidad2.png';
-                link.href = canvas.toDataURL('image/png');
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            };
-
-            img.src = url;
+            const downloadLink = document.createElement('a');
+            downloadLink.href = url;
+            downloadLink.download = 'Mapa_Conceptual_Ley_Penal_y_Tipos_Penales_Unidad2.svg';
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+            URL.revokeObjectURL(url);
         }
     </script>
 
