@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Características de la Ley Penal y de los Tipos Penales - Unidad 2</title>
 
-    <!-- Librerías nativas para renderizado y exportación limpia -->
+    <!-- Librería Mermaid -->
     <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <!-- Librerías de exportación a PNG y PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -58,11 +59,12 @@
         }
         .container {
             width: 100%;
-            max-width: 900px;
+            max-width: 1100px;
             background: #ffffff;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            overflow-x: auto;
         }
         .mermaid {
             display: flex;
@@ -82,6 +84,7 @@
                 padding: 0;
                 width: 100%;
                 max-width: 100%;
+                overflow: visible;
             }
         }
     </style>
@@ -91,110 +94,202 @@
     <h1>Características de la Ley Penal y de los Tipos Penales</h1>
     <p class="subtitle">Programa Oficial Unidad 2 | Integración Doctrinal: Mir Puig & Díaz-Aranda</p>
 
-    <!-- Botones de descarga -->
+    <!-- Botones de Descarga -->
     <div class="btn-container">
         <button class="btn btn-png" id="btn-png" onclick="descargarPNG()">🖼️ Descargar Imagen (PNG)</button>
         <button class="btn" id="btn-pdf" onclick="descargarPDF()">📄 Descargar Documento (PDF)</button>
     </div>
 
-    <!-- Contenedor del Mapa -->
+    <!-- Contenedor del Mapa Reestructurado -->
     <div class="container" id="captura-area">
         <pre class="mermaid">
-        graph TD
-            ROOT["<b>Características de la Ley Penal<br/>y de los Tipos Penales</b>"]
+flowchart TB
 
-            subgraph LEY["1. LA LEY PENAL"]
-                direction TB
-                B1["<b>La Ley Penal</b><br/>Norma jurídica estatal que determina delitos y sanciones"]
-                B1_EST["<b>Estructura de la Norma</b>"]
-                B1_SUP["• <b>Supuesto de Hecho:</b> Conducta prohibida o mandada"]
-                B1_CONS["• <b>Consecuencia Jurídica:</b> Pena o Medida de Seguridad"]
-                B1 --> B1_EST
-                B1_EST --> B1_SUP
-                B1_EST --> B1_CONS
-            end
+    ROOT["<b>CARACTERÍSTICAS DE LA LEY PENAL<br/>Y DE LOS TIPOS PENALES</b>"]
 
-            subgraph TIPO["2. EL TIPO PENAL Y DIMENSIONES"]
-                direction TB
-                TP["<b>El Tipo Penal</b><br/>Descripción concreta de la conducta delictiva en la ley"]
-                TP_DIM["<b>Dimensiones Dogmáticas</b>"]
-                TP_INJ["• <b>Tipo de Injusto:</b> Materia de la prohibición y el desvalor"]
-                TP_AMP["• <b>Tipo en Sentido Amplio:</b> Presupuestos para la punibilidad"]
-                TP --> TP_DIM
-                TP_DIM --> TP_INJ
-                TP_DIM --> TP_AMP
-            end
+    %% =====================================================
+    %% 1. LA LEY PENAL
+    %% =====================================================
 
-            subgraph FUNCIONES["3. FUNCIONES DEL TIPO PENAL"]
-                direction TB
-                TP_FUNC["<b>Funciones Principales</b>"]
-                F1["1. <b>Seleccionadora:</b> Elige conductas graves sobre Bienes Jurídicos"]
-                F2["2. <b>De Garantía:</b> Límite al arbitrio judicial (Nullum crimen sine lege)"]
-                F3["3. <b>Motivadora:</b> Incita a abstenerse de cometer delitos"]
-                TP_FUNC --> F1
-                TP_FUNC --> F2
-                TP_FUNC --> F3
-            end
+    LEY["<b>La Ley Penal</b><br/>Norma jurídica estatal que determina delitos y sanciones"]
 
-            subgraph ELEMENTOS["4. ELEMENTOS DEL TIPO PENAL"]
-                direction TB
-                EL["<b>Estructura de Elementos</b>"]
-                EL_OBJ["<b>A. Tipo Objetivo (Material)</b><br/>• Acción / Omisión humana<br/>• Sujeto Activo, Pasivo y Estado<br/>• Objeto Material y Bien Jurídico Tutelado<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado material (si lo exige el tipo)"]
-                EL_SUBJ["<b>B. Tipo Subjetivo (Psíquico)</b><br/>Procesos de la voluntad del autor"]
-                EL_NORM["<b>C. Elementos Normativos</b><br/>Valoración cultural o jurídico-formal"]
+    LEY_EST["<b>Estructura de la Ley Penal</b>"]
 
-                SUBJ_DOLO["<b>El Dolo</b><br/>Conocimiento y voluntad de realizar el tipo objetivo"]
-                D1["• <b>Dolo Directo 1er Grado:</b> Busca el resultado de forma directa"]
-                D2["• <b>Dolo Directo 2do Grado:</b> Consecuencias necesarias"]
-                D3["• <b>Dolo Eventual:</b> Prevé el resultado posible y lo acepta"]
+    SUP["<b>Supuesto de Hecho</b><br/>(Conducta prohibida o mandada)"]
 
-                SUBJ_CULP["<b>Delito Culposo / Imprudente</b><br/>Infracción al deber objetivo de cuidado"]
-                C1["• <b>Culpa Consciente:</b> Prevé el resultado pero confía en evitarlo"]
-                C2["• <b>Culpa Inconsciente:</b> No prevé el resultado habiéndolo podido prever"]
+    CONS["<b>Consecuencia Jurídica</b><br/>(Pena o Medida de Seguridad)"]
 
-                SUBJ_ESP["<b>Elementos Subjetivos Específicos</b><br/>Ánimo, fin o propósito particular exigido"]
+    ROOT -->|"define el marco de"| LEY
+    LEY -->|"se conforma de"| LEY_EST
+    LEY_EST -->|"hipótesis legal"| SUP
+    LEY_EST -->|"sanción adscrita"| CONS
 
-                EL --> EL_OBJ
-                EL --> EL_SUBJ
-                EL --> EL_NORM
-                EL_SUBJ --> SUBJ_DOLO
-                SUBJ_DOLO --> D1
-                SUBJ_DOLO --> D2
-                SUBJ_DOLO --> D3
-                EL_SUBJ --> SUBJ_CULP
-                SUBJ_CULP --> C1
-                SUBJ_CULP --> C2
-                EL_SUBJ --> SUBJ_ESP
-            end
 
-            subgraph CLASIF["5. CLASIFICACIÓN DE LOS TIPOS"]
-                direction TB
-                TP_CLAS["<b>Clasificación General</b><br/>• <b>Por el resultado:</b> Mera Actividad vs. Resultado<br/>• <b>Por la temporalidad:</b> Instantáneo, Permanente y Continuado<br/>• <b>Por la afectación:</b> Lesión vs. Peligro (Concreto/Abstracto)<br/>• <b>Por los sujetos:</b> Unisubjetivo vs. Plurisubjetivo / Común vs. Especial"]
-            end
+    %% =====================================================
+    %% 2. EL TIPO PENAL
+    %% =====================================================
 
-            subgraph SANCIÓN["6. FASES DE LA SANCIÓN PENAL"]
-                direction TB
-                TRIADA["<b>Fases de la Sanción</b>"]
-                PUN_1["1. <b>Punibilidad (Legislativa):</b> Merecimiento abstracto de pena en la ley"]
-                PUN_2["2. <b>Punición (Judicial):</b> Fijación concreta de la pena por el Juez"]
-                PUN_3["3. <b>Pena (Ejecutiva):</b> Cumplimiento orientado a la Reinserción Social"]
-                TRIADA --> PUN_1
-                TRIADA --> PUN_2
-                TRIADA --> PUN_3
-            end
+    TIPO["<b>El Tipo Penal</b><br/>Descripción concreta de la conducta delictiva en la ley"]
 
-            ROOT --> LEY
-            ROOT --> TIPO
-            ROOT --> FUNCIONES
-            ROOT --> ELEMENTOS
-            ROOT --> CLASIF
-            ROOT --> SANCIÓN
+    ROOT -->|"se concreta en"| TIPO
+
+    DIM["<b>Dimensiones Dogmáticas del Tipo</b>"]
+
+    INJ["<b>Tipo de Injusto</b><br/>Características que fundamentan la materia de la prohibición y el desvalor"]
+
+    AMP["<b>Tipo en Sentido Amplio</b><br/>Conjunto de todos los presupuestos necesarios para la punibilidad"]
+
+    TIPO -->|"se concibe como"| DIM
+
+    DIM -->|"perspectiva estricta"| INJ
+    DIM -->|"perspectiva amplia"| AMP
+
+
+    %% =====================================================
+    %% 3. FUNCIONES
+    %% =====================================================
+
+    FUNC["<b>Funciones del Tipo Penal</b>"]
+
+    F1["<b>Seleccionadora</b><br/>Elige las conductas más graves que lesionan Bienes Jurídicos"]
+
+    F2["<b>De Garantía</b><br/>Límite al arbitrio judicial<br/>(Nullum crimen sine lege)"]
+
+    F3["<b>Motivadora</b><br/>Incita a los ciudadanos a abstenerse de cometer el delito"]
+
+    TIPO -->|"desempeña"| FUNC
+
+    FUNC -->|"función 1"| F1
+    FUNC -->|"función 2"| F2
+    FUNC -->|"función 3"| F3
+
+
+    %% =====================================================
+    %% 4. ELEMENTOS DEL TIPO
+    %% =====================================================
+
+    ELEM["<b>Elementos del Tipo Penal</b>"]
+
+    OBJ["<b>Tipo Objetivo</b><br/>• Acción / Omisión humana<br/>• Sujeto Activo, Pasivo y Estado<br/>• Objeto Material y Bien Jurídico<br/>• Nexo Causal e Imputación Objetiva<br/>• Resultado (cuando el tipo lo exija)"]
+
+    SUB["<b>Tipo Subjetivo</b><br/>Procesos de la voluntad del autor"]
+
+    NORM["<b>Elementos Normativos</b><br/>Términos que requieren valoración cultural o concepto estrictamente jurídico"]
+
+    TIPO -->|"se estructura en"| ELEM
+
+    ELEM -->|"dimensión material"| OBJ
+    ELEM -->|"dimensión psíquica"| SUB
+    ELEM -->|"dimensión valorativa"| NORM
+
+
+    %% =====================================================
+    %% 5. DOLO
+    %% =====================================================
+
+    DOLO["<b>El Dolo</b><br/>Conocimiento y voluntad de realizar el tipo objetivo"]
+
+    INT["<b>Intención / Dolo Directo de 1er Grado</b><br/>El autor busca expresamente la realización del resultado"]
+
+    D2["<b>Dolo Directo de 2do Grado / Consecuencias Necesarias</b>"]
+
+    DE["<b>Dolo Eventual</b><br/>El autor prevé el resultado como posible y lo acepta"]
+
+    SUB -->|"forma dolo"| DOLO
+
+    DOLO -->|"modalidad 1"| INT
+    DOLO -->|"modalidad 2"| D2
+    DOLO -->|"modalidad 3"| DE
+
+
+    %% =====================================================
+    %% 6. CULPA
+    %% =====================================================
+
+    CULP["<b>Delito Culposo / Imprudente</b><br/>Infracción al deber objetivo de cuidado"]
+
+    CC["<b>Culpa Consciente / Con Representación</b><br/>El autor prevé el resultado pero confía en que lo evitará"]
+
+    CI["<b>Culpa Inconsciente / Sin Representación</b><br/>El autor no prevé el resultado habiéndolo podido prever"]
+
+    SUB -->|"forma culpa"| CULP
+
+    CULP -->|"modalidad 1"| CC
+    CULP -->|"modalidad 2"| CI
+
+
+    %% =====================================================
+    %% 7. ELEMENTOS SUBJETIVOS ESPECÍFICOS
+    %% =====================================================
+
+    ESP["<b>Elementos Subjetivos Específicos</b><br/>Ánimo, fin, intención o propósito particular exigido normativamente"]
+
+    SUB -->|"requiere a veces"| ESP
+
+
+    %% =====================================================
+    %% 8. CLASIFICACIÓN
+    %% =====================================================
+
+    CLAS["<b>Clasificación de los Tipos Penales</b>"]
+
+    CLAS_CONT["<b>Por el resultado:</b> Mera Actividad vs. Resultado<br/><br/><b>Por la temporalidad:</b> Instantáneo, Permanente y Continuado<br/><br/><b>Por la afectación:</b> Lesión vs. Peligro (Concreto/Abstracto)<br/><br/><b>Por los sujetos:</b> Unisubjetivo vs. Plurisubjetivo / Común vs. Especial"]
+
+    TIPO -->|"se clasifica en"| CLAS
+
+    CLAS --> CLAS_CONT
+
+
+    %% =====================================================
+    %% 9. SANCIÓN PENAL
+    %% =====================================================
+
+    SAN["<b>Fases de la Sanción Penal</b>"]
+
+    PUN["<b>Punibilidad</b><br/>Merecimiento abstracto de pena fijado en la ley con límites mínimos y máximos"]
+
+    PUNC["<b>Punición</b><br/>Fijación concreta e individualizada de la pena impuesta por el Juez en la sentencia"]
+
+    PENA["<b>Pena</b><br/>Ejecución y aplicación efectiva de la sanción orientada a la Reinserción Social"]
+
+    TIPO -->|"determina la consecuencia"| SAN
+
+    SAN -->|"1. Fase Legislativa"| PUN
+    SAN -->|"2. Fase Judicial"| PUNC
+    SAN -->|"3. Fase Ejecutiva"| PENA
+
+
+    %% =====================================================
+    %% ESTILOS DE COLOR NATIVOS
+    %% =====================================================
+
+    classDef root fill:#e8e0ff,stroke:#6f42c1,stroke-width:3px,color:#111;
+    classDef principal fill:#eee7ff,stroke:#7b61a8,stroke-width:2px,color:#111;
+    classDef secundario fill:#f7f3ff,stroke:#9b8ac4,stroke-width:1.5px,color:#111;
+    classDef detalle fill:#ffffff,stroke:#b8a9d6,stroke-width:1px,color:#111;
+
+    class ROOT root;
+    class LEY,TIPO,FUNC,ELEM,CLAS,SAN principal;
+    class LEY_EST,DIM,INJ,AMP,OBJ,SUB,NORM,DOLO,CULP,ESP,CLAS_CONT,PUN,PUNC,PENA secundario;
+    class SUP,CONS,F1,F2,F3,INT,D2,DE,CC,CI detalle;
         </pre>
     </div>
 
-    <!-- Scripts de renderizado y descarga -->
+    <!-- Script de Inicialización y Exportación -->
     <script>
-        mermaid.initialize({ startOnLoad: true, theme: 'default' });
+        // Configuración para flujo vertical amplio y nitidez de texto
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: "default",
+            securityLevel: "loose",
+            flowchart: {
+                useMaxWidth: false,
+                htmlLabels: true,
+                curve: "basis",
+                nodeSpacing: 35,
+                rankSpacing: 65
+            }
+        });
 
         function descargarPNG() {
             const area = document.getElementById('captura-area');
@@ -207,6 +302,10 @@
                 link.download = 'Mapa_Conceptual_Unidad2.png';
                 link.href = canvas.toDataURL('image/png');
                 link.click();
+                boton.innerText = "🖼️ Descargar Imagen (PNG)";
+                boton.disabled = false;
+            }).catch(() => {
+                alert('No se pudo generar la imagen.');
                 boton.innerText = "🖼️ Descargar Imagen (PNG)";
                 boton.disabled = false;
             });
@@ -228,6 +327,10 @@
                 });
                 pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
                 pdf.save('Mapa_Conceptual_Unidad2.pdf');
+                boton.innerText = "📄 Descargar Documento (PDF)";
+                boton.disabled = false;
+            }).catch(() => {
+                alert('No se pudo generar el PDF.');
                 boton.innerText = "📄 Descargar Documento (PDF)";
                 boton.disabled = false;
             });
