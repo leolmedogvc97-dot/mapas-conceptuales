@@ -227,11 +227,16 @@
     .btn-del-node { background: #ef4444; }
     .btn-del-node:hover { background: #dc2626; }
 
-    /* ESTADO DE EXPORTACIÓN LIMPIA */
-    body.exporting .toolbar { display: none !important; }
-    body.exporting .node-actions { display: none !important; }
-    body.exporting .node { box-shadow: none !important; cursor: default !important; }
-    body.exporting #viewport { background-image: none !important; }
+    /* ESTADOS DE EXPORTACIÓN LIMPIA Y IMPRESIÓN */
+    body.exporting-clean .node-actions { display: none !important; }
+    body.exporting-clean .node { box-shadow: none !important; }
+
+    @media print {
+      .toolbar { display: none !important; }
+      .node-actions { display: none !important; }
+      #viewport { background-image: none !important; background-color: #0f172a !important; }
+      body { height: auto !important; overflow: visible !important; }
+    }
 
     /* MODAL FUENTES */
     .modal {
@@ -306,9 +311,9 @@
     </div>
 
     <div class="btn-group">
-      <button class="btn" onclick="exportCleanImage('png')" title="Exportar PNG limpio">🖼️ PNG</button>
+      <button class="btn" onclick="exportDirectPNG()" title="Descargar PNG limpia directamente">🖼️ PNG</button>
       <button class="btn" onclick="exportCleanSVG()" title="Exportar SVG limpio">📐 SVG</button>
-      <button class="btn" onclick="exportCleanPDF()" title="Imprimir / PDF limpio">📄 PDF</button>
+      <button class="btn" onclick="exportCleanPDF()" title="Imprimir / PDF">📄 PDF</button>
     </div>
   </div>
 
@@ -354,7 +359,7 @@
     let historyStack = [];
     let historyIndex = -1;
 
-    // CONTENIDO ACADÉMICO LIMPIO DE EMOJIS CON NUEVO TÍTULO Y FORMATO MULTILÍNEA
+    // CONTENIDO ACADÉMICO EXACTO Y COMPLETO
     const initialData = {
       text: 'EVOLUCIÓN DE LA FAMILIA\nNEORROMANISTA DESDE SU\nORIGEN HASTA LA RECEPCIÓN\nDEL DERECHO ROMANO',
       color: '#38bdf8',
@@ -491,7 +496,6 @@
       ]
     };
 
-    // ALGORITMO RADIAL CON ESPACIO ESPACIOSO Y ADAPTATIVO
     function initTree() {
       nodes = [];
       const centerX = 4000;
@@ -509,7 +513,6 @@
       };
       nodes.push(root);
 
-      // Ponderación de pesos para asignar arcos proporcionales a la densidad
       const branchWeights = initialData.children.map(b => {
         let count = 1 + (b.children ? b.children.length : 0);
         if (b.children) {
@@ -529,8 +532,7 @@
         const angle = currentAngle + angleSpan / 2;
         currentAngle += angleSpan;
 
-        // Radios amplios para prevenir superposición de cajas
-        const radius = weight > 6 ? 750 : 620;
+        const radius = weight > 6 ? 780 : 640;
         const bx = centerX + Math.cos(angle) * radius;
         const by = centerY + Math.sin(angle) * radius;
 
@@ -551,7 +553,7 @@
 
           branch.children.forEach((sub, sIdx) => {
             const subAngle = angle + (sIdx - (totalSub - 1) / 2) * (subSpread / Math.max(1, totalSub - 1));
-            const subRadius = 380;
+            const subRadius = 400;
             const sx = bx + Math.cos(subAngle) * subRadius;
             const sy = by + Math.sin(subAngle) * subRadius;
 
@@ -574,8 +576,8 @@
                   id: 'node_' + idx + '_' + sIdx + '_' + ssIdx,
                   parentId: subId,
                   text: ssub.text,
-                  x: sx + Math.cos(ssubAngle) * 260,
-                  y: sy + Math.sin(ssubAngle) * 260,
+                  x: sx + Math.cos(ssubAngle) * 270,
+                  y: sy + Math.sin(ssubAngle) * 270,
                   color: branch.color,
                   type: 'secondary'
                 });
@@ -590,7 +592,6 @@
       centerMap();
     }
 
-    // MODOS Y MANEJO DE VISTA
     function setMode(mode) {
       currentMode = mode;
       document.getElementById('btnSelect').classList.toggle('active', mode === 'select');
@@ -647,7 +648,6 @@
       updateTransform();
     }
 
-    // EVENTOS TECLADO Y RATÓN
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !spacePressed && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
         spacePressed = true;
@@ -708,7 +708,6 @@
       draggedNode = null;
     });
 
-    // HISTORIAL UNDO / REDO
     function saveState() {
       historyStack = historyStack.slice(0, historyIndex + 1);
       historyStack.push(JSON.stringify(nodes));
@@ -731,7 +730,6 @@
       }
     }
 
-    // RENDERIZADO DEL MAPA EN EL DOM
     function render() {
       svgCanvas.innerHTML = '';
       document.querySelectorAll('.node').forEach(el => el.remove());
@@ -785,7 +783,6 @@
       el.style.height = el.scrollHeight + 'px';
     }
 
-    // DIBUJO DE LÍNEAS CURVAS DESDE LOS BORDES
     function drawConnection(parent, child) {
       const p1 = getNodeCenter(parent);
       const p2 = getNodeCenter(child);
@@ -822,7 +819,6 @@
       return { x: node.x + 80, y: node.y + 20 };
     }
 
-    // EDICIÓN DE NODOS
     function addChild(parentId) {
       const parent = nodes.find(n => n.id === parentId);
       if (!parent) return;
@@ -866,7 +862,6 @@
       }
     }
 
-    // PERSISTENCIA
     function saveMap() {
       const mapState = { nodes, panX, panY, scale };
       localStorage.setItem('mindmap_full_data', JSON.stringify(mapState));
@@ -892,25 +887,126 @@
       }
     }
 
-    // EXPORTACIÓN LIMPIA (SIN HERRAMIENTAS INTERACTIVAS)
-    function prepareCleanExport(callback) {
-      document.body.classList.add('exporting');
-      setTimeout(() => {
-        callback();
-        setTimeout(() => {
-          document.body.classList.remove('exporting');
-        }, 300);
-      }, 100);
+    // EXPORTACIÓN EXCLUSIVA Y DIRECTA A PNG SIN INTERFACES DE IMPRESIÓN
+    function exportDirectPNG() {
+      document.body.classList.add('exporting-clean');
+
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      nodes.forEach(n => {
+        const el = document.getElementById(n.id);
+        const w = el ? el.offsetWidth : 200;
+        const h = el ? el.offsetHeight : 80;
+        if (n.x < minX) minX = n.x;
+        if (n.x + w > maxX) maxX = n.x + w;
+        if (n.y < minY) minY = n.y;
+        if (n.y + h > maxY) maxY = n.y + h;
+      });
+
+      const padding = 80;
+      minX -= padding;
+      minY -= padding;
+      maxX += padding;
+      maxY += padding;
+
+      const width = maxX - minX;
+      const height = maxY - minY;
+
+      let svgContent = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">`;
+      svgContent += `<rect width="100%" height="100%" fill="#0f172a"/>`;
+      
+      // Renderizar líneas
+      nodes.forEach(node => {
+        if (node.parentId) {
+          const parent = nodes.find(n => n.id === node.parentId);
+          if (parent) {
+            const p1 = getNodeCenter(parent);
+            const p2 = getNodeCenter(node);
+            const x1 = p1.x - minX;
+            const y1 = p1.y - minY;
+            const x2 = p2.x - minX;
+            const y2 = p2.y - minY;
+            const dx = (x2 - x1) * 0.45;
+
+            const pathData = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+            const strokeWidth = node.type === 'primary' ? '3.5' : '2';
+            svgContent += `<path d="${pathData}" stroke="${node.color}" stroke-width="${strokeWidth}" fill="none" opacity="0.85"/>`;
+          }
+        }
+      });
+
+      // Renderizar nodos
+      nodes.forEach(node => {
+        const el = document.getElementById(node.id);
+        const w = el ? el.offsetWidth : 200;
+        const h = el ? el.offsetHeight : 80;
+        const nx = node.x - minX;
+        const ny = node.y - minY;
+
+        let bg = node.isRoot ? 'linear-gradient(135deg, #0284c7, #1d4ed8)' : (node.type === 'primary' ? '#1e293b' : '#0f172a');
+        if (node.isRoot) bg = '#0284c7';
+
+        const lines = node.text.split('\n');
+        let textSvg = '';
+        const lineHeight = 18;
+        const startY = (h / 2) - ((lines.length - 1) * lineHeight / 2);
+
+        lines.forEach((line, idx) => {
+          textSvg += `<tspan x="${nx + w / 2}" y="${ny + startY + (idx * lineHeight)}" text-anchor="middle" dominant-baseline="central">${escapeXml(line)}</tspan>`;
+        });
+
+        svgContent += `
+          <g>
+            <rect x="${nx}" y="${ny}" width="${w}" height="${h}" rx="12" fill="${bg}" stroke="${node.color}" stroke-width="2"/>
+            <text font-family="Segoe UI, sans-serif" font-size="13" font-weight="600" fill="#f8fafc">
+              ${textSvg}
+            </text>
+          </g>
+        `;
+      });
+
+      svgContent += `</svg>`;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+
+      const img = new Image();
+      const svgBlob = new Blob([svgContent], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = function () {
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+        
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = 'mapa_mental_neorromanista.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        document.body.classList.remove('exporting-clean');
+      };
+
+      img.src = url;
     }
 
-    function exportCleanImage(type) {
-      prepareCleanExport(() => {
-        window.print();
+    function escapeXml(unsafe) {
+      return unsafe.replace(/[<>&'"]/g, function (c) {
+        switch (c) {
+          case '<': return '&lt;';
+          case '>': return '&gt;';
+          case '&': return '&amp;';
+          case '\'': return '&apos;';
+          case '"': return '&quot;';
+        }
       });
     }
 
     function exportCleanSVG() {
-      prepareCleanExport(() => {
+      document.body.classList.add('exporting-clean');
+      setTimeout(() => {
         const svgCloned = svgCanvas.cloneNode(true);
         const blob = new Blob([svgCloned.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
         const url = URL.createObjectURL(blob);
@@ -918,20 +1014,23 @@
         a.href = url;
         a.download = 'mapa_mental_neorromanista.svg';
         a.click();
-      });
+        document.body.classList.remove('exporting-clean');
+      }, 50);
     }
 
     function exportCleanPDF() {
-      prepareCleanExport(() => {
+      document.body.classList.add('exporting-clean');
+      setTimeout(() => {
         window.print();
-      });
+        setTimeout(() => {
+          document.body.classList.remove('exporting-clean');
+        }, 500);
+      }, 100);
     }
 
-    // MODAL FUENTES
     function showSources() { document.getElementById('sourcesModal').style.display = 'flex'; }
     function closeSources() { document.getElementById('sourcesModal').style.display = 'none'; }
 
-    // INICIALIZACIÓN
     window.onload = () => {
       const saved = localStorage.getItem('mindmap_full_data');
       if (saved) {
