@@ -16,73 +16,107 @@
       background-color: #0f172a;
       color: #f8fafc;
       height: 100vh;
+      width: 100vw;
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
 
-    /* BARRA SUPERIOR */
+    /* BARRA SUPERIOR Y HERRAMIENTAS */
     .toolbar {
       background: #1e293b;
-      padding: 12px 24px;
+      padding: 8px 16px;
       display: flex;
-      gap: 12px;
+      gap: 8px;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-      z-index: 10;
+      flex-wrap: wrap;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      z-index: 100;
     }
 
     .toolbar h1 {
-      font-size: 1.1rem;
+      font-size: 1rem;
       font-weight: 700;
       color: #38bdf8;
+      margin-right: 8px;
     }
 
-    .instructions {
-      font-size: 0.85rem;
-      color: #94a3b8;
-      margin-left: auto;
+    .btn-group {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      background: #0f172a;
+      padding: 3px;
+      border-radius: 8px;
     }
 
     .btn {
-      padding: 8px 16px;
+      padding: 6px 12px;
       border: none;
-      border-radius: 8px;
+      border-radius: 6px;
       font-weight: 600;
+      font-size: 0.8rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 4px;
+      background: #334155;
+      color: #f8fafc;
       transition: all 0.2s;
     }
 
-    .btn-reset { background: #ef4444; color: white; }
-    .btn-reset:hover { background: #dc2626; }
+    .btn:hover { background: #475569; }
+    .btn.active { background: #0284c7; color: #fff; }
+    .btn-danger { background: #ef4444; color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-success { background: #10b981; color: white; }
+    .btn-success:hover { background: #059669; }
 
-    /* LIENZO PRINCIPAL DE DIBUJO */
+    /* CONTENEDOR DEL LIENZO */
     #viewport {
       flex: 1;
       position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: default;
       background-color: #0f172a;
       background-image: radial-gradient(#334155 1.5px, transparent 1.5px);
       background-size: 28px 28px;
-      overflow: auto;
+    }
+
+    #viewport.panning {
+      cursor: grab;
+    }
+
+    #viewport.panning:active {
+      cursor: grabbing;
+    }
+
+    /* CONTENEDOR TRANSFORMABLE (PAN & ZOOM) */
+    #canvasContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 5000px;
+      height: 4000px;
+      transform-origin: 0 0;
     }
 
     #svgCanvas {
       position: absolute;
       top: 0;
       left: 0;
-      width: 4000px;
-      height: 3000px;
+      width: 100%;
+      height: 100%;
       pointer-events: none;
     }
 
-    /* NODOS */
+    /* ESTILOS DE NODOS Y JERARQUÍA */
     .node {
       position: absolute;
-      padding: 8px 14px;
-      border-radius: 16px;
+      padding: 8px 12px;
+      border-radius: 12px;
       background: #1e293b;
       border: 2px solid var(--node-color, #38bdf8);
       box-shadow: 0 4px 15px rgba(0,0,0,0.4);
@@ -91,54 +125,91 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      max-width: 320px;
+      max-width: 260px;
+      min-width: 100px;
       z-index: 2;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
 
     .node:hover {
       box-shadow: 0 0 12px var(--node-color, #38bdf8);
+      z-index: 10;
     }
 
-    /* NODO CENTRAL REFORZADO */
     .node.root {
       background: linear-gradient(135deg, #0284c7, #1d4ed8);
       border-color: #38bdf8;
-      padding: 16px 24px;
-      border-radius: 28px;
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
-      z-index: 3;
+      padding: 16px 22px;
+      border-radius: 24px;
+      max-width: 320px;
+      box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+      z-index: 20;
     }
 
-    .node-input {
-      background: transparent;
-      border: none;
-      outline: none;
-      color: white;
-      font-size: 0.85rem;
-      font-weight: 600;
+    .node.primary {
+      padding: 10px 14px;
+      border-width: 3px;
+      border-radius: 16px;
+      font-size: 0.9rem;
+    }
+
+    .node.secondary {
+      padding: 6px 10px;
+      border-width: 2px;
+      font-size: 0.8rem;
+      background: #0f172a;
+    }
+
+    .node-content {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       width: 100%;
     }
 
-    .node.root .node-input {
-      font-size: 1.1rem;
+    .node-text {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #f8fafc;
+      font-size: 0.85rem;
+      font-weight: 600;
+      width: 100%;
+      resize: none;
+      overflow: hidden;
+      line-height: 1.2;
+    }
+
+    .node.root .node-text {
+      font-size: 1.05rem;
       font-weight: 800;
       text-align: center;
     }
 
-    /* BOTONES ACCIÓN EN NODO */
+    .node.primary .node-text {
+      font-weight: 700;
+    }
+
+    /* BOTONES DE ACCIÓN DENTRO DEL NODO */
     .node-actions {
       display: flex;
-      gap: 3px;
+      gap: 2px;
+      opacity: 0.3;
+      transition: opacity 0.2s;
+    }
+
+    .node:hover .node-actions {
+      opacity: 1;
     }
 
     .action-btn {
-      width: 20px;
-      height: 20px;
+      width: 18px;
+      height: 18px;
       border-radius: 50%;
       border: none;
       color: white;
       font-weight: bold;
-      font-size: 11px;
+      font-size: 10px;
       cursor: pointer;
       display: flex;
       align-items: center;
@@ -150,29 +221,110 @@
 
     .btn-del-node { background: #ef4444; }
     .btn-del-node:hover { background: #dc2626; }
+
+    /* MODAL FUENTES */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-content {
+      background: #1e293b;
+      padding: 24px;
+      border-radius: 16px;
+      max-width: 500px;
+      width: 90%;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      border: 1px solid #334155;
+    }
+
+    .modal-content h2 {
+      color: #38bdf8;
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+    }
+
+    .modal-content ul {
+      list-style: disc;
+      padding-left: 20px;
+      color: #cbd5e1;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .modal-content button {
+      margin-top: 16px;
+      float: right;
+    }
   </style>
 </head>
 <body>
 
   <div class="toolbar">
-    <h1>🧠 Mapa Mental: Familia Neorromanista</h1>
-    <span class="instructions">💡 Arrastra las cajas para acomodarlas. Haz clic en <b>+</b> para agregar más ideas.</span>
-    <button class="btn btn-reset" onclick="init()">🔄 Reiniciar Posiciones</button>
+    <h1>🧠 Mapa Mental</h1>
+
+    <div class="btn-group">
+      <button class="btn" id="btnHand" onclick="toggleHandTool()" title="Herramienta Mano (Espacio)">✋ Mano</button>
+      <button class="btn" onclick="zoomIn()" title="Aumentar Zoom">+</button>
+      <button class="btn" onclick="zoomOut()" title="Reducir Zoom">−</button>
+      <button class="btn" onclick="resetZoom()" title="Zoom 100%">100%</button>
+      <button class="btn" onclick="centerMap()" title="Centrar Mapa">🎯 Centrar</button>
+      <button class="btn" onclick="fitToScreen()" title="Ajustar a Pantalla">🔍 Ajustar</button>
+    </div>
+
+    <div class="btn-group">
+      <button class="btn btn-success" onclick="savePositions()">💾 Guardar</button>
+      <button class="btn" onclick="resetPositions()">🔄 Restaurar</button>
+      <button class="btn" onclick="showSources()">📚 Fuentes</button>
+    </div>
   </div>
 
   <div id="viewport">
-    <svg id="svgCanvas"></svg>
+    <div id="canvasContainer">
+      <svg id="svgCanvas"></svg>
+    </div>
+  </div>
+
+  <!-- MODAL DE FUENTES DE CONSULTA -->
+  <div id="sourcesModal" class="modal">
+    <div class="modal-content">
+      <h2>📚 Fuentes de Consulta</h2>
+      <ul>
+        <li>Apuntes de clase.</li>
+        <li>René David. <i>Los grandes sistemas jurídicos contemporáneos</i>.</li>
+        <li>Documentos académicos de consulta (Archivos PDF leídos de la revisión).</li>
+      </ul>
+      <button class="btn btn-danger" onclick="closeSources()">Cerrar</button>
+    </div>
   </div>
 
   <script>
     const viewport = document.getElementById('viewport');
+    const canvasContainer = document.getElementById('canvasContainer');
     const svgCanvas = document.getElementById('svgCanvas');
 
+    // ESTADO GLOBAL DE PAN Y ZOOM
+    let scale = 1;
+    let panX = 0;
+    let panY = 0;
+    let isPanningMode = false;
+    let isPanning = false;
+    let startPanX = 0;
+    let startPanY = 0;
+    let spacePressed = false;
+
+    // ESTADO DE ARRASTRE DE NODOS
     let nodes = [];
     let draggedNode = null;
-    let dragOffset = { x: 0, y: 0 };
+    let dragOffsetX = 0;
+    let dragOffsetY = 0;
 
-    // Estructura de datos completa extraída del texto
+    // DATOS ACADÉMICOS
     const initialData = {
       text: 'FAMILIA JURÍDICA DE TRADICIÓN NEORROMANISTA',
       color: '#38bdf8',
@@ -181,9 +333,9 @@
           text: '🏛️ 1. ORIGEN',
           color: '#f43f5e',
           children: [
-            { text: 'Derecho romano → Ley de las XII Tablas' },
-            { text: 'Tradición romana + germánica (Fusión en Europa)' },
-            { text: 'Características: Justicia, Moral, Derecho civil, Orden social' }
+            { text: 'Derecho romano → Ley XII Tablas' },
+            { text: 'Tradición romana + germánica (Fusión)' },
+            { text: 'Principios: Justicia, Moral, D. Civil' }
           ]
         },
         {
@@ -191,7 +343,7 @@
           color: '#fb7185',
           children: [
             { 
-              text: 'Obra jurídica (Corpus Iuris Civilis)',
+              text: 'Corpus Iuris Civilis',
               children: [
                 { text: 'Código de Justiniano' },
                 { text: 'Digesto' },
@@ -199,22 +351,22 @@
                 { text: 'Novelas' }
               ]
             },
-            { text: 'Gran compilación (Triboniano, 529–534 d.C.)' },
-            { text: 'Importancia: Conservación y transmisión del D. Romano' }
+            { text: 'Triboniano (529–534 d.C.)' },
+            { text: 'Conservación del D. Romano' }
           ]
         },
         {
-          text: '🌍 3. DESARROLLO EN ORIENTE',
+          text: '🌍 3. ORIENTE',
           color: '#c084fc',
           children: [
-            { text: 'Prohibición de comentarios tras Justiniano' },
-            { text: 'Siglo VIII: Reinicio de actividad legislativa' },
+            { text: 'Prohibición de comentarios' },
+            { text: 'Siglo VIII: Actividad legislativa' },
             { 
               text: 'Principales obras',
               children: [
                 { text: 'Paráfrasis de Teófilo' },
                 { text: 'Écloga Legum' },
-                { text: 'Basílicas (Digesto+Código+Novelas, 60 libros)' }
+                { text: 'Basílicas (60 libros)' }
               ]
             }
           ]
@@ -223,55 +375,55 @@
           text: '📜 4. INTERPOLACIONES',
           color: '#818cf8',
           children: [
-            { text: 'Alteraciones realizadas por comisiones justinianeas' },
-            { text: 'Incluyeron: Abreviaturas, Cambios, Correcciones, Adiciones' },
-            { text: 'Finalidad: Adaptar textos a necesidades de compilación' },
-            { text: 'Emblemata Triboniani (nombre de interpolaciones)' }
+            { text: 'Alteraciones justinianeas' },
+            { text: 'Cambios, correcciones y adiciones' },
+            { text: 'Adaptación a necesidades' },
+            { text: 'Emblemata Triboniani' }
           ]
         },
         {
-          text: '🎓 5. RENACIMIENTO EN OCCIDENTE',
+          text: '🎓 5. RENACIMIENTO',
           color: '#38bdf8',
           children: [
-            { text: 'Bolonia: Estudio de codificación justinianea' },
-            { text: 'Universidades: Formación de juristas y ciencia jurídica' },
-            { text: 'Ius Commune: Marco común, vocabulario y métodos' },
-            { text: 'Renacimiento del D. Romano: Nuevas categorías y conceptos' }
+            { text: 'Bolonia: Estudio de codificación' },
+            { text: 'Universidades: Formación de juristas' },
+            { text: 'Ius Commune: Marco de referencia' },
+            { text: 'Nuevas categorías jurídicas' }
           ]
         },
         {
-          text: '⚖️ 6. ESCUELAS JURÍDICAS',
+          text: '⚖️ 6. ESCUELAS',
           color: '#34d399',
           children: [
-            { text: 'Glosadores (S. XI, Irnerio, Glosas, Accursio)' },
-            { text: 'Ultramontanos (Escuela de Orleans, J. de Révigny)' },
-            { text: 'Posglosadores / Comentaristas (Bartolo, Baldo)' },
-            { text: 'Humanistas Franceses (Mos Gallicus, Cuyacio, Doneau)' },
-            { text: 'Jurisprudencia Elegante Holandesa' },
-            { text: 'Usus Modernus Pandectarum (D. Romano + Germánico)' },
-            { text: 'Escuela Racionalista (Razón y Derecho Natural)' },
-            { text: 'Escuela Histórica (Savigny, conciencia del pueblo)' }
+            { text: 'Glosadores (Irnerio, Accursio)' },
+            { text: 'Ultramontanos (J. de Révigny)' },
+            { text: 'Posglosadores (Bartolo, Baldo)' },
+            { text: 'Humanistas (Mos Gallicus, Cuyacio)' },
+            { text: 'Jurisprudencia Elegante' },
+            { text: 'Usus Modernus Pandectarum' },
+            { text: 'Escuela Racionalista' },
+            { text: 'Escuela Histórica (Savigny)' }
           ]
         },
         {
-          text: '🏰 7. DERECHO CONSUETUDINARIO Y ESCRITO',
+          text: '🏰 7. CONSUETUDINARIO',
           color: '#a3e635',
           children: [
-            { text: 'Costumbres locales → Multiplicidad de normas' },
-            { text: 'Evolución: Recopilaciones e influencia romana' },
-            { text: 'Compilaciones: Sustitución progresiva de la costumbre' }
+            { text: 'Costumbres locales' },
+            { text: 'Evolución a recopilaciones' },
+            { text: 'Sustitución por Derecho escrito' }
           ]
         },
         {
           text: '📚 8. CODIFICACIÓN',
           color: '#facc15',
           children: [
-            { text: 'Derecho Natural impulsa período legislativo' },
-            { text: 'Objetivos: Unificación, seguridad y expansión' },
+            { text: 'Impulso del Derecho Natural' },
+            { text: 'Unificación y seguridad jurídica' },
             { 
-              text: 'Ejemplos de Códigos',
+              text: 'Ejemplos clave',
               children: [
-                { text: 'Código Civil Francés (1804)' },
+                { text: 'Código Francés (1804)' },
                 { text: 'Código Civil Español' },
                 { text: 'Código Civil Alemán' }
               ]
@@ -279,49 +431,50 @@
           ]
         },
         {
-          text: '🌎 9. RECEPCIÓN EN EUROPA OCCIDENTAL',
+          text: '🌎 9. RECEPCIÓN EUROPA',
           color: '#fb923c',
           children: [
             { 
               text: 'España 🇪🇸',
               children: [
-                { text: 'Ordenanzas Reales de Castilla (1484)' },
+                { text: 'Ordenanzas Reales (1484)' },
                 { text: 'Leyes de Toro (1505)' },
-                { text: 'Nueva Recopilación (1567)' },
-                { text: 'Recopilación de Indias (1680)' },
-                { text: 'Novísima Recopilación (1805)' }
+                { text: 'Recopilación de Indias (1680)' }
               ]
             },
-            { text: 'Francia 🇫🇷: Consolidación territorial e influencia romana' },
-            { text: 'Alemania 🇩🇪: Tribunal del Imperio (1495) y Usus Modernus' },
-            { text: 'Inglaterra 🏴: Menor penetración, predominio Common Law' }
+            { text: 'Francia 🇫🇷: Consolidación' },
+            { text: 'Alemania 🇩🇪: Tribunal (1495)' },
+            { text: 'Inglaterra 🏴: Common Law' }
           ]
         },
         {
-          text: '🌐 10. EXPANSIÓN Y CARACTERÍSTICAS',
+          text: '🌐 10. EXPANSIÓN',
           color: '#f472b6',
           children: [
-            { text: 'Expansión: América Latina, África, Cercano Oriente, Japón' },
-            { text: 'Medios: Colonización, Recepción voluntaria, Codificación' },
-            { text: 'Características: Derecho escrito, D. Civil base, Técnica de codificación' }
-          ]
-        },
-        {
-          text: '🔵 IDEA DE CIERRE',
-          color: '#60a5fa',
-          children: [
-            { text: 'D. Romano → Justiniano → Corpus Iuris Civilis → Oriente/Occidente → Universidades → Escuelas → Recepción → Codificación → Familia Neorromanista' }
+            { text: 'América Latina, África, Asia' },
+            { text: 'Vías: Colonización y Recepción' },
+            { text: 'Base: Derecho civil y escrito' }
           ]
         }
       ]
     };
 
-    function init() {
-      nodes = [];
-      const centerX = 1800;
-      const centerY = 1200;
+    // INICIALIZACIÓN DE POSICIONES RADIALES
+    function initTree() {
+      const saved = localStorage.getItem('mindmap_nodes');
+      if (saved) {
+        try {
+          nodes = JSON.parse(saved);
+          render();
+          centerMap();
+          return;
+        } catch(e) { console.error("Error al cargar localStorage", e); }
+      }
 
-      // Crear Raíz
+      nodes = [];
+      const centerX = 2500;
+      const centerY = 2000;
+
       const root = {
         id: 'root',
         parentId: null,
@@ -329,66 +482,60 @@
         x: centerX,
         y: centerY,
         color: initialData.color,
-        isRoot: true
+        isRoot: true,
+        type: 'root'
       };
       nodes.push(root);
 
-      // Desplegar Ramas Principales en Círculo
-      const totalRamas = initialData.children.length;
+      const totalBranches = initialData.children.length;
       initialData.children.forEach((branch, idx) => {
-        const angle = (idx / totalRamas) * Math.PI * 2;
-        const radius = 380;
+        const angle = (idx / totalBranches) * Math.PI * 2;
+        const radius = 420;
         const bx = centerX + Math.cos(angle) * radius;
         const by = centerY + Math.sin(angle) * radius;
 
-        const branchId = 'node_' + Date.now() + '_' + idx;
-        const branchNode = {
+        const branchId = 'node_' + idx;
+        nodes.push({
           id: branchId,
           parentId: root.id,
           text: branch.text,
           x: bx,
           y: by,
           color: branch.color,
-          isRoot: false
-        };
-        nodes.push(branchNode);
+          type: 'primary'
+        });
 
-        // Desplegar Sub-ramas
         if (branch.children) {
+          const totalSub = branch.children.length;
           branch.children.forEach((sub, sIdx) => {
-            const subAngle = angle + ((sIdx - (branch.children.length - 1) / 2) * 0.22);
-            const subRadius = 260;
+            const spreadAngle = 0.5;
+            const subAngle = angle + (sIdx - (totalSub - 1) / 2) * (spreadAngle / Math.max(1, totalSub - 1));
+            const subRadius = 240;
             const sx = bx + Math.cos(subAngle) * subRadius;
             const sy = by + Math.sin(subAngle) * subRadius;
 
-            const subId = 'node_sub_' + Date.now() + '_' + idx + '_' + sIdx;
-            const subNode = {
+            const subId = 'node_' + idx + '_' + sIdx;
+            nodes.push({
               id: subId,
               parentId: branchId,
               text: sub.text,
               x: sx,
               y: sy,
               color: branch.color,
-              isRoot: false
-            };
-            nodes.push(subNode);
+              type: 'secondary'
+            });
 
-            // Sub-sub-ramas (si existen)
             if (sub.children) {
-              sub.children.forEach((ss, ssIdx) => {
-                const ssAngle = subAngle + ((ssIdx - (sub.children.length - 1) / 2) * 0.2);
-                const ssRadius = 180;
-                const ssx = sx + Math.cos(ssAngle) * ssRadius;
-                const ssy = sy + Math.sin(ssAngle) * ssRadius;
-
+              sub.children.forEach((ssub, ssIdx) => {
+                const ssubAngle = subAngle + (ssIdx - (sub.children.length - 1) / 2) * 0.25;
                 nodes.push({
-                  id: 'node_ssub_' + Date.now() + '_' + ssIdx,
+                  id: 'node_' + idx + '_' + sIdx + '_' + ssIdx,
                   parentId: subId,
-                  text: ss.text,
-                  x: ssx,
-                  y: ssy,
+                  text: ssub.text,
+                  x: sx + Math.cos(ssubAngle) * 180,
+                  y: sy + Math.sin(ssubAngle) * 180,
                   color: branch.color,
-                  isRoot: false
+                  type: 'secondary'
                 });
               });
             }
@@ -397,11 +544,218 @@
       });
 
       render();
-      // Auto scroll al centro
-      viewport.scrollLeft = centerX - window.innerWidth / 2;
-      viewport.scrollTop = centerY - window.innerHeight / 2;
+      centerMap();
     }
 
+    // APLICAR TRANSFORMACIONES DE PAN Y ZOOM
+    function updateTransform() {
+      canvasContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+    }
+
+    function setScale(newScale, clientX = window.innerWidth/2, clientY = window.innerHeight/2) {
+      const clampedScale = Math.min(Math.max(0.2, newScale), 2.5);
+      const rect = viewport.getBoundingClientRect();
+      const mouseX = clientX - rect.left;
+      const mouseY = clientY - rect.top;
+
+      panX = mouseX - (mouseX - panX) * (clampedScale / scale);
+      panY = mouseY - (mouseY - panY) * (clampedScale / scale);
+      scale = clampedScale;
+      updateTransform();
+    }
+
+    function zoomIn() { setScale(scale * 1.2); }
+    function zoomOut() { setScale(scale / 1.2); }
+    function resetZoom() { setScale(1); }
+
+    function centerMap() {
+      const rootNode = nodes.find(n => n.isRoot);
+      if (!rootNode) return;
+      panX = (window.innerWidth / 2) - (rootNode.x * scale) - 100;
+      panY = (window.innerHeight / 2) - (rootNode.y * scale) - 30;
+      updateTransform();
+    }
+
+    function fitToScreen() {
+      if (nodes.length === 0) return;
+      let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+      nodes.forEach(n => {
+        if (n.x < minX) minX = n.x;
+        if (n.x > maxX) maxX = n.x;
+        if (n.y < minY) minY = n.y;
+        if (n.y > maxY) maxY = n.y;
+      });
+
+      const width = maxX - minX + 400;
+      const height = maxY - minY + 400;
+      const scaleX = window.innerWidth / width;
+      const scaleY = window.innerHeight / height;
+      
+      scale = Math.min(Math.min(scaleX, scaleY), 1);
+      panX = (window.innerWidth / 2) - ((minX + maxX) / 2 * scale);
+      panY = (window.innerHeight / 2) - ((minY + maxY) / 2 * scale);
+      updateTransform();
+    }
+
+    function toggleHandTool() {
+      isPanningMode = !isPanningMode;
+      document.getElementById('btnHand').classList.toggle('active', isPanningMode);
+      viewport.classList.toggle('panning', isPanningMode);
+    }
+
+    // MANEJO DE EVENTOS DEL RATÓN Y TECLADO
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' && !spacePressed && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
+        spacePressed = true;
+        viewport.classList.add('panning');
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'Space') {
+        spacePressed = false;
+        if (!isPanningMode) viewport.classList.remove('panning');
+      }
+    });
+
+    viewport.addEventListener('wheel', (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        setScale(scale * factor, e.clientX, e.clientY);
+      } else {
+        panX -= e.deltaX;
+        panY -= e.deltaY;
+        updateTransform();
+      }
+    }, { passive: false });
+
+    viewport.addEventListener('mousedown', (e) => {
+      if (isPanningMode || spacePressed || e.button === 1 || (e.button === 0 && e.target === viewport)) {
+        isPanning = true;
+        startPanX = e.clientX - panX;
+        startPanY = e.clientY - panY;
+        viewport.classList.add('panning');
+      }
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isPanning) {
+        panX = e.clientX - startPanX;
+        panY = e.clientY - startPanY;
+        updateTransform();
+      } else if (draggedNode) {
+        const mouseCanvasX = (e.clientX - panX) / scale;
+        const mouseCanvasY = (e.clientY - panY) / scale;
+        draggedNode.x = mouseCanvasX - dragOffsetX;
+        draggedNode.y = mouseCanvasY - dragOffsetY;
+
+        const el = document.getElementById(draggedNode.id);
+        if (el) {
+          el.style.left = `${draggedNode.x}px`;
+          el.style.top = `${draggedNode.y}px`;
+        }
+        renderSvgOnly();
+      }
+    });
+
+    window.addEventListener('mouseup', () => {
+      isPanning = false;
+      if (!isPanningMode && !spacePressed) viewport.classList.remove('panning');
+      draggedNode = null;
+    });
+
+    // RENDERIZADO DOM & CONNECTIONS
+    function render() {
+      svgCanvas.innerHTML = '';
+      document.querySelectorAll('.node').forEach(el => el.remove());
+
+      nodes.forEach(node => {
+        if (node.parentId) {
+          const parent = nodes.find(n => n.id === node.parentId);
+          if (parent) {
+            drawConnection(parent, node);
+          }
+        }
+      });
+
+      nodes.forEach(node => {
+        const el = document.createElement('div');
+        const nodeType = node.isRoot ? 'root' : (node.type || 'secondary');
+        el.className = `node ${nodeType}`;
+        el.id = node.id;
+        el.style.left = `${node.x}px`;
+        el.style.top = `${node.y}px`;
+        el.style.setProperty('--node-color', node.color);
+
+        el.innerHTML = `
+          <div class="node-content">
+            <textarea class="node-text" rows="1" oninput="autoResizeTextarea(this); updateText('${node.id}', this.value)">${node.text}</textarea>
+            <div class="node-actions">
+              <button class="action-btn btn-add-child" title="Agregar sub-idea" onclick="addChild('${node.id}')">+</button>
+              ${!node.isRoot ? `<button class="action-btn btn-del-node" title="Eliminar" onclick="deleteNode('${node.id}')">✕</button>` : ''}
+            </div>
+          </div>
+        `;
+
+        el.addEventListener('mousedown', (e) => {
+          if (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA' || isPanningMode || spacePressed) return;
+          draggedNode = node;
+          const mouseCanvasX = (e.clientX - panX) / scale;
+          const mouseCanvasY = (e.clientY - panY) / scale;
+          dragOffsetX = mouseCanvasX - node.x;
+          dragOffsetY = mouseCanvasY - node.y;
+          e.stopPropagation();
+        });
+
+        canvasContainer.appendChild(el);
+        const txt = el.querySelector('.node-text');
+        autoResizeTextarea(txt);
+      });
+    }
+
+    function autoResizeTextarea(el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+
+    function drawConnection(parent, child) {
+      const p1 = getNodeCenter(parent);
+      const p2 = getNodeCenter(child);
+      const dx = (p2.x - p1.x) * 0.45;
+
+      const pathData = `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      path.setAttribute('d', pathData);
+      path.setAttribute('stroke', child.color);
+      path.setAttribute('stroke-width', child.type === 'primary' ? '3.5' : '2');
+      path.setAttribute('fill', 'none');
+      path.setAttribute('opacity', '0.85');
+      svgCanvas.appendChild(path);
+    }
+
+    function renderSvgOnly() {
+      svgCanvas.innerHTML = '';
+      nodes.forEach(node => {
+        if (node.parentId) {
+          const parent = nodes.find(n => n.id === node.parentId);
+          if (parent) drawConnection(parent, node);
+        }
+      });
+    }
+
+    function getNodeCenter(node) {
+      const el = document.getElementById(node.id);
+      if (el) {
+        return {
+          x: node.x + el.offsetWidth / 2,
+          y: node.y + el.offsetHeight / 2
+        };
+      }
+      return { x: node.x + 60, y: node.y + 20 };
+    }
+
+    // ACCIONES EN NODOS
     function addChild(parentId) {
       const parent = nodes.find(n => n.id === parentId);
       if (!parent) return;
@@ -410,11 +764,11 @@
       nodes.push({
         id,
         parentId,
-        text: 'Nueva Idea',
-        x: parent.x + 150,
-        y: parent.y + 50,
+        text: 'Nueva idea',
+        x: parent.x + 160,
+        y: parent.y + 40,
         color: parent.color,
-        isRoot: false
+        type: 'secondary'
       });
       render();
     }
@@ -440,109 +794,24 @@
       if (node) node.text = text;
     }
 
-    function render() {
-      svgCanvas.innerHTML = '';
-      document.querySelectorAll('.node').forEach(el => el.remove());
-
-      // Dibujar Curva Bezier
-      nodes.forEach(node => {
-        if (node.parentId) {
-          const parent = nodes.find(n => n.id === node.parentId);
-          if (parent) {
-            const p1 = getNodeCenter(parent);
-            const p2 = getNodeCenter(node);
-
-            const dx = (p2.x - p1.x) / 2;
-            const pathData = `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
-
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', pathData);
-            path.setAttribute('stroke', node.color);
-            path.setAttribute('stroke-width', '2.5');
-            path.setAttribute('fill', 'none');
-            svgCanvas.appendChild(path);
-          }
-        }
-      });
-
-      // Dibujar Nodos
-      nodes.forEach(node => {
-        const el = document.createElement('div');
-        el.className = `node ${node.isRoot ? 'root' : ''}`;
-        el.id = node.id;
-        el.style.left = `${node.x}px`;
-        el.style.top = `${node.y}px`;
-        el.style.setProperty('--node-color', node.color);
-
-        el.innerHTML = `
-          <input class="node-input" value="${node.text}" oninput="updateText('${node.id}', this.value)" />
-          <div class="node-actions">
-            <button class="action-btn btn-add-child" title="Agregar sub-rama" onclick="addChild('${node.id}')">+</button>
-            ${!node.isRoot ? `<button class="action-btn btn-del-node" title="Eliminar" onclick="deleteNode('${node.id}')">✕</button>` : ''}
-          </div>
-        `;
-
-        el.addEventListener('mousedown', (e) => {
-          if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
-          draggedNode = node;
-          dragOffset.x = e.clientX - node.x;
-          dragOffset.y = e.clientY - node.y;
-        });
-
-        viewport.appendChild(el);
-      });
+    // PERSISTENCIA
+    function savePositions() {
+      localStorage.setItem('mindmap_nodes', JSON.stringify(nodes));
+      alert('¡Posiciones guardadas con éxito!');
     }
 
-    function getNodeCenter(node) {
-      const el = document.getElementById(node.id);
-      if (el) {
-        return {
-          x: node.x + el.offsetWidth / 2,
-          y: node.y + el.offsetHeight / 2
-        };
+    function resetPositions() {
+      if (confirm('¿Deseas restaurar las posiciones iniciales del mapa?')) {
+        localStorage.removeItem('mindmap_nodes');
+        initTree();
       }
-      return { x: node.x + 80, y: node.y + 20 };
     }
 
-    window.addEventListener('mousemove', (e) => {
-      if (draggedNode) {
-        draggedNode.x = e.clientX - dragOffset.x + viewport.scrollLeft;
-        draggedNode.y = e.clientY - dragOffset.y + viewport.scrollTop;
+    // FUENTES DE CONSULTA
+    function showSources() { document.getElementById('sourcesModal').style.display = 'flex'; }
+    function closeSources() { document.getElementById('sourcesModal').style.display = 'none'; }
 
-        const el = document.getElementById(draggedNode.id);
-        if (el) {
-          el.style.left = `${draggedNode.x}px`;
-          el.style.top = `${draggedNode.y}px`;
-        }
-        renderSvgOnly();
-      }
-    });
-
-    window.addEventListener('mouseup', () => { draggedNode = null; });
-
-    function renderSvgOnly() {
-      svgCanvas.innerHTML = '';
-      nodes.forEach(node => {
-        if (node.parentId) {
-          const parent = nodes.find(n => n.id === node.parentId);
-          if (parent) {
-            const p1 = getNodeCenter(parent);
-            const p2 = getNodeCenter(node);
-            const dx = (p2.x - p1.x) / 2;
-            const pathData = `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
-
-            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            path.setAttribute('d', pathData);
-            path.setAttribute('stroke', node.color);
-            path.setAttribute('stroke-width', '2.5');
-            path.setAttribute('fill', 'none');
-            svgCanvas.appendChild(path);
-          }
-        }
-      });
-    }
-
-    window.onload = init;
+    window.onload = initTree;
   </script>
 </body>
 </html>
