@@ -1,946 +1,369 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Editor Visual Interactivo - Ley Penal y Tipos Penales</title>
-    
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creador de Mapas Mentales</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    }
 
-    <style>
-        body {
-            user-select: none;
-            overflow: hidden;
-            background-color: #f1f5f9;
-        }
-        
-        #workspace {
-            cursor: grab;
-            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        #workspace:active {
-            cursor: grabbing;
-        }
+    body {
+      background-color: #0f172a;
+      color: #f8fafc;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
 
-        .node-card {
-            position: absolute;
-            cursor: move;
-            transition: box-shadow 0.15s ease, border 0.15s ease;
-            touch-action: none;
-            user-select: text;
-            box-sizing: border-box;
-        }
+    /* BARRA SUPERIOR */
+    .toolbar {
+      background: #1e293b;
+      padding: 12px 24px;
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
 
-        .node-card.selected {
-            outline: 3px solid #3b82f6 !important;
-            box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.4);
-        }
+    .toolbar h1 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #38bdf8;
+    }
 
-        .editable-text {
-            outline: none;
-            cursor: text;
-        }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
 
-        .editable-text:focus {
-            background-color: rgba(59, 130, 246, 0.1);
-            border-radius: 4px;
-        }
+    .btn-reset { background: #ef4444; color: white; margin-left: auto; }
+    .btn-reset:hover { background: #dc2626; }
 
-        svg.connections-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 10000px;
-            height: 10000px;
-            pointer-events: none;
-        }
+    /* LIENZO PRINCIPAL */
+    #viewport {
+      flex: 1;
+      position: relative;
+      background-color: #0f172a;
+      background-image: radial-gradient(#334155 1.5px, transparent 1.5px);
+      background-size: 28px 28px;
+      overflow: hidden;
+    }
 
-        svg.connections-layer path, svg.connections-layer g {
-            pointer-events: visiblePainted;
-            cursor: pointer;
-        }
+    #svgCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
 
-        .line-selected {
-            stroke: #3b82f6 !important;
-            stroke-width: 3.5px !important;
-        }
+    /* NODOS DEL MAPA MENTAL */
+    .node {
+      position: absolute;
+      padding: 10px 18px;
+      border-radius: 20px;
+      background: #1e293b;
+      border: 3px solid var(--node-color, #38bdf8);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      cursor: move;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 120px;
+      justify-content: center;
+      transition: transform 0.1s;
+    }
 
-        /* Resizer panel lateral */
-        #panel-resizer {
-            width: 6px;
-            cursor: col-resize;
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            z-index: 50;
-        }
-        #panel-resizer:hover {
-            background-color: #3b82f6;
-        }
+    .node:hover {
+      transform: scale(1.03);
+    }
 
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+    /* NODO CENTRAL REFORZADO */
+    .node.root {
+      background: linear-gradient(135deg, #0284c7, #2563eb);
+      border-color: #38bdf8;
+      padding: 16px 28px;
+      border-radius: 30px;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+    }
+
+    .node-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: white;
+      font-size: 0.95rem;
+      font-weight: 600;
+      text-align: center;
+      width: 100%;
+      min-width: 80px;
+    }
+
+    .node.root .node-input {
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    /* BOTONES ACCIÓN EN NODO */
+    .node-actions {
+      display: flex;
+      gap: 4px;
+    }
+
+    .action-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: none;
+      color: white;
+      font-weight: bold;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s;
+    }
+
+    .btn-add-child { background: #10b981; }
+    .btn-add-child:hover { background: #059669; }
+
+    .btn-del-node { background: #ef4444; }
+    .btn-del-node:hover { background: #dc2626; }
+  </style>
 </head>
-<body class="w-screen h-screen flex flex-col font-sans">
+<body>
 
-    <!-- BARRA SUPERIOR FIJA DE DOS FILAS / MULTI-FILA ADAPTATIVA -->
-    <header class="bg-slate-900 text-white flex flex-wrap items-center justify-between px-4 py-2 z-40 border-b border-slate-700 shadow-md gap-y-2">
-        <div class="flex flex-wrap items-center gap-2">
-            <span class="font-bold text-base text-blue-400 mr-2">Editor Penal U2</span>
-            <span class="text-slate-600 hidden sm:inline">|</span>
-            <button onclick="agregarNodo()" class="bg-blue-600 hover:bg-blue-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">➕ Nuevo Concepto</button>
-            <button onclick="activarModoConexion()" id="btn-connect" class="bg-indigo-600 hover:bg-indigo-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">🔗 Nueva Conexión</button>
-            <button onclick="eliminarSeleccionado()" class="bg-rose-600 hover:bg-rose-500 px-3 py-1.5 rounded text-xs font-semibold flex items-center gap-1 transition">🗑️ Eliminar</button>
-            <span class="text-slate-600">|</span>
-            <button onclick="deshacer()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↶ Deshacer</button>
-            <button onclick="rehacer()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↷ Rehacer</button>
-        </div>
+  <div class="toolbar">
+    <h1>🧠 Mapa Mental Interactivo</h1>
+    <span style="font-size: 0.85rem; color: #94a3b8;">Presiona el botón <b>+</b> en cualquier idea para expandir una rama. Arrastra para acomodar.</span>
+    <button class="btn btn-reset" onclick="resetMap()">🔄 Reiniciar Mapa</button>
+  </div>
 
-        <div class="flex flex-wrap items-center gap-2">
-            <button onclick="cambiarZoom(-0.1)" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs font-bold">➖</button>
-            <span id="zoom-indicator" class="text-xs font-mono w-12 text-center">100%</span>
-            <button onclick="cambiarZoom(0.1)" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs font-bold">➕</button>
-            <button onclick="resetZoom()" class="bg-slate-800 hover:bg-slate-700 px-2.5 py-1.5 rounded text-xs">↔ Restablecer</button>
-            <span class="text-slate-600">|</span>
-            <button onclick="guardarJSON()" class="bg-emerald-600 hover:bg-emerald-500 px-3 py-1.5 rounded text-xs font-semibold">💾 Guardar</button>
-            <label class="bg-emerald-700 hover:bg-emerald-600 px-3 py-1.5 rounded text-xs font-semibold cursor-pointer">
-                📂 Cargar <input type="file" id="file-input" onchange="cargarJSON(event)" class="hidden">
-            </label>
-            <span class="text-slate-600">|</span>
+  <div id="viewport">
+    <svg id="svgCanvas"></svg>
+  </div>
 
-            <!-- BOTONES DE EXPORTACIÓN SIEMPRE VISIBLES -->
-            <button onclick="exportarPNG()" class="bg-amber-600 hover:bg-amber-500 px-3 py-1.5 rounded text-xs font-semibold shadow">🖼️ PNG</button>
-            <button onclick="exportarSVG()" class="bg-purple-600 hover:bg-purple-500 px-3 py-1.5 rounded text-xs font-semibold shadow">📐 SVG</button>
-            
-            <div class="flex items-center gap-1 bg-teal-700 rounded px-1.5 py-0.5">
-                <button onclick="exportarPDF()" class="hover:bg-teal-600 px-2 py-1 rounded text-xs font-semibold">📄 PDF</button>
-                <select id="pdf-format" class="bg-teal-800 text-white text-[11px] rounded px-1 py-0.5 outline-none border border-teal-600">
-                    <option value="a4-v">A4 Vert.</option>
-                    <option value="a4-h">A4 Horiz.</option>
-                    <option value="auto">Ajustar</option>
-                </select>
-            </div>
-        </div>
-    </header>
+  <script>
+    const viewport = document.getElementById('viewport');
+    const svgCanvas = document.getElementById('svgCanvas');
 
-    <!-- AREA PRINCIPAL (LIENZO + PANEL FLOTANTE PLEGABLE) -->
-    <div class="flex-1 flex relative overflow-hidden w-full h-full">
-        
-        <!-- LIENZO INDEPENDIENTE -->
-        <main id="workspace" class="flex-1 absolute inset-0 overflow-hidden w-full h-full">
-            <div id="canvas-container" class="absolute top-0 left-0 w-[10000px] h-[10000px] origin-top-left">
-                <svg id="svg-layer" class="connections-layer">
-                    <defs>
-                        <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b" />
-                        </marker>
-                        <marker id="arrow-selected" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-                            <path d="M 0 0 L 10 5 L 0 10 z" fill="#3b82f6" />
-                        </marker>
-                    </defs>
-                </svg>
-                <div id="nodes-container"></div>
-            </div>
-        </main>
+    // PALETA DE COLORES VIBRANTES PARA RAMAS
+    const colors = ['#f43f5e', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'];
 
-        <!-- BOTÓN REAPERTURA DEL PANEL (CUANDO ESTÁ OCULTO) -->
-        <button id="btn-show-panel" onclick="togglePanel(true)" class="hidden absolute top-4 right-0 bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-2 rounded-l-md shadow-2xl z-30 font-semibold text-xs flex items-center gap-1 border border-r-0 border-slate-600">
-            ▶ Mostrar panel
-        </button>
+    let nodes = [];
+    let draggedNode = null;
+    let dragOffset = { x: 0, y: 0 };
 
-        <!-- PANEL DE ESTILOS FLOTANTE Y REDIMENSIONABLE -->
-        <aside id="inspector-panel" class="absolute right-0 top-0 bottom-0 w-80 bg-white border-l border-slate-300 shadow-2xl flex flex-col z-30 transition-transform duration-200 ease-in-out">
-            <div id="panel-resizer"></div>
-            
-            <div class="p-3 border-b border-slate-200 bg-slate-100 flex justify-between items-center select-none">
-                <div class="flex items-center gap-2">
-                    <h3 class="font-bold text-slate-800 text-xs uppercase tracking-wider">Panel de Estilos</h3>
-                    <span id="target-type" class="text-[10px] bg-slate-200 text-slate-700 px-1.5 py-0.5 rounded font-mono">Ninguno</span>
-                </div>
-                <button onclick="togglePanel(false)" class="text-xs text-slate-600 hover:text-rose-600 font-semibold px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 transition">
-                    ◀ Ocultar panel
-                </button>
-            </div>
-            
-            <div id="inspector-content" class="p-4 space-y-4 overflow-y-auto flex-1 no-scrollbar text-xs">
-                <p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea para modificar su formato en este panel, o haz doble clic en cualquier cuadro para editarlo.</p>
-            </div>
-        </aside>
-    </div>
+    function init() {
+      const rect = viewport.getBoundingClientRect();
+      const centerX = rect.width / 2 - 80;
+      const centerY = rect.height / 2 - 30;
 
-    <!-- MODAL DE EDICIÓN CON DOBLE CLIC -->
-    <div id="modal-edit" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-white rounded-lg shadow-2xl w-full max-w-lg overflow-hidden flex flex-col">
-            <div class="bg-slate-800 text-white px-4 py-3 flex justify-between items-center">
-                <h3 class="font-bold text-sm">Editar Contenido del Nodo</h3>
-                <button onclick="cerrarModalEdit()" class="text-slate-400 hover:text-white font-bold text-lg">&times;</button>
-            </div>
-            <div class="p-4 space-y-3 text-xs">
-                <div>
-                    <label class="font-semibold block mb-1 text-slate-700">Título</label>
-                    <input type="text" id="modal-title" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
-                </div>
-                <div>
-                    <label class="font-semibold block mb-1 text-slate-700">Contenido / Texto (admite saltos de línea)</label>
-                    <textarea id="modal-text" rows="6" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                </div>
-            </div>
-            <div class="bg-slate-100 px-4 py-2.5 flex justify-end gap-2 border-t">
-                <button onclick="cerrarModalEdit()" class="px-3 py-1.5 rounded bg-slate-300 hover:bg-slate-400 text-slate-800 font-semibold">Cancelar</button>
-                <button onclick="guardarModalEdit()" class="px-4 py-1.5 rounded bg-blue-600 hover:bg-blue-500 text-white font-semibold">Guardar Cambios</button>
-            </div>
-        </div>
-    </div>
+      // Crear Raíz
+      const root = {
+        id: 'root',
+        parentId: null,
+        text: 'Idea Central',
+        x: centerX,
+        y: centerY,
+        color: '#38bdf8',
+        isRoot: true
+      };
 
-    <script>
-        let appState = {
-            zoom: 1,
-            pan: { x: 50, y: 50 },
-            nodes: [
-                { id: "root", title: "CARACTERÍSTICAS DE LA LEY PENAL Y TIPOS PENALES", text: "Programa Oficial Unidad 2 | Mir Puig & Díaz-Aranda", x: 250, y: 40, bg: "#1e293b", color: "#ffffff", border: "#0f172a", fontSize: 15, fontWeight: "bold", textAlign: "center", width: 480, height: 80, borderRadius: 8 },
-                { id: "ley", title: "1. La Ley Penal", text: "Norma jurídica estatal que determina delitos y sanciones", x: 60, y: 160, bg: "#eff6ff", color: "#1e40af", border: "#3b82f6", fontSize: 13, fontWeight: "bold", textAlign: "left", width: 260, height: 90, borderRadius: 6 },
-                { id: "ley_est", title: "Estructura de la Norma", text: "• Supuesto de Hecho: Conducta prohibida/mandada\n• Consecuencia Jurídica: Pena/Medida de seguridad", x: 60, y: 280, bg: "#ffffff", color: "#1e293b", border: "#94a3b8", fontSize: 12, fontWeight: "normal", textAlign: "left", width: 260, height: 110, borderRadius: 6 },
-                { id: "tipo", title: "2. El Tipo Penal", text: "Descripción concreta de la conducta delictiva en la ley", x: 440, y: 160, bg: "#eff6ff", color: "#1e40af", border: "#3b82f6", fontSize: 13, fontWeight: "bold", textAlign: "left", width: 260, height: 90, borderRadius: 6 },
-                { id: "dim", title: "Dimensiones Dogmáticas", text: "• Tipo de Injusto: Materia de la prohibición y desvalor\n• Tipo Amplio: Presupuestos para la punibilidad", x: 440, y: 280, bg: "#ffffff", color: "#1e293b", border: "#94a3b8", fontSize: 12, fontWeight: "normal", textAlign: "left", width: 260, height: 110, borderRadius: 6 },
-                { id: "func", title: "3. Funciones del Tipo Penal", text: "1. Seleccionadora: Protege Bienes Jurídicos graves\n2. De Garantía: Nullum crimen sine lege\n3. Motivadora: Incita a abstenerse de delinquir", x: 440, y: 420, bg: "#fefce8", color: "#854d0e", border: "#eab308", fontSize: 12, fontWeight: "normal", textAlign: "left", width: 270, height: 115, borderRadius: 6 },
-                { id: "elem", title: "4. Elementos del Tipo Penal", text: "Estructura tripartita del Injusto Penal", x: 440, y: 560, bg: "#f3e8ff", color: "#6b21a8", border: "#a855f7", fontSize: 13, fontWeight: "bold", textAlign: "center", width: 260, height: 80, borderRadius: 6 },
-                { id: "obj", title: "A. Tipo Objetivo (Material)", text: "• Acción / Omisión humana\n• Sujeto Activo, Pasivo y Estado\n• Objeto Material y Bien Jurídico Tutelado\n• Nexo Causal e Imputación Objetiva\n• Resultado material (si se exige)", x: 120, y: 680, bg: "#ffffff", color: "#1e293b", border: "#c084fc", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 250, height: 140, borderRadius: 6 },
-                { id: "subj", title: "B. Tipo Subjetivo (Psíquico)", text: "Procesos internos y voluntad del autor", x: 440, y: 680, bg: "#faf5ff", color: "#581c87", border: "#c084fc", fontSize: 12, fontWeight: "normal", textAlign: "left", width: 250, height: 80, borderRadius: 6 },
-                { id: "norm", title: "C. Elementos Normativos", text: "Términos que requieren valoración cultural o jurídico-formal", x: 740, y: 680, bg: "#ffffff", color: "#1e293b", border: "#c084fc", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 240, height: 90, borderRadius: 6 },
-                { id: "dolo", title: "El Dolo", text: "Conocimiento y voluntad de realizar el tipo objetivo\n• Dolo 1er Grado: Intención directa\n• Dolo 2do Grado: Consecuencias necesarias\n• Dolo Eventual: Acepta el resultado posible", x: 340, y: 830, bg: "#ffffff", color: "#1e293b", border: "#d8b4fe", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 240, height: 130, borderRadius: 6 },
-                { id: "culpa", title: "Delito Culposo / Imprudente", text: "Infracción al deber objetivo de cuidado\n• Culpa Consciente: Confía en evitarlo\n• Culpa Inconsciente: No prevé pudiendo prever", x: 610, y: 830, bg: "#ffffff", color: "#1e293b", border: "#d8b4fe", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 240, height: 120, borderRadius: 6 },
-                { id: "clas", title: "5. Clasificación de los Tipos", text: "• Por el resultado: Mera Actividad vs. Resultado\n• Temporalidad: Instantáneo, Permanente y Continuado\n• Afectación: Lesión vs. Peligro (Concreto/Abstracto)\n• Sujetos: Unisubjetivo vs. Plurisubjetivo", x: 60, y: 1010, bg: "#ecfdf5", color: "#065f46", border: "#10b981", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 310, height: 130, borderRadius: 6 },
-                { id: "sanc", title: "6. Fases de la Sanción Penal", text: "1. Punibilidad (Legislativa): Amenaza abstracta\n2. Punición (Judicial): Fijación por el Juez\n3. Pena (Ejecutiva): Reinserción Social", x: 440, y: 1010, bg: "#fff7ed", color: "#9a3412", border: "#f97316", fontSize: 11, fontWeight: "normal", textAlign: "left", width: 290, height: 110, borderRadius: 6 }
-            ],
-            connections: [
-                { id: "c1", from: "root", to: "ley", label: "define marco de", color: "#64748b", width: 2, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c2", from: "ley", to: "ley_est", label: "se conforma de", color: "#94a3b8", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c3", from: "root", to: "tipo", label: "se concreta en", color: "#64748b", width: 2, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c4", from: "tipo", to: "dim", label: "se analiza mediante", color: "#94a3b8", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c5", from: "tipo", to: "func", label: "desempeña", color: "#64748b", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c6", from: "tipo", to: "elem", label: "se estructura en", color: "#64748b", width: 2, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c7", from: "elem", to: "obj", label: "dimensión material", color: "#a855f7", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c8", from: "elem", to: "subj", label: "dimensión psíquica", color: "#a855f7", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c9", from: "elem", to: "norm", label: "valoración", color: "#a855f7", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c10", from: "subj", to: "dolo", label: "modalidad", color: "#c084fc", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c11", from: "subj", to: "culpa", label: "modalidad", color: "#c084fc", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c12", from: "tipo", to: "clas", label: "se clasifica en", color: "#10b981", width: 1.5, dashed: false, arrow: true, curvature: 0.5 },
-                { id: "c13", from: "tipo", to: "sanc", label: "determina", color: "#f97316", width: 1.5, dashed: false, arrow: true, curvature: 0.5 }
-            ]
+      nodes = [root];
+
+      // Ramas Iniciales
+      addChild(root.id, 'Subtema 1', centerX - 220, centerY - 120);
+      addChild(root.id, 'Subtema 2', centerX + 220, centerY - 120);
+      addChild(root.id, 'Subtema 3', centerX - 200, centerY + 140);
+      addChild(root.id, 'Subtema 4', centerX + 200, centerY + 140);
+
+      render();
+    }
+
+    function addChild(parentId, text = 'Nueva Idea', customX = null, customY = null) {
+      const parent = nodes.find(n => n.id === parentId);
+      if (!parent) return;
+
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      const id = 'node_' + Date.now() + Math.random().toString(36).substr(2, 4);
+
+      // Posición aproximada alrededor del padre si no se provee
+      const angle = Math.random() * Math.PI * 2;
+      const distance = 160;
+      const x = customX !== null ? customX : parent.x + Math.cos(angle) * distance;
+      const y = customY !== null ? customY : parent.y + Math.sin(angle) * distance;
+
+      const newNode = {
+        id,
+        parentId,
+        text,
+        x,
+        y,
+        color: parent.isRoot ? randomColor : parent.color,
+        isRoot: false
+      };
+
+      nodes.push(newNode);
+      render();
+    }
+
+    function deleteNode(id) {
+      // Eliminar nodo y sus descendientes recursivamente
+      const toDelete = new Set([id]);
+      let added = true;
+
+      while (added) {
+        added = false;
+        nodes.forEach(n => {
+          if (n.parentId && toDelete.has(n.parentId) && !toDelete.has(n.id)) {
+            toDelete.add(n.id);
+            added = true;
+          }
+        });
+      }
+
+      nodes = nodes.filter(n => !toDelete.has(n.id));
+      render();
+    }
+
+    function updateText(id, text) {
+      const node = nodes.find(n => n.id === id);
+      if (node) node.text = text;
+    }
+
+    function render() {
+      // Limpiar lienzo previo (respetando solo el SVG)
+      svgCanvas.innerHTML = '';
+      document.querySelectorAll('.node').forEach(el => el.remove());
+
+      // 1. Dibujar Ramas Orgánicas (Líneas Curvas Bezier)
+      nodes.forEach(node => {
+        if (node.parentId) {
+          const parent = nodes.find(n => n.id === node.parentId);
+          if (parent) {
+            const p1 = getNodeCenter(parent);
+            const p2 = getNodeCenter(node);
+
+            // Control de puntos para la curva Bezier suave
+            const dx = (p2.x - p1.x) / 2;
+            const pathData = `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', node.color);
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('fill', 'none');
+            path.setAttribute('stroke-linecap', 'round');
+            svgCanvas.appendChild(path);
+          }
+        }
+      });
+
+      // 2. Dibujar Nodos HTML
+      nodes.forEach(node => {
+        const el = document.createElement('div');
+        el.className = `node ${node.isRoot ? 'root' : ''}`;
+        el.id = node.id;
+        el.style.left = `${node.x}px`;
+        el.style.top = `${node.y}px`;
+        el.style.setProperty('--node-color', node.color);
+
+        el.innerHTML = `
+          <input class="node-input" value="${node.text}" oninput="updateText('${node.id}', this.value)" />
+          <div class="node-actions">
+            <button class="action-btn btn-add-child" title="Agregar Rama" onclick="addChild('${node.id}')">+</button>
+            ${!node.isRoot ? `<button class="action-btn btn-del-node" title="Eliminar Rama" onclick="deleteNode('${node.id}')">✕</button>` : ''}
+          </div>
+        `;
+
+        // Arrastrar Nodos
+        el.addEventListener('mousedown', (e) => {
+          if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+          draggedNode = node;
+          dragOffset.x = e.clientX - node.x;
+          dragOffset.y = e.clientY - node.y;
+        });
+
+        viewport.appendChild(el);
+      });
+    }
+
+    function getNodeCenter(node) {
+      const el = document.getElementById(node.id);
+      if (el) {
+        return {
+          x: node.x + el.offsetWidth / 2,
+          y: node.y + el.offsetHeight / 2
         };
+      }
+      return { x: node.x + 60, y: node.y + 20 };
+    }
 
-        let selectedNodeId = null;
-        let selectedConnectionId = null;
-        let connectingSourceId = null;
-        let nodeToEditModal = null;
-        let historyStack = [];
-        let redoStack = [];
+    // Eventos Globales de Arrastre
+    window.addEventListener('mousemove', (e) => {
+      if (draggedNode) {
+        draggedNode.x = e.clientX - dragOffset.x;
+        draggedNode.y = e.clientY - dragOffset.y;
 
-        window.onload = () => {
-            guardarHistorial();
-            render();
-            setupPanZoom();
-            setupKeyboardShortcuts();
-            setupPanelResizer();
-        };
-
-        function guardarHistorial() {
-            if (historyStack.length > 30) historyStack.shift();
-            historyStack.push(JSON.stringify({ nodes: appState.nodes, connections: appState.connections }));
-            redoStack = [];
+        const el = document.getElementById(draggedNode.id);
+        if (el) {
+          el.style.left = `${draggedNode.x}px`;
+          el.style.top = `${draggedNode.y}px`;
         }
+        renderSvgOnly();
+      }
+    });
 
-        function deshacer() {
-            if (historyStack.length > 1) {
-                redoStack.push(historyStack.pop());
-                const state = JSON.parse(historyStack[historyStack.length - 1]);
-                appState.nodes = state.nodes;
-                appState.connections = state.connections;
-                render();
-            }
+    window.addEventListener('mouseup', () => {
+      draggedNode = null;
+    });
+
+    // Actualización fluida del SVG al arrastrar (evita re-renderizar HTML innecesariamente)
+    function renderSvgOnly() {
+      svgCanvas.innerHTML = '';
+      nodes.forEach(node => {
+        if (node.parentId) {
+          const parent = nodes.find(n => n.id === node.parentId);
+          if (parent) {
+            const p1 = getNodeCenter(parent);
+            const p2 = getNodeCenter(node);
+            const dx = (p2.x - p1.x) / 2;
+            const pathData = `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', pathData);
+            path.setAttribute('stroke', node.color);
+            path.setAttribute('stroke-width', '3');
+            path.setAttribute('fill', 'none');
+            svgCanvas.appendChild(path);
+          }
         }
-
-        function rehacer() {
-            if (redoStack.length > 0) {
-                const stateStr = redoStack.pop();
-                historyStack.push(stateStr);
-                const state = JSON.parse(stateStr);
-                appState.nodes = state.nodes;
-                appState.connections = state.connections;
-                render();
-            }
-        }
-
-        /* MOSTRAR / OCULTAR PANEL */
-        function togglePanel(show) {
-            const panel = document.getElementById("inspector-panel");
-            const btnShow = document.getElementById("btn-show-panel");
-            if (show) {
-                panel.classList.remove("translate-x-full");
-                btnShow.classList.add("hidden");
-            } else {
-                panel.classList.add("translate-x-full");
-                btnShow.classList.remove("hidden");
-            }
-        }
-
-        /* REDIMENSIONAR PANEL LATERAL */
-        function setupPanelResizer() {
-            const panel = document.getElementById("inspector-panel");
-            const resizer = document.getElementById("panel-resizer");
-            let isResizing = false;
-
-            resizer.addEventListener("mousedown", (e) => {
-                isResizing = true;
-                document.body.style.cursor = "col-resize";
-            });
-
-            window.addEventListener("mousemove", (e) => {
-                if (!isResizing) return;
-                const newWidth = window.innerWidth - e.clientX;
-                if (newWidth >= 240 && newWidth <= 550) {
-                    panel.style.width = `${newWidth}px`;
-                }
-            });
-
-            window.addEventListener("mouseup", () => {
-                if (isResizing) {
-                    isResizing = false;
-                    document.body.style.cursor = "default";
-                }
-            });
-        }
-
-        function render() {
-            const container = document.getElementById("nodes-container");
-            const svgLayer = document.getElementById("svg-layer");
-            container.innerHTML = "";
-            
-            const defs = svgLayer.querySelector("defs");
-            svgLayer.innerHTML = "";
-            svgLayer.appendChild(defs);
-
-            // Renderizar Nodos
-            appState.nodes.forEach(node => {
-                const div = document.createElement("div");
-                div.className = `node-card p-3 shadow-md border ${selectedNodeId === node.id ? 'selected' : ''}`;
-                div.id = `node-${node.id}`;
-                div.style.left = `${node.x}px`;
-                div.style.top = `${node.y}px`;
-                div.style.width = `${node.width || 220}px`;
-                if (node.height) div.style.minHeight = `${node.height}px`;
-                div.style.backgroundColor = node.bg;
-                div.style.borderColor = node.border;
-                div.style.color = node.color;
-                div.style.fontSize = `${node.fontSize || 12}px`;
-                div.style.fontWeight = node.fontWeight || "normal";
-                div.style.textAlign = node.textAlign || "left";
-                div.style.borderRadius = `${node.borderRadius !== undefined ? node.borderRadius : 6}px`;
-
-                div.innerHTML = `
-                    <div contenteditable="true" class="editable-text font-bold border-b border-black/10 pb-1 mb-1" data-field="title">${node.title}</div>
-                    <div contenteditable="true" class="editable-text whitespace-pre-wrap opacity-90" data-field="text">${node.text}</div>
-                `;
-
-                // Eventos de edición directos e interacciones
-                const editables = div.querySelectorAll(".editable-text");
-                editables.forEach(elem => {
-                    elem.addEventListener("input", (e) => {
-                        const field = e.target.getAttribute("data-field");
-                        node[field] = e.target.innerText;
-                        renderInspector();
-                    });
-                    elem.addEventListener("blur", () => guardarHistorial());
-                    elem.addEventListener("mousedown", (e) => e.stopPropagation());
-                });
-
-                div.addEventListener("dblclick", (e) => {
-                    e.stopPropagation();
-                    abrirModalEdit(node.id);
-                });
-
-                div.addEventListener("mousedown", (e) => iniciarArrastreNodo(e, node.id));
-                div.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    if (connectingSourceId) {
-                        finalizarConexion(node.id);
-                    } else {
-                        seleccionarNodo(node.id);
-                    }
-                });
-
-                container.appendChild(div);
-            });
-
-            // Renderizar Conexiones
-            appState.connections.forEach(conn => {
-                const fromNode = appState.nodes.find(n => n.id === conn.from);
-                const toNode = appState.nodes.find(n => n.id === conn.to);
-                if (!fromNode || !toNode) return;
-
-                const pos = calcularPuntosConexion(fromNode, toNode);
-                const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                
-                const dx = pos.x2 - pos.x1;
-                const dy = pos.y2 - pos.y1;
-                const curv = conn.curvature !== undefined ? conn.curvature : 0.5;
-                const d = `M ${pos.x1} ${pos.y1} C ${pos.x1 + dx * curv} ${pos.y1}, ${pos.x2 - dx * curv} ${pos.y2}, ${pos.x2} ${pos.y2}`;
-                
-                path.setAttribute("d", d);
-                path.setAttribute("stroke", selectedConnectionId === conn.id ? "#3b82f6" : conn.color);
-                path.setAttribute("stroke-width", selectedConnectionId === conn.id ? (conn.width + 1.5) : conn.width);
-                path.setAttribute("fill", "none");
-                if (conn.dashed) path.setAttribute("stroke-dasharray", "4,4");
-                
-                if (conn.arrow !== false) {
-                    path.setAttribute("marker-end", selectedConnectionId === conn.id ? "url(#arrow-selected)" : "url(#arrow)");
-                }
-
-                if (selectedConnectionId === conn.id) path.classList.add("line-selected");
-
-                path.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    seleccionarConexion(conn.id);
-                });
-
-                g.appendChild(path);
-
-                if (conn.label) {
-                    const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                    const midX = (pos.x1 + pos.x2) / 2;
-                    const midY = (pos.y1 + pos.y2) / 2;
-
-                    text.setAttribute("x", midX);
-                    text.setAttribute("y", midY - 5);
-                    text.setAttribute("fill", "#475569");
-                    text.setAttribute("font-size", "11px");
-                    text.setAttribute("font-weight", "600");
-                    text.setAttribute("text-anchor", "middle");
-                    text.textContent = conn.label;
-
-                    g.appendChild(text);
-                }
-
-                svgLayer.appendChild(g);
-            });
-
-            renderInspector();
-        }
-
-        function calcularPuntosConexion(n1, n2) {
-            const w1 = n1.width || 220;
-            const h1 = document.getElementById(`node-${n1.id}`)?.offsetHeight || n1.height || 80;
-            const w2 = n2.width || 220;
-            const h2 = document.getElementById(`node-${n2.id}`)?.offsetHeight || n2.height || 80;
-
-            const c1 = { x: n1.x + w1 / 2, y: n1.y + h1 / 2 };
-            const c2 = { x: n2.x + w2 / 2, y: n2.y + h2 / 2 };
-
-            return {
-                x1: c1.x < c2.x ? n1.x + w1 : n1.x,
-                y1: c1.y,
-                x2: c2.x < c1.x ? n2.x + w2 : n2.x,
-                y2: c2.y
-            };
-        }
-
-        function iniciarArrastreNodo(e, id) {
-            if (e.button !== 0 || connectingSourceId) return;
-            e.stopPropagation();
-            seleccionarNodo(id);
-
-            const node = appState.nodes.find(n => n.id === id);
-            const startX = e.clientX;
-            const startY = e.clientY;
-            const initialX = node.x;
-            const initialY = node.y;
-
-            function mover(e) {
-                node.x = initialX + (e.clientX - startX) / appState.zoom;
-                node.y = initialY + (e.clientY - startY) / appState.zoom;
-                render();
-            }
-
-            function soltar() {
-                window.removeEventListener("mousemove", mover);
-                window.removeEventListener("mouseup", soltar);
-                guardarHistorial();
-            }
-
-            window.addEventListener("mousemove", mover);
-            window.addEventListener("mouseup", soltar);
-        }
-
-        function setupPanZoom() {
-            const workspace = document.getElementById("workspace");
-            let isPanning = false;
-            let startX, startY;
-
-            workspace.addEventListener("mousedown", (e) => {
-                if (e.target === workspace || e.target.tagName === "svg") {
-                    isPanning = true;
-                    startX = e.clientX - appState.pan.x;
-                    startY = e.clientY - appState.pan.y;
-                    seleccionarNada();
-                }
-            });
-
-            window.addEventListener("mousemove", (e) => {
-                if (!isPanning) return;
-                appState.pan.x = e.clientX - startX;
-                appState.pan.y = e.clientY - startY;
-                actualizarTransform();
-            });
-
-            window.addEventListener("mouseup", () => isPanning = false);
-
-            workspace.addEventListener("wheel", (e) => {
-                e.preventDefault();
-                const delta = e.deltaY > 0 ? -0.05 : 0.05;
-                cambiarZoom(delta);
-            });
-        }
-
-        function cambiarZoom(delta) {
-            appState.zoom = Math.min(Math.max(0.3, appState.zoom + delta), 2.5);
-            document.getElementById("zoom-indicator").textContent = `${Math.round(appState.zoom * 100)}%`;
-            actualizarTransform();
-        }
-
-        function resetZoom() {
-            appState.zoom = 1;
-            appState.pan = { x: 50, y: 50 };
-            document.getElementById("zoom-indicator").textContent = "100%";
-            actualizarTransform();
-        }
-
-        function actualizarTransform() {
-            const container = document.getElementById("canvas-container");
-            container.style.transform = `translate(${appState.pan.x}px, ${appState.pan.y}px) scale(${appState.zoom})`;
-        }
-
-        function seleccionarNodo(id) {
-            selectedNodeId = id;
-            selectedConnectionId = null;
-            renderInspector();
-            render();
-        }
-
-        function seleccionarConexion(id) {
-            selectedConnectionId = id;
-            selectedNodeId = null;
-            renderInspector();
-            render();
-        }
-
-        function seleccionarNada() {
-            selectedNodeId = null;
-            selectedConnectionId = null;
-            renderInspector();
-            render();
-        }
-
-        /* INSPECTOR MODIFICADO SEGÚN REQUERIMIENTOS EXPRESOS */
-        function renderInspector() {
-            const panel = document.getElementById("inspector-content");
-            const targetType = document.getElementById("target-type");
-
-            if (selectedNodeId) {
-                const node = appState.nodes.find(n => n.id === selectedNodeId);
-                targetType.textContent = "Nodo";
-                panel.innerHTML = `
-                    <div>
-                        <label class="font-semibold block mb-1">Título</label>
-                        <input type="text" value="${node.title}" oninput="actualizarNodoProp('title', this.value)" class="w-full border rounded p-1.5 focus:ring-1 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="font-semibold block mb-1">Contenido / Texto</label>
-                        <textarea rows="3" oninput="actualizarNodoProp('text', this.value)" class="w-full border rounded p-1.5 focus:ring-1 focus:ring-blue-500 outline-none">${node.text}</textarea>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="font-semibold block mb-1">Fondo</label>
-                            <input type="color" value="${rgbaToHex(node.bg)}" onchange="actualizarNodoProp('bg', this.value)" class="w-full h-8 rounded cursor-pointer border">
-                        </div>
-                        <div>
-                            <label class="font-semibold block mb-1">Borde</label>
-                            <input type="color" value="${rgbaToHex(node.border)}" onchange="actualizarNodoProp('border', this.value)" class="w-full h-8 rounded cursor-pointer border">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="font-semibold block mb-1">Color de Texto</label>
-                            <input type="color" value="${rgbaToHex(node.color)}" onchange="actualizarNodoProp('color', this.value)" class="w-full h-8 rounded cursor-pointer border">
-                        </div>
-                        <div>
-                            <label class="font-semibold block mb-1">Tamaño de Letra</label>
-                            <input type="number" value="${node.fontSize || 12}" onchange="actualizarNodoProp('fontSize', parseInt(this.value))" class="w-full border rounded p-1.5">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="font-semibold block mb-1">Negrita</label>
-                            <select onchange="actualizarNodoProp('fontWeight', this.value)" class="w-full border rounded p-1.5">
-                                <option value="normal" ${node.fontWeight === 'normal' ? 'selected' : ''}>Normal</option>
-                                <option value="bold" ${node.fontWeight === 'bold' ? 'selected' : ''}>Negrita</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="font-semibold block mb-1">Alineación</label>
-                            <select onchange="actualizarNodoProp('textAlign', this.value)" class="w-full border rounded p-1.5">
-                                <option value="left" ${node.textAlign === 'left' ? 'selected' : ''}>Izquierda</option>
-                                <option value="center" ${node.textAlign === 'center' ? 'selected' : ''}>Centro</option>
-                                <option value="right" ${node.textAlign === 'right' ? 'selected' : ''}>Derecha</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-3 gap-2">
-                        <div>
-                            <label class="font-semibold block mb-1">Ancho (px)</label>
-                            <input type="number" value="${node.width || 220}" onchange="actualizarNodoProp('width', parseInt(this.value))" class="w-full border rounded p-1.5">
-                        </div>
-                        <div>
-                            <label class="font-semibold block mb-1">Alto (px)</label>
-                            <input type="number" value="${node.height || 80}" onchange="actualizarNodoProp('height', parseInt(this.value))" class="w-full border rounded p-1.5">
-                        </div>
-                        <div>
-                            <label class="font-semibold block mb-1">Radio Esq.</label>
-                            <input type="number" value="${node.borderRadius !== undefined ? node.borderRadius : 6}" onchange="actualizarNodoProp('borderRadius', parseInt(this.value))" class="w-full border rounded p-1.5">
-                        </div>
-                    </div>
-                `;
-            } else if (selectedConnectionId) {
-                const conn = appState.connections.find(c => c.id === selectedConnectionId);
-                targetType.textContent = "Conexión";
-                panel.innerHTML = `
-                    <div>
-                        <label class="font-semibold block mb-1">Texto de Enlace</label>
-                        <input type="text" value="${conn.label || ''}" oninput="actualizarConnProp('label', this.value)" class="w-full border rounded p-1.5">
-                    </div>
-                    <div>
-                        <label class="font-semibold block mb-1">Color</label>
-                        <input type="color" value="${rgbaToHex(conn.color)}" onchange="actualizarConnProp('color', this.value)" class="w-full h-8 rounded cursor-pointer border">
-                    </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="font-semibold block mb-1">Grosor (px)</label>
-                            <input type="number" step="0.5" value="${conn.width}" onchange="actualizarConnProp('width', parseFloat(this.value))" class="w-full border rounded p-1.5">
-                        </div>
-                        <div>
-                            <label class="font-semibold block mb-1">Curvatura</label>
-                            <input type="number" step="0.1" min="0" max="1" value="${conn.curvature !== undefined ? conn.curvature : 0.5}" onchange="actualizarConnProp('curvature', parseFloat(this.value))" class="w-full border rounded p-1.5">
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-2 gap-2 pt-2">
-                        <div>
-                            <label class="font-semibold block mb-1">Tipo de Línea</label>
-                            <select onchange="actualizarConnProp('dashed', this.value === 'true')" class="w-full border rounded p-1.5">
-                                <option value="false" ${!conn.dashed ? 'selected' : ''}>Sólida</option>
-                                <option value="true" ${conn.dashed ? 'selected' : ''}>Punteada</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="font-semibold block mb-1">Flecha</label>
-                            <select onchange="actualizarConnProp('arrow', this.value === 'true')" class="w-full border rounded p-1.5">
-                                <option value="true" ${conn.arrow !== false ? 'selected' : ''}>Sí</option>
-                                <option value="false" ${conn.arrow === false ? 'selected' : ''}>No</option>
-                            </select>
-                        </div>
-                    </div>
-                `;
-            } else {
-                targetType.textContent = "Ninguno";
-                panel.innerHTML = `<p class="text-slate-400 text-center py-8">Selecciona un cuadro o una línea para modificar su formato en este panel, o haz doble clic en cualquier cuadro para editarlo.</p>`;
-            }
-        }
-
-        function actualizarNodoProp(prop, val) {
-            const node = appState.nodes.find(n => n.id === selectedNodeId);
-            if (node) {
-                node[prop] = val;
-                render();
-            }
-        }
-
-        function actualizarConnProp(prop, val) {
-            const conn = appState.connections.find(c => c.id === selectedConnectionId);
-            if (conn) {
-                conn[prop] = val;
-                render();
-            }
-        }
-
-        function rgbaToHex(colorStr) {
-            if (colorStr && colorStr.startsWith('#')) return colorStr;
-            return "#3b82f6";
-        }
-
-        function abrirModalEdit(id) {
-            nodeToEditModal = id;
-            const node = appState.nodes.find(n => n.id === id);
-            if (!node) return;
-            document.getElementById("modal-title").value = node.title;
-            document.getElementById("modal-text").value = node.text;
-            document.getElementById("modal-edit").classList.remove("hidden");
-        }
-
-        function cerrarModalEdit() {
-            document.getElementById("modal-edit").classList.add("hidden");
-            nodeToEditModal = null;
-        }
-
-        function guardarModalEdit() {
-            if (!nodeToEditModal) return;
-            const node = appState.nodes.find(n => n.id === nodeToEditModal);
-            if (node) {
-                node.title = document.getElementById("modal-title").value;
-                node.text = document.getElementById("modal-text").value;
-                guardarHistorial();
-                render();
-            }
-            cerrarModalEdit();
-        }
-
-        function agregarNodo() {
-            const newNode = {
-                id: "node_" + Date.now(),
-                title: "Nuevo Concepto",
-                text: "Haz doble clic o usa el panel para editar",
-                x: 300 - appState.pan.x,
-                y: 200 - appState.pan.y,
-                bg: "#ffffff",
-                color: "#1e293b",
-                border: "#3b82f6",
-                fontSize: 12,
-                fontWeight: "normal",
-                textAlign: "left",
-                width: 220,
-                height: 80,
-                borderRadius: 6
-            };
-
-            appState.nodes.push(newNode);
-            guardarHistorial();
-            seleccionarNodo(newNode.id);
-        }
-
-        function activarModoConexion() {
-            if (!selectedNodeId) {
-                alert("Primero selecciona el nodo de origen haciéndole clic.");
-                return;
-            }
-            connectingSourceId = selectedNodeId;
-            document.getElementById("btn-connect").classList.add("ring-2", "ring-yellow-400");
-        }
-
-        function finalizarConexion(targetId) {
-            if (connectingSourceId && connectingSourceId !== targetId) {
-                appState.connections.push({
-                    id: "conn_" + Date.now(),
-                    from: connectingSourceId,
-                    to: targetId,
-                    label: "relación",
-                    color: "#64748b",
-                    width: 1.5,
-                    dashed: false,
-                    arrow: true,
-                    curvature: 0.5
-                });
-                guardarHistorial();
-            }
-            connectingSourceId = null;
-            document.getElementById("btn-connect").classList.remove("ring-2", "ring-yellow-400");
-            render();
-        }
-
-        function eliminarSeleccionado() {
-            if (selectedNodeId) {
-                appState.nodes = appState.nodes.filter(n => n.id !== selectedNodeId);
-                appState.connections = appState.connections.filter(c => c.from !== selectedNodeId && c.to !== selectedNodeId);
-                selectedNodeId = null;
-                guardarHistorial();
-                render();
-            } else if (selectedConnectionId) {
-                appState.connections = appState.connections.filter(c => c.id !== selectedConnectionId);
-                selectedConnectionId = null;
-                guardarHistorial();
-                render();
-            }
-        }
-
-        function setupKeyboardShortcuts() {
-            window.addEventListener("keydown", (e) => {
-                if (e.key === "Delete") {
-                    if (document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA" && !document.activeElement.isContentEditable) {
-                        eliminarSeleccionado();
-                    }
-                }
-            });
-        }
-
-        function guardarJSON() {
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appState, null, 2));
-            const dlAnchorElem = document.createElement('a');
-            dlAnchorElem.setAttribute("href", dataStr);
-            dlAnchorElem.setAttribute("download", `Mapa_Penal_U2_Proyecto.json`);
-            dlAnchorElem.click();
-        }
-
-        function cargarJSON(event) {
-            const fileReader = new FileReader();
-            fileReader.onload = (e) => {
-                try {
-                    const loadedState = JSON.parse(e.target.result);
-                    if (loadedState.nodes && loadedState.connections) {
-                        appState = loadedState;
-                        guardarHistorial();
-                        render();
-                    }
-                } catch (err) {
-                    alert("Archivo JSON inválido.");
-                }
-            };
-            fileReader.readAsText(event.target.files[0]);
-        }
-
-        /* OBTENER LÍMITES DEL MAPA PARA EXPORTACIONES LIMPIAS */
-        function obtenerBoundingBoxMapa() {
-            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-            appState.nodes.forEach(node => {
-                const w = node.width || 220;
-                const h = document.getElementById(`node-${node.id}`)?.offsetHeight || node.height || 80;
-                if (node.x < minX) minX = node.x;
-                if (node.y < minY) minY = node.y;
-                if (node.x + w > maxX) maxX = node.x + w;
-                if (node.y + h > maxY) maxY = node.y + h;
-            });
-            return {
-                x: minX - 40,
-                y: minY - 40,
-                width: (maxX - minX) + 80,
-                height: (maxY - minY) + 80
-            };
-        }
-
-        /* EXPORTACIÓN PNG 4X HD SIN INTERFAZ */
-        function exportarPNG() {
-            const bbox = obtenerBoundingBoxMapa();
-            const container = document.getElementById("canvas-container");
-            const prevTransform = container.style.transform;
-            
-            // Temporalmente resetear transformacion para clon exacto
-            container.style.transform = "none";
-
-            html2canvas(container, {
-                x: bbox.x,
-                y: bbox.y,
-                width: bbox.width,
-                height: bbox.height,
-                scale: 4, // Alta resolución 4X
-                backgroundColor: "#ffffff",
-                logging: false
-            }).then(canvas => {
-                container.style.transform = prevTransform;
-                const a = document.createElement("a");
-                a.href = canvas.toDataURL("image/png");
-                a.download = "Mapa_Conceptual_Penal_U2_HD.png";
-                a.click();
-            });
-        }
-
-        /* EXPORTACIÓN SVG PURE SIN INTERFAZ */
-        function exportarSVG() {
-            const bbox = obtenerBoundingBoxMapa();
-            const svgLayer = document.getElementById("svg-layer").cloneNode(true);
-            const container = document.getElementById("nodes-container").cloneNode(true);
-
-            // Ajustar visuales clonados
-            container.querySelectorAll('.node-card').forEach(card => card.classList.remove('selected'));
-
-            const wrapper = document.createElement("svg");
-            wrapper.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-            wrapper.setAttribute("width", bbox.width);
-            wrapper.setAttribute("height", bbox.height);
-            wrapper.setAttribute("viewBox", `${bbox.x} ${bbox.y} ${bbox.width} ${bbox.height}`);
-            wrapper.style.backgroundColor = "#ffffff";
-
-            const foreignObject = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-            foreignObject.setAttribute("x", "0");
-            foreignObject.setAttribute("y", "0");
-            foreignObject.setAttribute("width", "10000");
-            foreignObject.setAttribute("height", "10000");
-            
-            const style = document.createElement("style");
-            style.textContent = `
-                .node-card { position: absolute; font-family: sans-serif; padding: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); box-sizing: border-box; }
-                .font-bold { font-weight: bold; }
-                .whitespace-pre-wrap { white-space: pre-wrap; }
-            `;
-            
-            foreignObject.appendChild(style);
-            foreignObject.appendChild(container);
-            
-            wrapper.appendChild(svgLayer);
-            wrapper.appendChild(foreignObject);
-
-            const blob = new Blob([wrapper.outerHTML], { type: "image/svg+xml;charset=utf-8" });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "Mapa_Conceptual_Penal_U2.svg";
-            a.click();
-        }
-
-        /* EXPORTACIÓN PDF CONFIGURABLE SIN INTERFAZ */
-        function exportarPDF() {
-            const formatOption = document.getElementById("pdf-format").value;
-            const bbox = obtenerBoundingBoxMapa();
-            const container = document.getElementById("canvas-container");
-            const prevTransform = container.style.transform;
-
-            container.style.transform = "none";
-
-            html2canvas(container, {
-                x: bbox.x,
-                y: bbox.y,
-                width: bbox.width,
-                height: bbox.height,
-                scale: 3,
-                backgroundColor: "#ffffff",
-                logging: false
-            }).then(canvas => {
-                container.style.transform = prevTransform;
-                const imgData = canvas.toDataURL("image/png");
-                
-                const { jsPDF } = window.jspdf;
-                let pdf;
-
-                if (formatOption === "a4-v") {
-                    pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-                    pdf.addImage(imgData, 'PNG', 5, 5, 200, (bbox.height * 200) / bbox.width);
-                } else if (formatOption === "a4-h") {
-                    pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
-                    pdf.addImage(imgData, 'PNG', 5, 5, 287, (bbox.height * 287) / bbox.width);
-                } else {
-                    // Ajustar exactamente al contenido
-                    pdf = new jsPDF({
-                        orientation: bbox.width > bbox.height ? 'landscape' : 'portrait',
-                        unit: 'px',
-                        format: [bbox.width, bbox.height]
-                    });
-                    pdf.addImage(imgData, 'PNG', 0, 0, bbox.width, bbox.height);
-                }
-
-                pdf.save("Mapa_Conceptual_Penal_U2.pdf");
-            });
-        }
-    </script>
+      });
+    }
+
+    function resetMap() {
+      init();
+    }
+
+    window.onload = init;
+  </script>
 </body>
 </html>
