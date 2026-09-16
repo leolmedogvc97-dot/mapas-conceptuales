@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Creador de Mapas Mentales</title>
+  <title>Mapa Mental: Familia Neorromanista</title>
   <style>
     * {
       box-sizing: border-box;
@@ -28,7 +28,7 @@
       display: flex;
       gap: 12px;
       align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
       z-index: 10;
     }
 
@@ -36,6 +36,12 @@
       font-size: 1.1rem;
       font-weight: 700;
       color: #38bdf8;
+    }
+
+    .instructions {
+      font-size: 0.85rem;
+      color: #94a3b8;
+      margin-left: auto;
     }
 
     .btn {
@@ -50,57 +56,57 @@
       transition: all 0.2s;
     }
 
-    .btn-reset { background: #ef4444; color: white; margin-left: auto; }
+    .btn-reset { background: #ef4444; color: white; }
     .btn-reset:hover { background: #dc2626; }
 
-    /* LIENZO PRINCIPAL */
+    /* LIENZO PRINCIPAL DE DIBUJO */
     #viewport {
       flex: 1;
       position: relative;
       background-color: #0f172a;
       background-image: radial-gradient(#334155 1.5px, transparent 1.5px);
       background-size: 28px 28px;
-      overflow: hidden;
+      overflow: auto;
     }
 
     #svgCanvas {
       position: absolute;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
+      width: 4000px;
+      height: 3000px;
       pointer-events: none;
     }
 
-    /* NODOS DEL MAPA MENTAL */
+    /* NODOS */
     .node {
       position: absolute;
-      padding: 10px 18px;
-      border-radius: 20px;
+      padding: 8px 14px;
+      border-radius: 16px;
       background: #1e293b;
-      border: 3px solid var(--node-color, #38bdf8);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+      border: 2px solid var(--node-color, #38bdf8);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       cursor: move;
       user-select: none;
       display: flex;
       align-items: center;
-      gap: 8px;
-      min-width: 120px;
-      justify-content: center;
-      transition: transform 0.1s;
+      gap: 6px;
+      max-width: 320px;
+      z-index: 2;
     }
 
     .node:hover {
-      transform: scale(1.03);
+      box-shadow: 0 0 12px var(--node-color, #38bdf8);
     }
 
     /* NODO CENTRAL REFORZADO */
     .node.root {
-      background: linear-gradient(135deg, #0284c7, #2563eb);
+      background: linear-gradient(135deg, #0284c7, #1d4ed8);
       border-color: #38bdf8;
-      padding: 16px 28px;
-      border-radius: 30px;
-      box-shadow: 0 0 25px rgba(56, 189, 248, 0.4);
+      padding: 16px 24px;
+      border-radius: 28px;
+      box-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+      z-index: 3;
     }
 
     .node-input {
@@ -108,37 +114,35 @@
       border: none;
       outline: none;
       color: white;
-      font-size: 0.95rem;
+      font-size: 0.85rem;
       font-weight: 600;
-      text-align: center;
       width: 100%;
-      min-width: 80px;
     }
 
     .node.root .node-input {
-      font-size: 1.2rem;
+      font-size: 1.1rem;
       font-weight: 800;
+      text-align: center;
     }
 
     /* BOTONES ACCIÓN EN NODO */
     .node-actions {
       display: flex;
-      gap: 4px;
+      gap: 3px;
     }
 
     .action-btn {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       border-radius: 50%;
       border: none;
       color: white;
       font-weight: bold;
-      font-size: 12px;
+      font-size: 11px;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: opacity 0.2s;
     }
 
     .btn-add-child { background: #10b981; }
@@ -151,9 +155,9 @@
 <body>
 
   <div class="toolbar">
-    <h1>🧠 Mapa Mental Interactivo</h1>
-    <span style="font-size: 0.85rem; color: #94a3b8;">Presiona el botón <b>+</b> en cualquier idea para expandir una rama. Arrastra para acomodar.</span>
-    <button class="btn btn-reset" onclick="resetMap()">🔄 Reiniciar Mapa</button>
+    <h1>🧠 Mapa Mental: Familia Neorromanista</h1>
+    <span class="instructions">💡 Arrastra las cajas para acomodarlas. Haz clic en <b>+</b> para agregar más ideas.</span>
+    <button class="btn btn-reset" onclick="init()">🔄 Reiniciar Posiciones</button>
   </div>
 
   <div id="viewport">
@@ -164,72 +168,260 @@
     const viewport = document.getElementById('viewport');
     const svgCanvas = document.getElementById('svgCanvas');
 
-    // PALETA DE COLORES VIBRANTES PARA RAMAS
-    const colors = ['#f43f5e', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ec4899', '#3b82f6'];
-
     let nodes = [];
     let draggedNode = null;
     let dragOffset = { x: 0, y: 0 };
 
+    // Estructura de datos completa extraída del texto
+    const initialData = {
+      text: 'FAMILIA JURÍDICA DE TRADICIÓN NEORROMANISTA',
+      color: '#38bdf8',
+      children: [
+        {
+          text: '🏛️ 1. ORIGEN',
+          color: '#f43f5e',
+          children: [
+            { text: 'Derecho romano → Ley de las XII Tablas' },
+            { text: 'Tradición romana + germánica (Fusión en Europa)' },
+            { text: 'Características: Justicia, Moral, Derecho civil, Orden social' }
+          ]
+        },
+        {
+          text: '👑 2. JUSTINIANO',
+          color: '#fb7185',
+          children: [
+            { 
+              text: 'Obra jurídica (Corpus Iuris Civilis)',
+              children: [
+                { text: 'Código de Justiniano' },
+                { text: 'Digesto' },
+                { text: 'Instituciones' },
+                { text: 'Novelas' }
+              ]
+            },
+            { text: 'Gran compilación (Triboniano, 529–534 d.C.)' },
+            { text: 'Importancia: Conservación y transmisión del D. Romano' }
+          ]
+        },
+        {
+          text: '🌍 3. DESARROLLO EN ORIENTE',
+          color: '#c084fc',
+          children: [
+            { text: 'Prohibición de comentarios tras Justiniano' },
+            { text: 'Siglo VIII: Reinicio de actividad legislativa' },
+            { 
+              text: 'Principales obras',
+              children: [
+                { text: 'Paráfrasis de Teófilo' },
+                { text: 'Écloga Legum' },
+                { text: 'Basílicas (Digesto+Código+Novelas, 60 libros)' }
+              ]
+            }
+          ]
+        },
+        {
+          text: '📜 4. INTERPOLACIONES',
+          color: '#818cf8',
+          children: [
+            { text: 'Alteraciones realizadas por comisiones justinianeas' },
+            { text: 'Incluyeron: Abreviaturas, Cambios, Correcciones, Adiciones' },
+            { text: 'Finalidad: Adaptar textos a necesidades de compilación' },
+            { text: 'Emblemata Triboniani (nombre de interpolaciones)' }
+          ]
+        },
+        {
+          text: '🎓 5. RENACIMIENTO EN OCCIDENTE',
+          color: '#38bdf8',
+          children: [
+            { text: 'Bolonia: Estudio de codificación justinianea' },
+            { text: 'Universidades: Formación de juristas y ciencia jurídica' },
+            { text: 'Ius Commune: Marco común, vocabulario y métodos' },
+            { text: 'Renacimiento del D. Romano: Nuevas categorías y conceptos' }
+          ]
+        },
+        {
+          text: '⚖️ 6. ESCUELAS JURÍDICAS',
+          color: '#34d399',
+          children: [
+            { text: 'Glosadores (S. XI, Irnerio, Glosas, Accursio)' },
+            { text: 'Ultramontanos (Escuela de Orleans, J. de Révigny)' },
+            { text: 'Posglosadores / Comentaristas (Bartolo, Baldo)' },
+            { text: 'Humanistas Franceses (Mos Gallicus, Cuyacio, Doneau)' },
+            { text: 'Jurisprudencia Elegante Holandesa' },
+            { text: 'Usus Modernus Pandectarum (D. Romano + Germánico)' },
+            { text: 'Escuela Racionalista (Razón y Derecho Natural)' },
+            { text: 'Escuela Histórica (Savigny, conciencia del pueblo)' }
+          ]
+        },
+        {
+          text: '🏰 7. DERECHO CONSUETUDINARIO Y ESCRITO',
+          color: '#a3e635',
+          children: [
+            { text: 'Costumbres locales → Multiplicidad de normas' },
+            { text: 'Evolución: Recopilaciones e influencia romana' },
+            { text: 'Compilaciones: Sustitución progresiva de la costumbre' }
+          ]
+        },
+        {
+          text: '📚 8. CODIFICACIÓN',
+          color: '#facc15',
+          children: [
+            { text: 'Derecho Natural impulsa período legislativo' },
+            { text: 'Objetivos: Unificación, seguridad y expansión' },
+            { 
+              text: 'Ejemplos de Códigos',
+              children: [
+                { text: 'Código Civil Francés (1804)' },
+                { text: 'Código Civil Español' },
+                { text: 'Código Civil Alemán' }
+              ]
+            }
+          ]
+        },
+        {
+          text: '🌎 9. RECEPCIÓN EN EUROPA OCCIDENTAL',
+          color: '#fb923c',
+          children: [
+            { 
+              text: 'España 🇪🇸',
+              children: [
+                { text: 'Ordenanzas Reales de Castilla (1484)' },
+                { text: 'Leyes de Toro (1505)' },
+                { text: 'Nueva Recopilación (1567)' },
+                { text: 'Recopilación de Indias (1680)' },
+                { text: 'Novísima Recopilación (1805)' }
+              ]
+            },
+            { text: 'Francia 🇫🇷: Consolidación territorial e influencia romana' },
+            { text: 'Alemania 🇩🇪: Tribunal del Imperio (1495) y Usus Modernus' },
+            { text: 'Inglaterra 🏴: Menor penetración, predominio Common Law' }
+          ]
+        },
+        {
+          text: '🌐 10. EXPANSIÓN Y CARACTERÍSTICAS',
+          color: '#f472b6',
+          children: [
+            { text: 'Expansión: América Latina, África, Cercano Oriente, Japón' },
+            { text: 'Medios: Colonización, Recepción voluntaria, Codificación' },
+            { text: 'Características: Derecho escrito, D. Civil base, Técnica de codificación' }
+          ]
+        },
+        {
+          text: '🔵 IDEA DE CIERRE',
+          color: '#60a5fa',
+          children: [
+            { text: 'D. Romano → Justiniano → Corpus Iuris Civilis → Oriente/Occidente → Universidades → Escuelas → Recepción → Codificación → Familia Neorromanista' }
+          ]
+        }
+      ]
+    };
+
     function init() {
-      const rect = viewport.getBoundingClientRect();
-      const centerX = rect.width / 2 - 80;
-      const centerY = rect.height / 2 - 30;
+      nodes = [];
+      const centerX = 1800;
+      const centerY = 1200;
 
       // Crear Raíz
       const root = {
         id: 'root',
         parentId: null,
-        text: 'Idea Central',
+        text: initialData.text,
         x: centerX,
         y: centerY,
-        color: '#38bdf8',
+        color: initialData.color,
         isRoot: true
       };
+      nodes.push(root);
 
-      nodes = [root];
+      // Desplegar Ramas Principales en Círculo
+      const totalRamas = initialData.children.length;
+      initialData.children.forEach((branch, idx) => {
+        const angle = (idx / totalRamas) * Math.PI * 2;
+        const radius = 380;
+        const bx = centerX + Math.cos(angle) * radius;
+        const by = centerY + Math.sin(angle) * radius;
 
-      // Ramas Iniciales
-      addChild(root.id, 'Subtema 1', centerX - 220, centerY - 120);
-      addChild(root.id, 'Subtema 2', centerX + 220, centerY - 120);
-      addChild(root.id, 'Subtema 3', centerX - 200, centerY + 140);
-      addChild(root.id, 'Subtema 4', centerX + 200, centerY + 140);
+        const branchId = 'node_' + Date.now() + '_' + idx;
+        const branchNode = {
+          id: branchId,
+          parentId: root.id,
+          text: branch.text,
+          x: bx,
+          y: by,
+          color: branch.color,
+          isRoot: false
+        };
+        nodes.push(branchNode);
+
+        // Desplegar Sub-ramas
+        if (branch.children) {
+          branch.children.forEach((sub, sIdx) => {
+            const subAngle = angle + ((sIdx - (branch.children.length - 1) / 2) * 0.22);
+            const subRadius = 260;
+            const sx = bx + Math.cos(subAngle) * subRadius;
+            const sy = by + Math.sin(subAngle) * subRadius;
+
+            const subId = 'node_sub_' + Date.now() + '_' + idx + '_' + sIdx;
+            const subNode = {
+              id: subId,
+              parentId: branchId,
+              text: sub.text,
+              x: sx,
+              y: sy,
+              color: branch.color,
+              isRoot: false
+            };
+            nodes.push(subNode);
+
+            // Sub-sub-ramas (si existen)
+            if (sub.children) {
+              sub.children.forEach((ss, ssIdx) => {
+                const ssAngle = subAngle + ((ssIdx - (sub.children.length - 1) / 2) * 0.2);
+                const ssRadius = 180;
+                const ssx = sx + Math.cos(ssAngle) * ssRadius;
+                const ssy = sy + Math.sin(ssAngle) * ssRadius;
+
+                nodes.push({
+                  id: 'node_ssub_' + Date.now() + '_' + ssIdx,
+                  parentId: subId,
+                  text: ss.text,
+                  x: ssx,
+                  y: ssy,
+                  color: branch.color,
+                  isRoot: false
+                });
+              });
+            }
+          });
+        }
+      });
 
       render();
+      // Auto scroll al centro
+      viewport.scrollLeft = centerX - window.innerWidth / 2;
+      viewport.scrollTop = centerY - window.innerHeight / 2;
     }
 
-    function addChild(parentId, text = 'Nueva Idea', customX = null, customY = null) {
+    function addChild(parentId) {
       const parent = nodes.find(n => n.id === parentId);
       if (!parent) return;
 
-      const randomColor = colors[Math.floor(Math.random() * colors.length)];
-      const id = 'node_' + Date.now() + Math.random().toString(36).substr(2, 4);
-
-      // Posición aproximada alrededor del padre si no se provee
-      const angle = Math.random() * Math.PI * 2;
-      const distance = 160;
-      const x = customX !== null ? customX : parent.x + Math.cos(angle) * distance;
-      const y = customY !== null ? customY : parent.y + Math.sin(angle) * distance;
-
-      const newNode = {
+      const id = 'node_' + Date.now();
+      nodes.push({
         id,
         parentId,
-        text,
-        x,
-        y,
-        color: parent.isRoot ? randomColor : parent.color,
+        text: 'Nueva Idea',
+        x: parent.x + 150,
+        y: parent.y + 50,
+        color: parent.color,
         isRoot: false
-      };
-
-      nodes.push(newNode);
+      });
       render();
     }
 
     function deleteNode(id) {
-      // Eliminar nodo y sus descendientes recursivamente
       const toDelete = new Set([id]);
       let added = true;
-
       while (added) {
         added = false;
         nodes.forEach(n => {
@@ -239,7 +431,6 @@
           }
         });
       }
-
       nodes = nodes.filter(n => !toDelete.has(n.id));
       render();
     }
@@ -250,11 +441,10 @@
     }
 
     function render() {
-      // Limpiar lienzo previo (respetando solo el SVG)
       svgCanvas.innerHTML = '';
       document.querySelectorAll('.node').forEach(el => el.remove());
 
-      // 1. Dibujar Ramas Orgánicas (Líneas Curvas Bezier)
+      // Dibujar Curva Bezier
       nodes.forEach(node => {
         if (node.parentId) {
           const parent = nodes.find(n => n.id === node.parentId);
@@ -262,22 +452,20 @@
             const p1 = getNodeCenter(parent);
             const p2 = getNodeCenter(node);
 
-            // Control de puntos para la curva Bezier suave
             const dx = (p2.x - p1.x) / 2;
             const pathData = `M ${p1.x} ${p1.y} C ${p1.x + dx} ${p1.y}, ${p2.x - dx} ${p2.y}, ${p2.x} ${p2.y}`;
 
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('d', pathData);
             path.setAttribute('stroke', node.color);
-            path.setAttribute('stroke-width', '3');
+            path.setAttribute('stroke-width', '2.5');
             path.setAttribute('fill', 'none');
-            path.setAttribute('stroke-linecap', 'round');
             svgCanvas.appendChild(path);
           }
         }
       });
 
-      // 2. Dibujar Nodos HTML
+      // Dibujar Nodos
       nodes.forEach(node => {
         const el = document.createElement('div');
         el.className = `node ${node.isRoot ? 'root' : ''}`;
@@ -289,12 +477,11 @@
         el.innerHTML = `
           <input class="node-input" value="${node.text}" oninput="updateText('${node.id}', this.value)" />
           <div class="node-actions">
-            <button class="action-btn btn-add-child" title="Agregar Rama" onclick="addChild('${node.id}')">+</button>
-            ${!node.isRoot ? `<button class="action-btn btn-del-node" title="Eliminar Rama" onclick="deleteNode('${node.id}')">✕</button>` : ''}
+            <button class="action-btn btn-add-child" title="Agregar sub-rama" onclick="addChild('${node.id}')">+</button>
+            ${!node.isRoot ? `<button class="action-btn btn-del-node" title="Eliminar" onclick="deleteNode('${node.id}')">✕</button>` : ''}
           </div>
         `;
 
-        // Arrastrar Nodos
         el.addEventListener('mousedown', (e) => {
           if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
           draggedNode = node;
@@ -314,14 +501,13 @@
           y: node.y + el.offsetHeight / 2
         };
       }
-      return { x: node.x + 60, y: node.y + 20 };
+      return { x: node.x + 80, y: node.y + 20 };
     }
 
-    // Eventos Globales de Arrastre
     window.addEventListener('mousemove', (e) => {
       if (draggedNode) {
-        draggedNode.x = e.clientX - dragOffset.x;
-        draggedNode.y = e.clientY - dragOffset.y;
+        draggedNode.x = e.clientX - dragOffset.x + viewport.scrollLeft;
+        draggedNode.y = e.clientY - dragOffset.y + viewport.scrollTop;
 
         const el = document.getElementById(draggedNode.id);
         if (el) {
@@ -332,11 +518,8 @@
       }
     });
 
-    window.addEventListener('mouseup', () => {
-      draggedNode = null;
-    });
+    window.addEventListener('mouseup', () => { draggedNode = null; });
 
-    // Actualización fluida del SVG al arrastrar (evita re-renderizar HTML innecesariamente)
     function renderSvgOnly() {
       svgCanvas.innerHTML = '';
       nodes.forEach(node => {
@@ -351,16 +534,12 @@
             const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
             path.setAttribute('d', pathData);
             path.setAttribute('stroke', node.color);
-            path.setAttribute('stroke-width', '3');
+            path.setAttribute('stroke-width', '2.5');
             path.setAttribute('fill', 'none');
             svgCanvas.appendChild(path);
           }
         }
       });
-    }
-
-    function resetMap() {
-      init();
     }
 
     window.onload = init;
