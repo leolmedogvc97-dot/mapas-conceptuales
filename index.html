@@ -22,28 +22,29 @@
       overflow: hidden;
     }
 
-    /* BARRA SUPERIOR Y HERRAMIENTAS */
+    /* BARRA SUPERIOR */
     .toolbar {
       background: #1e293b;
-      padding: 8px 16px;
+      padding: 8px 14px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center;
       flex-wrap: wrap;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       z-index: 100;
+      border-bottom: 1px solid #334155;
     }
 
     .toolbar h1 {
-      font-size: 1rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: #38bdf8;
-      margin-right: 8px;
+      margin-right: 6px;
     }
 
     .btn-group {
       display: flex;
-      gap: 4px;
+      gap: 3px;
       align-items: center;
       background: #0f172a;
       padding: 3px;
@@ -51,11 +52,11 @@
     }
 
     .btn {
-      padding: 6px 12px;
+      padding: 5px 10px;
       border: none;
       border-radius: 6px;
       font-weight: 600;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -66,40 +67,38 @@
     }
 
     .btn:hover { background: #475569; }
-    .btn.active { background: #0284c7; color: #fff; }
+    .btn.active { background: #0284c7; color: #fff; box-shadow: 0 0 8px #0284c7; }
     .btn-danger { background: #ef4444; color: white; }
     .btn-danger:hover { background: #dc2626; }
     .btn-success { background: #10b981; color: white; }
     .btn-success:hover { background: #059669; }
 
-    /* CONTENEDOR DEL LIENZO */
+    /* CONTENEDOR PRINCIPAL */
     #viewport {
       flex: 1;
       position: relative;
       width: 100%;
       height: 100%;
       overflow: hidden;
-      cursor: default;
       background-color: #0f172a;
       background-image: radial-gradient(#334155 1.5px, transparent 1.5px);
       background-size: 28px 28px;
     }
 
-    #viewport.panning {
+    #viewport.mode-hand {
       cursor: grab;
     }
 
-    #viewport.panning:active {
+    #viewport.mode-hand:active {
       cursor: grabbing;
     }
 
-    /* CONTENEDOR TRANSFORMABLE (PAN & ZOOM) */
     #canvasContainer {
       position: absolute;
       top: 0;
       left: 0;
-      width: 5000px;
-      height: 4000px;
+      width: 6000px;
+      height: 5000px;
       transform-origin: 0 0;
     }
 
@@ -112,7 +111,7 @@
       pointer-events: none;
     }
 
-    /* ESTILOS DE NODOS Y JERARQUÍA */
+    /* NODOS Y JERARQUÍA VISUAL */
     .node {
       position: absolute;
       padding: 8px 12px;
@@ -124,39 +123,49 @@
       user-select: none;
       display: flex;
       align-items: center;
-      gap: 6px;
-      max-width: 260px;
-      min-width: 100px;
+      width: max-content;
+      max-width: 280px;
+      min-width: 120px;
       z-index: 2;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .mode-hand .node {
+      cursor: grab !important;
     }
 
     .node:hover {
-      box-shadow: 0 0 12px var(--node-color, #38bdf8);
+      box-shadow: 0 0 14px var(--node-color, #38bdf8);
       z-index: 10;
     }
 
+    /* NIVEL 1 */
     .node.root {
       background: linear-gradient(135deg, #0284c7, #1d4ed8);
       border-color: #38bdf8;
-      padding: 16px 22px;
+      padding: 16px 24px;
       border-radius: 24px;
-      max-width: 320px;
-      box-shadow: 0 0 30px rgba(56, 189, 248, 0.5);
+      max-width: 340px;
+      box-shadow: 0 0 35px rgba(56, 189, 248, 0.6);
       z-index: 20;
     }
 
+    /* NIVEL 2 */
     .node.primary {
-      padding: 10px 14px;
+      padding: 10px 16px;
       border-width: 3px;
       border-radius: 16px;
-      font-size: 0.9rem;
+      max-width: 300px;
+      font-size: 0.92rem;
+      background: #1e293b;
     }
 
+    /* NIVEL 3 */
     .node.secondary {
-      padding: 6px 10px;
+      padding: 6px 12px;
       border-width: 2px;
-      font-size: 0.8rem;
+      border-radius: 10px;
+      max-width: 260px;
+      font-size: 0.82rem;
       background: #0f172a;
     }
 
@@ -167,6 +176,7 @@
       width: 100%;
     }
 
+    /* TEXTAREAS AUTO-AJUSTABLES (Evitan que el texto se corte) */
     .node-text {
       background: transparent;
       border: none;
@@ -177,11 +187,14 @@
       width: 100%;
       resize: none;
       overflow: hidden;
-      line-height: 1.2;
+      line-height: 1.35;
+      display: block;
+      white-space: pre-wrap;
+      word-break: break-word;
     }
 
     .node.root .node-text {
-      font-size: 1.05rem;
+      font-size: 1.1rem;
       font-weight: 800;
       text-align: center;
     }
@@ -190,12 +203,12 @@
       font-weight: 700;
     }
 
-    /* BOTONES DE ACCIÓN DENTRO DEL NODO */
     .node-actions {
       display: flex;
-      gap: 2px;
-      opacity: 0.3;
+      gap: 3px;
+      opacity: 0.2;
       transition: opacity 0.2s;
+      margin-left: 4px;
     }
 
     .node:hover .node-actions {
@@ -222,12 +235,12 @@
     .btn-del-node { background: #ef4444; }
     .btn-del-node:hover { background: #dc2626; }
 
-    /* MODAL FUENTES */
+    /* MODAL */
     .modal {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0,0,0,0.75);
       z-index: 1000;
       align-items: center;
       justify-content: center;
@@ -254,7 +267,7 @@
       padding-left: 20px;
       color: #cbd5e1;
       font-size: 0.9rem;
-      line-height: 1.5;
+      line-height: 1.6;
     }
 
     .modal-content button {
@@ -268,19 +281,39 @@
   <div class="toolbar">
     <h1>🧠 Mapa Mental</h1>
 
+    <!-- MODO SELECCIÓN / MANO -->
     <div class="btn-group">
-      <button class="btn" id="btnHand" onclick="toggleHandTool()" title="Herramienta Mano (Espacio)">✋ Mano</button>
-      <button class="btn" onclick="zoomIn()" title="Aumentar Zoom">+</button>
-      <button class="btn" onclick="zoomOut()" title="Reducir Zoom">−</button>
-      <button class="btn" onclick="resetZoom()" title="Zoom 100%">100%</button>
-      <button class="btn" onclick="centerMap()" title="Centrar Mapa">🎯 Centrar</button>
-      <button class="btn" onclick="fitToScreen()" title="Ajustar a Pantalla">🔍 Ajustar</button>
+      <button class="btn active" id="btnSelect" onclick="setMode('select')" title="Modo Mover Nodos">🖱️ Selección</button>
+      <button class="btn" id="btnHand" onclick="setMode('hand')" title="Modo Mover Mapa completo (o Mantén Espacio)">✋ Mover mapa</button>
     </div>
 
+    <!-- HISTORIAL -->
     <div class="btn-group">
-      <button class="btn btn-success" onclick="savePositions()">💾 Guardar</button>
-      <button class="btn" onclick="resetPositions()">🔄 Restaurar</button>
-      <button class="btn" onclick="showSources()">📚 Fuentes</button>
+      <button class="btn" onclick="undo()" title="Deshacer">↶ Deshacer</button>
+      <button class="btn" onclick="redo()" title="Rehacer">↷ Rehacer</button>
+    </div>
+
+    <!-- CONTROLES DE VISTA / ZOOM -->
+    <div class="btn-group">
+      <button class="btn" onclick="zoomOut()" title="Reducir Zoom">−</button>
+      <button class="btn" onclick="resetZoom()" title="Zoom 100%">100%</button>
+      <button class="btn" onclick="zoomIn()" title="Aumentar Zoom">+</button>
+      <button class="btn" onclick="centerMap()" title="Centrar mapa">🎯 Centrar</button>
+      <button class="btn" onclick="fitToScreen()" title="Ajustar a pantalla">🔍 Ajustar</button>
+    </div>
+
+    <!-- ARCHIVO Y FUENTES -->
+    <div class="btn-group">
+      <button class="btn btn-success" onclick="saveMap()" title="Guardar cambios">💾 Guardar</button>
+      <button class="btn" onclick="loadMap()" title="Cargar guardado">📂 Cargar</button>
+      <button class="btn" onclick="showSources()" title="Ver fuentes de consulta">📚 Fuentes</button>
+    </div>
+
+    <!-- EXPORTACIÓN -->
+    <div class="btn-group">
+      <button class="btn" onclick="exportImage('png')" title="Exportar PNG">🖼️ PNG</button>
+      <button class="btn" onclick="exportSVG()" title="Exportar SVG">📐 SVG</button>
+      <button class="btn" onclick="exportPDF()" title="Imprimir / PDF">📄 PDF</button>
     </div>
   </div>
 
@@ -290,14 +323,14 @@
     </div>
   </div>
 
-  <!-- MODAL DE FUENTES DE CONSULTA -->
+  <!-- MODAL DE FUENTES -->
   <div id="sourcesModal" class="modal">
     <div class="modal-content">
       <h2>📚 Fuentes de Consulta</h2>
       <ul>
         <li>Apuntes de clase.</li>
         <li>René David. <i>Los grandes sistemas jurídicos contemporáneos</i>.</li>
-        <li>Documentos académicos de consulta (Archivos PDF leídos de la revisión).</li>
+        <li>Documentos académicos PDF leídos en la revisión.</li>
       </ul>
       <button class="btn btn-danger" onclick="closeSources()">Cerrar</button>
     </div>
@@ -308,23 +341,26 @@
     const canvasContainer = document.getElementById('canvasContainer');
     const svgCanvas = document.getElementById('svgCanvas');
 
-    // ESTADO GLOBAL DE PAN Y ZOOM
+    // ESTADO GLOBAL
     let scale = 1;
     let panX = 0;
     let panY = 0;
-    let isPanningMode = false;
+    let currentMode = 'select'; // 'select' o 'hand'
     let isPanning = false;
     let startPanX = 0;
     let startPanY = 0;
     let spacePressed = false;
 
-    // ESTADO DE ARRASTRE DE NODOS
     let nodes = [];
     let draggedNode = null;
     let dragOffsetX = 0;
     let dragOffsetY = 0;
 
-    // DATOS ACADÉMICOS
+    // HISTORIAL UNDO/REDO
+    let historyStack = [];
+    let historyIndex = -1;
+
+    // ESTRUCTURA ACADÉMICA EXACTA DE INITIALDATA (Formateada para 2-3 líneas)
     const initialData = {
       text: 'FAMILIA JURÍDICA DE TRADICIÓN NEORROMANISTA',
       color: '#38bdf8',
@@ -333,9 +369,9 @@
           text: '🏛️ 1. ORIGEN',
           color: '#f43f5e',
           children: [
-            { text: 'Derecho romano → Ley XII Tablas' },
-            { text: 'Tradición romana + germánica (Fusión)' },
-            { text: 'Principios: Justicia, Moral, D. Civil' }
+            { text: 'Derecho romano\n→ Ley de las XII Tablas' },
+            { text: 'Tradición romana + germánica\n(Fusión en Europa)' },
+            { text: 'Características:\nJusticia, Moral, D. Civil, Orden social' }
           ]
         },
         {
@@ -343,7 +379,7 @@
           color: '#fb7185',
           children: [
             { 
-              text: 'Corpus Iuris Civilis',
+              text: 'Obra jurídica\n(Corpus Iuris Civilis)',
               children: [
                 { text: 'Código de Justiniano' },
                 { text: 'Digesto' },
@@ -351,22 +387,22 @@
                 { text: 'Novelas' }
               ]
             },
-            { text: 'Triboniano (529–534 d.C.)' },
-            { text: 'Conservación del D. Romano' }
+            { text: 'Compilación por Triboniano\n(529–534 d.C.)' },
+            { text: 'Importancia:\nConservación del D. Romano' }
           ]
         },
         {
-          text: '🌍 3. ORIENTE',
+          text: '🌍 3. DESARROLLO EN ORIENTE',
           color: '#c084fc',
           children: [
-            { text: 'Prohibición de comentarios' },
-            { text: 'Siglo VIII: Actividad legislativa' },
+            { text: 'Prohibición de comentarios\ntras Justiniano' },
+            { text: 'Siglo VIII:\nReinicio de actividad legislativa' },
             { 
-              text: 'Principales obras',
+              text: 'Obras principales',
               children: [
                 { text: 'Paráfrasis de Teófilo' },
                 { text: 'Écloga Legum' },
-                { text: 'Basílicas (60 libros)' }
+                { text: 'Basílicas\n(60 libros y títulos)' }
               ]
             }
           ]
@@ -375,51 +411,51 @@
           text: '📜 4. INTERPOLACIONES',
           color: '#818cf8',
           children: [
-            { text: 'Alteraciones justinianeas' },
-            { text: 'Cambios, correcciones y adiciones' },
-            { text: 'Adaptación a necesidades' },
+            { text: 'Alteraciones de comisiones\njustinianeas' },
+            { text: 'Incluyeron: Abreviaturas,\ncambios y adiciones' },
+            { text: 'Adaptación a necesidades\nde compilación' },
             { text: 'Emblemata Triboniani' }
           ]
         },
         {
-          text: '🎓 5. RENACIMIENTO',
+          text: '🎓 5. RENACIMIENTO EN OCCIDENTE',
           color: '#38bdf8',
           children: [
-            { text: 'Bolonia: Estudio de codificación' },
-            { text: 'Universidades: Formación de juristas' },
-            { text: 'Ius Commune: Marco de referencia' },
-            { text: 'Nuevas categorías jurídicas' }
+            { text: 'Bolonia:\nEstudio de codificación' },
+            { text: 'Universidades:\nFormación de juristas' },
+            { text: 'Ius commune:\nMarco común y vocabulario' },
+            { text: 'Renacimiento del D. Romano:\nNuevas categorías' }
           ]
         },
         {
-          text: '⚖️ 6. ESCUELAS',
+          text: '⚖️ 6. ESCUELAS JURÍDICAS',
           color: '#34d399',
           children: [
-            { text: 'Glosadores (Irnerio, Accursio)' },
-            { text: 'Ultramontanos (J. de Révigny)' },
-            { text: 'Posglosadores (Bartolo, Baldo)' },
-            { text: 'Humanistas (Mos Gallicus, Cuyacio)' },
-            { text: 'Jurisprudencia Elegante' },
-            { text: 'Usus Modernus Pandectarum' },
-            { text: 'Escuela Racionalista' },
-            { text: 'Escuela Histórica (Savigny)' }
+            { text: 'Glosadores (S. XI)\nIrnerio, Glosas, Accursio' },
+            { text: 'Ultramontanos (Orleans)\nJ. de Révigny, P. Belleperche' },
+            { text: 'Posglosadores / Comentaristas\nBartolo de Saxoferrato, Baldo' },
+            { text: 'Humanistas Franceses\nMos Gallicus, Cuyacio' },
+            { text: 'Jurisprudencia Elegante Holandesa' },
+            { text: 'Usus Modernus Pandectarum\n(D. Romano + Germánico)' },
+            { text: 'Escuela Racionalista\nRazón y Derecho Natural' },
+            { text: 'Escuela Histórica (Savigny)\nConciencia del pueblo' }
           ]
         },
         {
-          text: '🏰 7. CONSUETUDINARIO',
+          text: '🏰 7. DERECHO CONSUETUDINARIO\nY ESCRITO',
           color: '#a3e635',
           children: [
-            { text: 'Costumbres locales' },
-            { text: 'Evolución a recopilaciones' },
-            { text: 'Sustitución por Derecho escrito' }
+            { text: 'Costumbres locales\n→ Multiplicidad de normas' },
+            { text: 'Evolución:\nRecopilaciones e influencia' },
+            { text: 'Sustitución progresiva\nde la costumbre' }
           ]
         },
         {
           text: '📚 8. CODIFICACIÓN',
           color: '#facc15',
           children: [
-            { text: 'Impulso del Derecho Natural' },
-            { text: 'Unificación y seguridad jurídica' },
+            { text: 'Derecho Natural impulsa\nperíodo legislativo' },
+            { text: 'Objetivos: Unificación,\nseguridad y expansión' },
             { 
               text: 'Ejemplos clave',
               children: [
@@ -431,7 +467,7 @@
           ]
         },
         {
-          text: '🌎 9. RECEPCIÓN EUROPA',
+          text: '🌎 9. RECEPCIÓN EN\nEUROPA OCCIDENTAL',
           color: '#fb923c',
           children: [
             { 
@@ -439,41 +475,33 @@
               children: [
                 { text: 'Ordenanzas Reales (1484)' },
                 { text: 'Leyes de Toro (1505)' },
-                { text: 'Recopilación de Indias (1680)' }
+                { text: 'Nueva Recopilación (1567)' },
+                { text: 'Recopilación Indias (1680)' },
+                { text: 'Novísima Recopilación (1805)' }
               ]
             },
-            { text: 'Francia 🇫🇷: Consolidación' },
-            { text: 'Alemania 🇩🇪: Tribunal (1495)' },
-            { text: 'Inglaterra 🏴: Common Law' }
+            { text: 'Francia 🇫🇷:\nConsolidación e influencia' },
+            { text: 'Alemania 🇩🇪:\nSupremo Tribunal (1495)' },
+            { text: 'Inglaterra 🏴:\nPredominio del Common Law' }
           ]
         },
         {
-          text: '🌐 10. EXPANSIÓN',
+          text: '🌐 10. EXPANSIÓN Y\nCARACTERÍSTICAS',
           color: '#f472b6',
           children: [
-            { text: 'América Latina, África, Asia' },
-            { text: 'Vías: Colonización y Recepción' },
-            { text: 'Base: Derecho civil y escrito' }
+            { text: 'Expansión: América Latina,\nÁfrica, Asia, Japón' },
+            { text: 'Medios: Colonización,\nRecepción voluntaria' },
+            { text: 'Base: D. escrito,\nD. Civil y Codificación' }
           ]
         }
       ]
     };
 
-    // INICIALIZACIÓN DE POSICIONES RADIALES
+    // ALGORITMO RADIAL INTELIGENTE (Asigna más espacio a ramas densas)
     function initTree() {
-      const saved = localStorage.getItem('mindmap_nodes');
-      if (saved) {
-        try {
-          nodes = JSON.parse(saved);
-          render();
-          centerMap();
-          return;
-        } catch(e) { console.error("Error al cargar localStorage", e); }
-      }
-
       nodes = [];
-      const centerX = 2500;
-      const centerY = 2000;
+      const centerX = 3000;
+      const centerY = 2500;
 
       const root = {
         id: 'root',
@@ -487,10 +515,27 @@
       };
       nodes.push(root);
 
-      const totalBranches = initialData.children.length;
+      // Calcular peso de cada rama
+      const branchWeights = initialData.children.map(b => {
+        let count = 1 + (b.children ? b.children.length : 0);
+        if (b.children) {
+          b.children.forEach(sub => {
+            if (sub.children) count += sub.children.length;
+          });
+        }
+        return count;
+      });
+
+      const totalWeight = branchWeights.reduce((a, b) => a + b, 0);
+      let currentAngle = 0;
+
       initialData.children.forEach((branch, idx) => {
-        const angle = (idx / totalBranches) * Math.PI * 2;
-        const radius = 420;
+        const weight = branchWeights[idx];
+        const angleSpan = (weight / totalWeight) * Math.PI * 2;
+        const angle = currentAngle + angleSpan / 2;
+        currentAngle += angleSpan;
+
+        const radius = 550;
         const bx = centerX + Math.cos(angle) * radius;
         const by = centerY + Math.sin(angle) * radius;
 
@@ -507,10 +552,11 @@
 
         if (branch.children) {
           const totalSub = branch.children.length;
+          const subSpread = Math.min(1.2, angleSpan * 0.85);
+
           branch.children.forEach((sub, sIdx) => {
-            const spreadAngle = 0.5;
-            const subAngle = angle + (sIdx - (totalSub - 1) / 2) * (spreadAngle / Math.max(1, totalSub - 1));
-            const subRadius = 240;
+            const subAngle = angle + (sIdx - (totalSub - 1) / 2) * (subSpread / Math.max(1, totalSub - 1));
+            const subRadius = 320;
             const sx = bx + Math.cos(subAngle) * subRadius;
             const sy = by + Math.sin(subAngle) * subRadius;
 
@@ -526,14 +572,15 @@
             });
 
             if (sub.children) {
+              const totalSSub = sub.children.length;
               sub.children.forEach((ssub, ssIdx) => {
-                const ssubAngle = subAngle + (ssIdx - (sub.children.length - 1) / 2) * 0.25;
+                const ssubAngle = subAngle + (ssIdx - (totalSSub - 1) / 2) * 0.35;
                 nodes.push({
                   id: 'node_' + idx + '_' + sIdx + '_' + ssIdx,
                   parentId: subId,
                   text: ssub.text,
-                  x: sx + Math.cos(ssubAngle) * 180,
-                  y: sy + Math.sin(ssubAngle) * 180,
+                  x: sx + Math.cos(ssubAngle) * 220,
+                  y: sy + Math.sin(ssubAngle) * 220,
                   color: branch.color,
                   type: 'secondary'
                 });
@@ -543,17 +590,26 @@
         }
       });
 
+      saveState();
       render();
       centerMap();
     }
 
-    // APLICAR TRANSFORMACIONES DE PAN Y ZOOM
+    // MODOS SELECCIÓN Y MANO
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('btnSelect').classList.toggle('active', mode === 'select');
+      document.getElementById('btnHand').classList.toggle('active', mode === 'hand');
+      viewport.classList.toggle('mode-hand', mode === 'hand');
+    }
+
+    // TRANSFORMACIONES PAN Y ZOOM
     function updateTransform() {
       canvasContainer.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
     }
 
-    function setScale(newScale, clientX = window.innerWidth/2, clientY = window.innerHeight/2) {
-      const clampedScale = Math.min(Math.max(0.2, newScale), 2.5);
+    function setScale(newScale, clientX = window.innerWidth / 2, clientY = window.innerHeight / 2) {
+      const clampedScale = Math.min(Math.max(0.15, newScale), 2.5);
       const rect = viewport.getBoundingClientRect();
       const mouseX = clientX - rect.left;
       const mouseY = clientY - rect.top;
@@ -586,42 +642,36 @@
         if (n.y > maxY) maxY = n.y;
       });
 
-      const width = maxX - minX + 400;
-      const height = maxY - minY + 400;
+      const width = maxX - minX + 500;
+      const height = maxY - minY + 500;
       const scaleX = window.innerWidth / width;
       const scaleY = window.innerHeight / height;
-      
-      scale = Math.min(Math.min(scaleX, scaleY), 1);
+
+      scale = Math.min(Math.min(scaleX, scaleY), 0.9);
       panX = (window.innerWidth / 2) - ((minX + maxX) / 2 * scale);
       panY = (window.innerHeight / 2) - ((minY + maxY) / 2 * scale);
       updateTransform();
     }
 
-    function toggleHandTool() {
-      isPanningMode = !isPanningMode;
-      document.getElementById('btnHand').classList.toggle('active', isPanningMode);
-      viewport.classList.toggle('panning', isPanningMode);
-    }
-
-    // MANEJO DE EVENTOS DEL RATÓN Y TECLADO
+    // TECLADO Y EVENTOS
     window.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && !spacePressed && e.target.tagName !== 'TEXTAREA' && e.target.tagName !== 'INPUT') {
         spacePressed = true;
-        viewport.classList.add('panning');
+        viewport.classList.add('mode-hand');
       }
     });
 
     window.addEventListener('keyup', (e) => {
       if (e.code === 'Space') {
         spacePressed = false;
-        if (!isPanningMode) viewport.classList.remove('panning');
+        if (currentMode !== 'hand') viewport.classList.remove('mode-hand');
       }
     });
 
     viewport.addEventListener('wheel', (e) => {
+      e.preventDefault();
       if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        const factor = e.deltaY < 0 ? 1.1 : 0.9;
+        const factor = e.deltaY < 0 ? 1.15 : 0.85;
         setScale(scale * factor, e.clientX, e.clientY);
       } else {
         panX -= e.deltaX;
@@ -631,11 +681,10 @@
     }, { passive: false });
 
     viewport.addEventListener('mousedown', (e) => {
-      if (isPanningMode || spacePressed || e.button === 1 || (e.button === 0 && e.target === viewport)) {
+      if (currentMode === 'hand' || spacePressed || e.button === 1 || e.target === viewport || e.target === canvasContainer) {
         isPanning = true;
         startPanX = e.clientX - panX;
         startPanY = e.clientY - panY;
-        viewport.classList.add('panning');
       }
     });
 
@@ -660,12 +709,35 @@
     });
 
     window.addEventListener('mouseup', () => {
+      if (draggedNode) saveState();
       isPanning = false;
-      if (!isPanningMode && !spacePressed) viewport.classList.remove('panning');
       draggedNode = null;
     });
 
-    // RENDERIZADO DOM & CONNECTIONS
+    // HISTORIAL UNDO / REDO
+    function saveState() {
+      historyStack = historyStack.slice(0, historyIndex + 1);
+      historyStack.push(JSON.stringify(nodes));
+      historyIndex++;
+    }
+
+    function undo() {
+      if (historyIndex > 0) {
+        historyIndex--;
+        nodes = JSON.parse(historyStack[historyIndex]);
+        render();
+      }
+    }
+
+    function redo() {
+      if (historyIndex < historyStack.length - 1) {
+        historyIndex++;
+        nodes = JSON.parse(historyStack[historyIndex]);
+        render();
+      }
+    }
+
+    // RENDERIZADO DOM
     function render() {
       svgCanvas.innerHTML = '';
       document.querySelectorAll('.node').forEach(el => el.remove());
@@ -673,9 +745,7 @@
       nodes.forEach(node => {
         if (node.parentId) {
           const parent = nodes.find(n => n.id === node.parentId);
-          if (parent) {
-            drawConnection(parent, node);
-          }
+          if (parent) drawConnection(parent, node);
         }
       });
 
@@ -699,7 +769,9 @@
         `;
 
         el.addEventListener('mousedown', (e) => {
-          if (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA' || isPanningMode || spacePressed) return;
+          if (e.target.tagName === 'BUTTON' || e.target.tagName === 'TEXTAREA') return;
+          if (currentMode === 'hand' || spacePressed) return;
+
           draggedNode = node;
           const mouseCanvasX = (e.clientX - panX) / scale;
           const mouseCanvasY = (e.clientY - panY) / scale;
@@ -752,10 +824,10 @@
           y: node.y + el.offsetHeight / 2
         };
       }
-      return { x: node.x + 60, y: node.y + 20 };
+      return { x: node.x + 80, y: node.y + 20 };
     }
 
-    // ACCIONES EN NODOS
+    // EDICIÓN DE NODOS
     function addChild(parentId) {
       const parent = nodes.find(n => n.id === parentId);
       if (!parent) return;
@@ -765,11 +837,12 @@
         id,
         parentId,
         text: 'Nueva idea',
-        x: parent.x + 160,
+        x: parent.x + 180,
         y: parent.y + 40,
         color: parent.color,
         type: 'secondary'
       });
+      saveState();
       render();
     }
 
@@ -786,32 +859,81 @@
         });
       }
       nodes = nodes.filter(n => !toDelete.has(n.id));
+      saveState();
       render();
     }
 
     function updateText(id, text) {
       const node = nodes.find(n => n.id === id);
-      if (node) node.text = text;
-    }
-
-    // PERSISTENCIA
-    function savePositions() {
-      localStorage.setItem('mindmap_nodes', JSON.stringify(nodes));
-      alert('¡Posiciones guardadas con éxito!');
-    }
-
-    function resetPositions() {
-      if (confirm('¿Deseas restaurar las posiciones iniciales del mapa?')) {
-        localStorage.removeItem('mindmap_nodes');
-        initTree();
+      if (node) {
+        node.text = text;
+        renderSvgOnly();
       }
     }
 
-    // FUENTES DE CONSULTA
+    // PERSISTENCIA COMPLETA EN LOCALSTORAGE
+    function saveMap() {
+      const mapState = {
+        nodes,
+        panX,
+        panY,
+        scale
+      };
+      localStorage.setItem('mindmap_full_data', JSON.stringify(mapState));
+      alert('¡Mapa mental guardado correctamente!');
+    }
+
+    function loadMap() {
+      const saved = localStorage.getItem('mindmap_full_data');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          nodes = data.nodes;
+          panX = data.panX || panX;
+          panY = data.panY || panY;
+          scale = data.scale || scale;
+          saveState();
+          render();
+          updateTransform();
+          alert('¡Mapa cargado con éxito!');
+        } catch(e) { alert('Error al cargar los datos.'); }
+      } else {
+        alert('No se encontró un mapa guardado.');
+      }
+    }
+
+    // EXPORTACIONES
+    function exportSVG() {
+      const svgCloned = svgCanvas.cloneNode(true);
+      const blob = new Blob([svgCloned.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'mapa_mental.svg';
+      a.click();
+    }
+
+    function exportImage(type) {
+      window.print();
+    }
+
+    function exportPDF() {
+      window.print();
+    }
+
+    // MODAL FUENTES
     function showSources() { document.getElementById('sourcesModal').style.display = 'flex'; }
     function closeSources() { document.getElementById('sourcesModal').style.display = 'none'; }
 
-    window.onload = initTree;
+    // INICIALIZACIÓN
+    window.onload = () => {
+      const saved = localStorage.getItem('mindmap_full_data');
+      if (saved) {
+        loadMap();
+      } else {
+        initTree();
+      }
+    };
   </script>
 </body>
 </html>
